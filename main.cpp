@@ -6,13 +6,20 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 13:36:19 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/11 16:28:33 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/12 17:04:02 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-int	main()
+
+int	main(int argc, char **argv)
 {
+	if(argc != 2)
+	{
+		std::cerr<< "PUT THE CONFT FILE U IDIOT" <<"\n";
+		exit(1);
+	}
+	conf_pars(argv[1]);
 	struct socketadd addr;
 
 	addr.sin_family = AF_INET;
