@@ -6,13 +6,15 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/12 18:59:54 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/13 21:25:18 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #ifndef SERVER_HPP
 #define SERVER_HPP
-struct CGIConfig
+#include "webserv.hpp"
+struct CGIConfig //done
 {
 	std::string extension;
 	std::string path;
@@ -20,19 +22,19 @@ struct CGIConfig
 
 struct LocationConfig
 {
-	std::string path;
-	std::vector<std::string> methods;
-	bool autoindex;
-	bool upload_enable;
-	std::string upload_store;
-	std::string root;
-	std::string index;
-	std::string redirect;
-	long long max_body_size;
-	std::map<std::string, CGIConfig> cgi;
+	std::string path; //done
+	std::vector<std::string> methods; //done
+	bool autoindex; //done
+	bool upload_enable; //done
+	std::string upload_store; //done
+	std::string root; //done
+	std::string index; //done
+	std::string redirect; //done
+	long long max_body_size; //done
+	std::map<std::string, CGIConfig> cgi; //done
 };
 
-struct ListenConfig
+struct ListenConfig //done
 {
 	std::string host;
 	int port;
@@ -44,12 +46,12 @@ class server
 		server();
 		server(const server &obj);
 		~server();
-		std::vector<ListenConfig> listens;
-		std::string root;
-		std::string index;
-		long long max_body_size;
-		std::map<int, std::string> error_pages;
-		std::map<std::string, LocationConfig> locations;
+		std::vector<ListenConfig> listens; //done
+		std::string root; //done
+		std::string index; //done
+		long long max_body_size; //done
+		std::map<int, std::string> error_pages; //done
+		std::map<std::string, LocationConfig> locations; //done
 };
 
 #endif
