@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/13 21:25:18 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/14 19:37:39 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ struct CGIConfig //done
 
 struct LocationConfig
 {
+	LocationConfig();
 	std::string path; //done
 	std::vector<std::string> methods; //done
 	bool autoindex; //done
@@ -52,6 +53,12 @@ class server
 		long long max_body_size; //done
 		std::map<int, std::string> error_pages; //done
 		std::map<std::string, LocationConfig> locations; //done
+		std::vector<std::string> methods;
+		bool autoindex; //done
+		bool upload_enable; //done
+		std::string upload_store; //done
+		std::string redirect; //done
+		std::map<std::string, CGIConfig> cgi;
 };
 
 #endif

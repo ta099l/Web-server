@@ -6,11 +6,12 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 13:36:19 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/13 19:26:52 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/14 15:57:02 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+
 
 int	main(int argc, char **argv)
 {
@@ -21,6 +22,7 @@ int	main(int argc, char **argv)
 	}
 	webserv spiderweb;
 	spiderweb.conf_pars(argv[1]);
+	spiderweb.printConfig();
 	struct socketadd addr;
 
 	addr.sin_family = AF_INET;

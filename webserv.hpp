@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/13 21:22:46 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/14 16:27:00 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,11 @@ class webserv
 		void	setServers(const server& s);
 		void	conf_pars(char *file);
 		int		save_info(std::ifstream& inFile, server& s);
-};
+		void	printConfig() const;
 
+	};
+
+int	take_default(std::string line, server& srv, LocationConfig &loc);
 void	parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfig& loc);
 std::string	trim(std::string &str);
 void parse_cgi(const std::vector<std::string>& tokens, LocationConfig& loc);

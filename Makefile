@@ -1,5 +1,5 @@
 CXX = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 TARGET = webserv
 SRCS = main.cpp conf_parser.cpp conf_parser_util.cpp webserv.cpp server.cpp utils.cpp

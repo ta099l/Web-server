@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/12 19:06:18 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/14 19:07:34 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,3 +29,10 @@ server::~server()
 {
 
 }
+LocationConfig::LocationConfig()
+{
+	autoindex = false;
+	upload_enable = false;
+	max_body_size = 0;
+}
+

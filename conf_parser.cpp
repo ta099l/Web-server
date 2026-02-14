@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/13 21:40:18 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/14 19:39:23 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,12 +83,12 @@ int	parse_listen(std::string line, server& srv)
 
 int	store_location(std::string line, server& srv, LocationConfig &loc)
 {
-	(void)srv;
 	size_t start = line.rfind(" ");
 	int len = line.length() - start;
 	std::string substr = line.substr(start + 1, len);
 	std::vector<std::string> tokens = split(line);
 
+	take_default(line, srv, loc);
 	if(!line.compare(0,15, "allowed_methods"))
 		parse_allowed_methods(tokens, loc);
 	else if (!line.compare(0,3, "cgi"))
@@ -146,14 +146,59 @@ int	parse_default(std::string line, server& srv)
 	std::string substr = line.substr(start + 1, len);
 	std::vector<std::string> tokens = split(line);
 
-	if (!line.compare(0,5, "index"))
+	// if(!line.compare(0,15, "allowed_methods"))
+	// 	parse_allowed_methods(tokens, srv);
+	// if (!line.compare(0,5, "index"))
+	// 	srv.index = substr;
+	// else if (!line.compare(0,4, "root"))
+	// 	srv.root = substr;
+	// else if (!line.compare(0,20, "client_max_body_size"))
+	// 	srv.max_body_size = atoll(substr.c_str());
+	// else if (!line.compare(0,10, "error_page"))
+	// 	parse_error_page(tokens, srv);
+	if(!line.compare(0,15, "allowed_methods"))
+	{
+		for (size_t i = 1; i < tokens.size(); ++i)
+		{
+			if (tokens[i] != "GET" && tokens[i] != "POST" && tokens[i] != "DELETE")
+			{
+				std::cerr << "Invalid HTTP method: " << tokens[i] << "\n";
+				exit(1);
+			}
+			srv.methods.push_back(tokens[i]);
+		}
+	}
+	else if (!line.compare(0,3, "cgi"))
+	{
+		CGIConfig cgi;
+		cgi.extension = tokens[1];
+		cgi.path = tokens[2];
+		srv.cgi[cgi.extension] = cgi;
+	}
+	else if (!line.compare(0,9, "autoindex"))
+	{
+		if(!substr.compare(0,2, "on"))
+			srv.autoindex = true;
+		else
+			srv.autoindex = false;
+	}
+	else if (!line.compare(0,13, "upload_enable"))
+	{
+		if(!substr.compare(0,2, "on"))
+			srv.upload_enable = true;
+		else
+			srv.upload_enable = false;
+	}
+	else if (!line.compare(0,12, "upload_store"))
+		srv.upload_store = substr;
+	else if (!line.compare(0,5, "index"))
 		srv.index = substr;
+	else if (!line.compare(0,8, "redirect"))
+		srv.redirect = substr;
 	else if (!line.compare(0,4, "root"))
 		srv.root = substr;
 	else if (!line.compare(0,20, "client_max_body_size"))
 		srv.max_body_size = atoll(substr.c_str());
-	else if (!line.compare(0,10, "error_page"))
-		parse_error_page(tokens, srv);
 	return (0);
 }
 
