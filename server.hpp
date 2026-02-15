@@ -37,6 +37,7 @@ struct LocationConfig
 
 	public:
 		LocationConfig();
+		~LocationConfig();
 		// Getters
 		const std::string& getPath() const;
 		const std::vector<std::string>& getMethods() const;
@@ -72,6 +73,7 @@ struct ListenConfig //done
 	public:
 		ListenConfig();
 		ListenConfig(const std::string& h, int p);
+		~ListenConfig();
 		// Getters
 		const std::string& getHost() const;
 		int getPort() const;

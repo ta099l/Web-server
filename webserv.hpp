@@ -6,7 +6,7 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 15:10:58 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/15 18:36:41 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,6 @@
 #include "server.hpp"
 #include <unistd.h>
 
-struct socketadd_in{
-	sa_family_t		sin_family;	// Address family
-	in_port_t		sin_port;	// Port
-	struct in_addr	sin_addr;
-};
-
 class webserv
 {
 	private:
@@ -45,10 +39,12 @@ class webserv
 		~webserv();
 		int count;
 		const	std::vector<server>& getServers() const;
+		std::vector<server>& getServers();
 		void	setServers(const server& s);
 		void	conf_pars(char *file);
 		int		save_info(std::ifstream& inFile, server& s);
 		void	printConfig() const;
+
 
 };
 

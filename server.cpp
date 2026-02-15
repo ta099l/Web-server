@@ -158,6 +158,9 @@ void server::addCgi(const CGIConfig& c)
 	cgi[c.extension] = c;
 }
 
+server::~server()
+{
+}
 
 LocationConfig::LocationConfig()
 {
@@ -286,5 +289,13 @@ void ListenConfig::setHost(const std::string& h)
 void ListenConfig::setPort(int p)
 {
 	port = p;
+}
+
+LocationConfig::~LocationConfig()
+{
+}
+
+ListenConfig::~ListenConfig()
+{
 }
 

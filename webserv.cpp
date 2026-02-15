@@ -6,7 +6,7 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 15:11:33 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/15 17:03:19 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@ webserv::webserv()
 webserv::~webserv()
 {
 }
+std::vector<server>& webserv::getServers()
+{
+    return servers;
+}
+
 const std::vector<server>& webserv::getServers() const
 {
 	return(this->servers);
@@ -28,40 +33,42 @@ void webserv::setServers(const server& s)
 }
 void printLocation(const LocationConfig& loc)
 {
-    std::cout << "    Location: " << loc.path << std::endl;
+    std::cout << "    Location: " << loc.getPath() << std::endl;
 
-    std::cout << "      root: " << loc.root << std::endl;
-    std::cout << "      index: " << loc.index << std::endl;
+    std::cout << "      root: " << loc.getRoot() << std::endl;
+    std::cout << "      index: " << loc.getIndex() << std::endl;
 
     std::cout << "      autoindex: "
-              << (loc.autoindex ? "on" : "off")
+              << (loc.getAutoindex() ? "on" : "off")
               << std::endl;
 
     std::cout << "      upload_enable: "
-              << (loc.upload_enable ? "on" : "off")
+              << (loc.getUploadEnable() ? "on" : "off")
               << std::endl;
 
     std::cout << "      max_body_size: "
-              << loc.max_body_size
+              << loc.getMaxBodySize()
               << std::endl;
 
     std::cout << "      methods: ";
-    for (size_t i = 0; i < loc.methods.size(); ++i)
-        std::cout << loc.methods[i] << " ";
+    const std::vector<std::string>& methods = loc.getMethods();
+    for (size_t i = 0; i < methods.size(); ++i)
+        std::cout << methods[i] << " ";
     std::cout << std::endl;
 
     std::cout << "      upload_store: "
-              << (loc.upload_store.empty() ? "(none)" : loc.upload_store)
+              << (loc.getUploadStore().empty() ? "(none)" : loc.getUploadStore())
               << std::endl;
 
     std::cout << "      redirect: "
-              << (loc.redirect.empty() ? "(none)" : loc.redirect)
+              << (loc.getRedirect().empty() ? "(none)" : loc.getRedirect())
               << std::endl;
 
     std::cout << "      error_pages:" << std::endl;
+    const std::map<int, std::string>& error_pages = loc.getErrorPages();
     for (std::map<int, std::string>::const_iterator it =
-         loc.error_pages.begin();
-         it != loc.error_pages.end();
+         error_pages.begin();
+         it != error_pages.end();
          ++it)
     {
         std::cout << "        "
@@ -72,9 +79,10 @@ void printLocation(const LocationConfig& loc)
     }
 
     std::cout << "      CGI:" << std::endl;
+    const std::map<std::string, CGIConfig>& cgi = loc.getCgi();
     for (std::map<std::string, CGIConfig>::const_iterator it =
-         loc.cgi.begin();
-         it != loc.cgi.end();
+         cgi.begin();
+         it != cgi.end();
          ++it)
     {
         std::cout << "        extension: "

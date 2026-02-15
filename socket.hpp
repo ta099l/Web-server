@@ -1,33 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/10 13:36:19 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 18:39:18 by balhamad         ###   ########.fr       */
+/*   Created: 2026/02/15 13:58:13 by balhamad          #+#    #+#             */
+/*   Updated: 2026/02/15 14:33:19 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef SOCKET_HPP
+#define SOCKET_HPP
+#include <fcntl.h>
 #include "webserv.hpp"
-#include "socket/socket.hpp"
+#include <unistd.h>
+struct socketadd_in {
+	sa_family_t		sin_family;	// Address family
+	in_port_t		sin_port;	// Port
+	struct in_addr	sin_addr;
+};
+
+int create_listen_socket();
 
 
-int	main(int argc, char **argv)
-{
-	if(argc != 2)
-	{
-		std::cerr<< "PUT THE CONFIG FILE U IDIOT" <<"\n";
-		exit(1);
-	}
-	webserv spiderweb;
-	spiderweb.conf_pars(argv[1]);
-	//spiderweb.printConfig();
-	if (init_sockets(spiderweb) == -1)
-	{
-		std::cerr << "Failed to initialize sockets\n";
-		return 1;
-	}
-	return 0;
-}
+
+
+#endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 14:48:54 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 16:55:43 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,25 +56,25 @@ int	parse_listen(std::string line, server& srv)
 	{
 		int pos = substr.find(":");
 		// std::cout<<"pos :"<<pos<<"\n";
-		listen.host = substr.substr(0 , pos);
-		// std::cout<<"host :"<<listen.host<<"\n";
+		listen.setHost(substr.substr(0 , pos));
+		// std::cout<<"host :"<<listen.getHost()<<"\n";
 		std::string port = substr.substr(pos + 1, substr.length() - pos);
-		listen.port = atoi(port.c_str());
-		// std::cout<<"port :"<<listen.port<<"\n";
+		listen.setPort(atoi(port.c_str()));
+		// std::cout<<"port :"<<listen.getPort()<<"\n";
 	}
 	else
 	{
 		if(substr.find(".") != std::string::npos)
 		{
-			listen.host = substr.substr(0 , substr.length());
-			listen.port = 0;
-			// std::cout<<"host :"<<listen.host<<"\n";
+			listen.setHost(substr.substr(0 , substr.length()));
+			listen.setPort(0);
+			// std::cout<<"host :"<<listen.getHost()<<"\n";
 		}
 		else
 		{
 			std::string port = substr.substr(0 , substr.length());
-			listen.port = atoi(port.c_str());
-			// std::cout<<"port :"<<listen.port<<"\n";
+			listen.setPort(atoi(port.c_str()));
+			// std::cout<<"port :"<<listen.getPort()<<"\n";
 		}
 	}
 	srv.addListen(listen);
@@ -96,27 +96,27 @@ int	store_location(std::string line, server& srv, LocationConfig &loc)
 	else if (!line.compare(0,9, "autoindex"))
 	{
 		if(!substr.compare(0,2, "on"))
-			loc.autoindex = true;
+			loc.setAutoindex(true);
 		else
-			loc.autoindex = false;
+			loc.setAutoindex(false);
 	}
 	else if (!line.compare(0,13, "upload_enable"))
 	{
 		if(!substr.compare(0,2, "on"))
-			loc.upload_enable = true;
+			loc.setUploadEnable(true);
 		else
-			loc.upload_enable = false;
+			loc.setUploadEnable(false);
 	}
 	else if (!line.compare(0,12, "upload_store"))
-		loc.upload_store = substr;
+		loc.setUploadStore(substr);
 	else if (!line.compare(0,5, "index"))
-		loc.index = substr;
+		loc.setIndex(substr);
 	else if (!line.compare(0,8, "redirect"))
-		loc.redirect = substr;
+		loc.setRedirect(substr);
 	else if (!line.compare(0,4, "root"))
-		loc.root = substr;
+		loc.setRoot(substr);
 	else if (!line.compare(0,20, "client_max_body_size"))
-		loc.max_body_size = atoll(substr.c_str());
+		loc.setMaxBodySize(atoll(substr.c_str()));
 	else if (!line.compare(0,10, "error_page"))
 	{
 		if (tokens.size() != 3)
@@ -143,7 +143,7 @@ int	parse_location(std::ifstream& inFile, std::string line, server& srv)
 	size_t start = line.rfind(" ");
 	int len = line.length() - start;
 	std::string substr = line.substr(start + 1, len);
-	loc.path = substr;
+	loc.setPath(substr);
 	while(std::getline(inFile, line))
 	{
 		line = trim(line);

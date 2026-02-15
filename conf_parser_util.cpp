@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser_util.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 21:03:35 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 14:44:07 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 18:18:06 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfi
 			std::cerr << "Invalid HTTP method: " << tokens[i] << "\n";
 			exit(1);
 		}
-		loc.methods.push_back(tokens[i]);
+		loc.addMethod(tokens[i]);
 	}
 }
 void parse_cgi(const std::vector<std::string>& tokens, LocationConfig& loc)
@@ -36,7 +36,7 @@ void parse_cgi(const std::vector<std::string>& tokens, LocationConfig& loc)
 	cgi.extension = tokens[1];
 	cgi.path = tokens[2];
 
-	loc.cgi[cgi.extension] = cgi;
+	loc.addCgi(cgi);
 }
 void parse_error_page(const std::vector<std::string>& tokens, server& srv)
 {
@@ -61,15 +61,23 @@ void parse_error_page(const std::vector<std::string>& tokens, server& srv)
 int	take_default(std::string line, server& srv, LocationConfig &loc)
 {
 	std::cout<<line<<"\n";
-	loc.methods = srv.getMethods();
-	loc.error_pages = srv.getErrorPages();
-	loc.autoindex = srv.getAutoindex();
-	loc.upload_enable = srv.getUploadEnable();
-	loc.upload_store = srv.getUploadStore();
-	loc.index = srv.getIndex();
-	loc.redirect = srv.getRedirect();
-	loc.root = srv.getRoot();
-	loc.max_body_size = srv.getMaxBodySize();
+	// Copy methods from server to location
+	const std::vector<std::string>& methods = srv.getMethods();
+	for (size_t i = 0; i < methods.size(); ++i)
+		loc.addMethod(methods[i]);
+
+	// Copy error pages from server to location
+	const std::map<int, std::string>& error_pages = srv.getErrorPages();
+	for (std::map<int, std::string>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+		loc.addErrorPage(it->first, it->second);
+
+	loc.setAutoindex(srv.getAutoindex());
+	loc.setUploadEnable(srv.getUploadEnable());
+	loc.setUploadStore(srv.getUploadStore());
+	loc.setIndex(srv.getIndex());
+	loc.setRedirect(srv.getRedirect());
+	loc.setRoot(srv.getRoot());
+	loc.setMaxBodySize(srv.getMaxBodySize());
 
 	return (0);
 }
