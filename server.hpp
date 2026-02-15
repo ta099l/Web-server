@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 14:50:21 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 15:21:00 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,46 +22,63 @@ struct CGIConfig //done
 
 struct LocationConfig
 {
-	LocationConfig();
-	std::string path; //done
-	std::vector<std::string> methods; //done
-	bool autoindex; //done
-	bool upload_enable; //done
-	std::string upload_store; //done
-	std::string root; //done
-	std::string index; //done
-	std::string redirect; //done
-	long long max_body_size; //done
-	std::map<std::string, CGIConfig> cgi; //done
-	std::map<int, std::string> error_pages; //done
+	private:
+		std::string path; //done
+		std::vector<std::string> methods; //done
+		bool autoindex; //done
+		bool upload_enable; //done
+		std::string upload_store; //done
+		std::string root; //done
+		std::string index; //done
+		std::string redirect; //done
+		long long max_body_size; //done
+		std::map<std::string, CGIConfig> cgi; //done
+		std::map<int, std::string> error_pages; //done
+
+	public:
+		LocationConfig();
+		// Getters
+		const std::string& getPath() const;
+		const std::vector<std::string>& getMethods() const;
+		bool getAutoindex() const;
+		bool getUploadEnable() const;
+		const std::string& getUploadStore() const;
+		const std::string& getRoot() const;
+		const std::string& getIndex() const;
+		const std::string& getRedirect() const;
+		long long getMaxBodySize() const;
+		const std::map<std::string, CGIConfig>& getCgi() const;
+		const std::map<int, std::string>& getErrorPages() const;
+		// Setters
+		void setPath(const std::string& p);
+		void addMethod(const std::string& method);
+		void setAutoindex(bool value);
+		void setUploadEnable(bool value);
+		void setUploadStore(const std::string& path);
+		void setRoot(const std::string& r);
+		void setIndex(const std::string& i);
+		void setRedirect(const std::string& r);
+		void setMaxBodySize(long long size);
+		void addCgi(const CGIConfig& c);
+		void addErrorPage(int code, const std::string& path);
 };
 
 struct ListenConfig //done
 {
-	std::string host;
-	int port;
-};
+	private:
+		std::string host;
+		int port;
 
-// class server
-// {
-// 	public:
-// 		server();
-// 		server(const server &obj);
-// 		server& operator=(const server &obj);
-// 		~server();
-// 		std::vector<ListenConfig> listens; //done
-// 		std::string root; //done
-// 		std::string index; //done
-// 		long long max_body_size; //done
-// 		std::map<int, std::string> error_pages; //done
-// 		std::map<std::string, LocationConfig> locations; //done
-// 		std::vector<std::string> methods;
-// 		bool autoindex; //done
-// 		bool upload_enable; //done
-// 		std::string upload_store; //done
-// 		std::string redirect; //done
-// 		std::map<std::string, CGIConfig> cgi;
-// };
+	public:
+		ListenConfig();
+		ListenConfig(const std::string& h, int p);
+		// Getters
+		const std::string& getHost() const;
+		int getPort() const;
+		// Setters
+		void setHost(const std::string& h);
+		void setPort(int p);
+};
 class server
 {
 private:
@@ -77,6 +94,7 @@ private:
 	std::string upload_store;
 	std::string redirect;
 	std::map<std::string, CGIConfig> cgi;
+	int server_fd; // Unique identifier for the server
 
 public:
 	server();
@@ -96,7 +114,7 @@ public:
 	const std::string& getUploadStore() const;
 	const std::string& getRedirect() const;
 	const std::map<std::string, CGIConfig>& getCgi() const;
-
+	int getServerFd() const;
 	// setters
 	void addListen(const ListenConfig& l);
 	void setRoot(const std::string& r);
@@ -110,6 +128,7 @@ public:
 	void addErrorPage(int code, const std::string& path);
 	void addLocation(const LocationConfig& loc);
 	void addCgi(const CGIConfig& cgi);
+	void setServerFd(int fd);
 };
 
 #endif

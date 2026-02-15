@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 14:30:16 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 15:10:58 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include "server.hpp"
+#include <unistd.h>
 
-struct socketadd{
+struct socketadd_in{
 	sa_family_t		sin_family;	// Address family
 	in_port_t		sin_port;	// Port
 	struct in_addr	sin_addr;
