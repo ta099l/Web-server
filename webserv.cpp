@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/14 19:32:58 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 14:26:02 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,29 +28,61 @@ void webserv::setServers(const server& s)
 }
 void printLocation(const LocationConfig& loc)
 {
-	std::cout << "    Location: " << loc.path << std::endl;
+    std::cout << "    Location: " << loc.path << std::endl;
 
-	std::cout << "      root: " << loc.root << std::endl;
-	std::cout << "      index: " << loc.index << std::endl;
-	std::cout << "      autoindex: "
-			<< (loc.autoindex ? "on" : "off")
-			<< std::endl;
+    std::cout << "      root: " << loc.root << std::endl;
+    std::cout << "      index: " << loc.index << std::endl;
 
-	std::cout << "      methods: ";
-	for (size_t i = 0; i < loc.methods.size(); ++i)
-		std::cout << loc.methods[i] << " ";
-	std::cout << std::endl;
+    std::cout << "      autoindex: "
+              << (loc.autoindex ? "on" : "off")
+              << std::endl;
 
-	if (!loc.upload_store.empty())
-		std::cout << "      upload_store: "
-				<< loc.upload_store
-				<< std::endl;
+    std::cout << "      upload_enable: "
+              << (loc.upload_enable ? "on" : "off")
+              << std::endl;
 
-	if (!loc.redirect.empty())
-		std::cout << "      redirect: "
-				<< loc.redirect
-				<< std::endl;
+    std::cout << "      max_body_size: "
+              << loc.max_body_size
+              << std::endl;
+
+    std::cout << "      methods: ";
+    for (size_t i = 0; i < loc.methods.size(); ++i)
+        std::cout << loc.methods[i] << " ";
+    std::cout << std::endl;
+
+    std::cout << "      upload_store: "
+              << (loc.upload_store.empty() ? "(none)" : loc.upload_store)
+              << std::endl;
+
+    std::cout << "      redirect: "
+              << (loc.redirect.empty() ? "(none)" : loc.redirect)
+              << std::endl;
+
+    std::cout << "      error_pages:" << std::endl;
+    for (std::map<int, std::string>::const_iterator it =
+         loc.error_pages.begin();
+         it != loc.error_pages.end();
+         ++it)
+    {
+        std::cout << "        "
+                  << it->first
+                  << " -> "
+                  << it->second
+                  << std::endl;
+    }
+
+    std::cout << "      CGI:" << std::endl;
+    for (std::map<std::string, CGIConfig>::const_iterator it =
+         loc.cgi.begin();
+         it != loc.cgi.end();
+         ++it)
+    {
+        std::cout << "        extension: "
+                  << it->first
+                  << std::endl;
+    }
 }
+
 
 
 void printServer(const server& server)
@@ -79,6 +111,32 @@ void printServer(const server& server)
 		it != server.error_pages.end(); ++it)
 	{
 		std::cout << "    " << it->first << " -> " << it->second << std::endl;
+	}
+	std::cout << "  autoindex: "
+	          << (server.autoindex ? "on" : "off")
+	          << std::endl;
+	
+	std::cout << "  upload_enable: "
+	          << (server.upload_enable ? "on" : "off")
+	          << std::endl;
+	
+	std::cout << "  upload_store: "
+	          << (server.upload_store.empty() ? "(none)" : server.upload_store)
+	          << std::endl;
+	
+	std::cout << "  redirect: "
+	          << (server.redirect.empty() ? "(none)" : server.redirect)
+	          << std::endl;
+	
+	std::cout << "  CGI:" << std::endl;
+	for (std::map<std::string, CGIConfig>::const_iterator it =
+	     server.cgi.begin();
+	     it != server.cgi.end();
+	     ++it)
+	{
+	    std::cout << "    extension: "
+	              << it->first
+	              << std::endl;
 	}
 
 	std::cout << "  locations:" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/14 19:39:23 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 14:48:54 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int	parse_listen(std::string line, server& srv)
 			// std::cout<<"port :"<<listen.port<<"\n";
 		}
 	}
-	srv.listens.push_back(listen);
+	srv.addListen(listen);
 	return (0);
 }
 
@@ -117,6 +117,22 @@ int	store_location(std::string line, server& srv, LocationConfig &loc)
 		loc.root = substr;
 	else if (!line.compare(0,20, "client_max_body_size"))
 		loc.max_body_size = atoll(substr.c_str());
+	else if (!line.compare(0,10, "error_page"))
+	{
+		if (tokens.size() != 3)
+		{
+			std::cerr << "Invalid error_page directive\n";
+			exit(1);
+		}
+		char* endptr;
+		long code = std::strtol(tokens[1].c_str(), &endptr, 10);
+		if (*endptr != '\0' || code < 100 || code > 599)
+		{
+			std::cerr << "Invalid error code in error_page\n";
+			exit(1);
+		}
+		srv.addErrorPage((int)code, tokens[2]);
+	}
 	return (0);
 }
 
@@ -135,7 +151,7 @@ int	parse_location(std::ifstream& inFile, std::string line, server& srv)
 			break;
 		store_location(line, srv, loc);
 	}
-	srv.locations[loc.path] = loc;
+	srv.addLocation(loc);
 	return (0);
 }
 
@@ -146,16 +162,6 @@ int	parse_default(std::string line, server& srv)
 	std::string substr = line.substr(start + 1, len);
 	std::vector<std::string> tokens = split(line);
 
-	// if(!line.compare(0,15, "allowed_methods"))
-	// 	parse_allowed_methods(tokens, srv);
-	// if (!line.compare(0,5, "index"))
-	// 	srv.index = substr;
-	// else if (!line.compare(0,4, "root"))
-	// 	srv.root = substr;
-	// else if (!line.compare(0,20, "client_max_body_size"))
-	// 	srv.max_body_size = atoll(substr.c_str());
-	// else if (!line.compare(0,10, "error_page"))
-	// 	parse_error_page(tokens, srv);
 	if(!line.compare(0,15, "allowed_methods"))
 	{
 		for (size_t i = 1; i < tokens.size(); ++i)
@@ -165,54 +171,60 @@ int	parse_default(std::string line, server& srv)
 				std::cerr << "Invalid HTTP method: " << tokens[i] << "\n";
 				exit(1);
 			}
-			srv.methods.push_back(tokens[i]);
+			srv.addMethod(tokens[i]);
 		}
 	}
 	else if (!line.compare(0,3, "cgi"))
 	{
+		if (tokens.size() != 3)
+		{
+			std::cerr << "Invalid CGI directive\n";
+			exit(1);
+		}
 		CGIConfig cgi;
 		cgi.extension = tokens[1];
 		cgi.path = tokens[2];
-		srv.cgi[cgi.extension] = cgi;
+		srv.addCgi(cgi);
 	}
 	else if (!line.compare(0,9, "autoindex"))
 	{
 		if(!substr.compare(0,2, "on"))
-			srv.autoindex = true;
+			srv.setAutoindex(true);
 		else
-			srv.autoindex = false;
+			srv.setAutoindex(false);
 	}
 	else if (!line.compare(0,13, "upload_enable"))
 	{
 		if(!substr.compare(0,2, "on"))
-			srv.upload_enable = true;
+			srv.setUploadEnable(true);
 		else
-			srv.upload_enable = false;
+			srv.setUploadEnable(false);
 	}
 	else if (!line.compare(0,12, "upload_store"))
-		srv.upload_store = substr;
+		srv.setUploadStore(substr);
 	else if (!line.compare(0,5, "index"))
-		srv.index = substr;
+		srv.setIndex(substr);
 	else if (!line.compare(0,8, "redirect"))
-		srv.redirect = substr;
+		srv.setRedirect(substr);
 	else if (!line.compare(0,4, "root"))
-		srv.root = substr;
+		srv.setRoot(substr);
 	else if (!line.compare(0,20, "client_max_body_size"))
-		srv.max_body_size = atoll(substr.c_str());
+		srv.setMaxBodySize(atoll(substr.c_str()));
+	else if (!line.compare(0,10, "error_page"))
+		parse_error_page(tokens, srv);
 	return (0);
 }
 
 int	webserv::save_info(std::ifstream& inFile, server& srv)
 {
 	std::string line;
-	(void)srv;
 	while(std::getline(inFile, line))
 	{
 		line = trim(line);
 		std::cout<<line<<"\n";
 		if(line == "}")
 			return (1);
-		if(line.empty())
+		if(line.empty() || line[0] == '#')
 			continue;
 		if(!line.compare(0,6, "listen"))
 			parse_listen(line, srv);

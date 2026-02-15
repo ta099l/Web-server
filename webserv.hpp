@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/14 16:27:00 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/15 14:30:16 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 #include <iostream>
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -48,7 +49,7 @@ class webserv
 		int		save_info(std::ifstream& inFile, server& s);
 		void	printConfig() const;
 
-	};
+};
 
 int	take_default(std::string line, server& srv, LocationConfig &loc);
 void	parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfig& loc);
