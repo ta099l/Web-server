@@ -6,7 +6,7 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 21:03:35 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 18:18:06 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/18 12:09:26 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void	parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfig& loc)
 {
+	loc.clearMethods();
 	for (size_t i = 1; i < tokens.size(); ++i)
 	{
 		if (tokens[i] != "GET" && tokens[i] != "POST" && tokens[i] != "DELETE")

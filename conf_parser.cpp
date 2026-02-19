@@ -6,31 +6,29 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 16:55:43 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/18 12:15:10 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-
-void	webserv::conf_pars(char *file)
+int	webserv::conf_pars(char *file, int flag)
 {
 	std::ifstream inFile(file);
 	std::string line;
 	if(inFile.is_open())
 	{
-		while(std::getline(inFile, line))
+		while(std::getline(inFile, line) && flag == 1)
 		{
-			line = trim(line);
+			line = s_trim(line);
 			if (line == "server")
 				continue;
 			else if(line == "{")
 			{
 				server new_srv;
-				save_info(inFile, new_srv);
+				flag = save_info(inFile, new_srv, flag);
 				servers.push_back(new_srv);
 			}
 			count++;
-			std::cout << "Number of servers: " << servers.size() << "\n";
 		}
 	}
 	else
@@ -39,17 +37,19 @@ void	webserv::conf_pars(char *file)
 		exit(1);
 	}
 	inFile.close();
+	return (flag);
 }
 
-int	parse_listen(std::string line, server& srv)
+int	parse_listen(std::string s_line, std::string line, server& srv, int flag)
 {
-	size_t start = line.rfind(" ");
+	flag = check_line(line);
+	size_t start = s_line.rfind(" ");
 	// if(start == std::string::npos)
 	// 	return (-1);
 	// std::cout<<start<<"\n";
-	int len = line.length() - start;
+	int len = s_line.length() - start;
 	// std::cout<<len<<"\n";
-	std::string substr = line.substr(start + 1, len);
+	std::string substr = s_line.substr(start + 1, len);
 	// std::cout<<substr<<"\n";
 	ListenConfig listen;
 	if(substr.find(":") != std::string::npos)
@@ -78,29 +78,31 @@ int	parse_listen(std::string line, server& srv)
 		}
 	}
 	srv.addListen(listen);
-	return (0);
+	return (flag);
 }
 
-int	store_location(std::string line, server& srv, LocationConfig &loc)
+int	store_location(std::string line,std::string s_line, server& srv, LocationConfig &loc, int flag)
 {
-	size_t start = line.rfind(" ");
-	int len = line.length() - start;
-	std::string substr = line.substr(start + 1, len);
-	std::vector<std::string> tokens = split(line);
+	flag = check_line(line);
+	if (flag == 0)
+		return (0);
+	size_t start = s_line.rfind(" ");
+	int len = s_line.length() - start;
+	std::string substr = s_line.substr(start + 1, len);
+	std::vector<std::string> tokens = split(s_line);
 
-	take_default(line, srv, loc);
-	if(!line.compare(0,15, "allowed_methods"))
+	if(!s_line.compare(0,15, "allowed_methods"))
 		parse_allowed_methods(tokens, loc);
-	else if (!line.compare(0,3, "cgi"))
+	else if (!s_line.compare(0,3, "cgi"))
 		parse_cgi(tokens, loc);
-	else if (!line.compare(0,9, "autoindex"))
+	else if (!s_line.compare(0,9, "autoindex"))
 	{
 		if(!substr.compare(0,2, "on"))
 			loc.setAutoindex(true);
 		else
 			loc.setAutoindex(false);
 	}
-	else if (!line.compare(0,13, "upload_enable"))
+	else if (!s_line.compare(0,13, "upload_enable"))
 	{
 		if(!substr.compare(0,2, "on"))
 			loc.setUploadEnable(true);
@@ -133,36 +135,49 @@ int	store_location(std::string line, server& srv, LocationConfig &loc)
 		}
 		srv.addErrorPage((int)code, tokens[2]);
 	}
-	return (0);
+	else
+	{
+		std::cerr << "WHAT EVEN IS THIS CANT U WRITE A CONFIG FILE YOU IDIOT: " << line << "\n";
+		exit(1);
+	}
+	return (flag);
 }
 
-int	parse_location(std::ifstream& inFile, std::string line, server& srv)
+int	parse_location(std::ifstream& inFile,std::string s_line, std::string line, server& srv, int flag)
 {
 	LocationConfig loc;
 
-	size_t start = line.rfind(" ");
-	int len = line.length() - start;
-	std::string substr = line.substr(start + 1, len);
+	take_default(s_line, srv, loc);
+	size_t start = s_line.rfind(" ");
+	int len = s_line.length() - start;
+	std::string substr = s_line.substr(start + 1, len);
 	loc.setPath(substr);
-	while(std::getline(inFile, line))
+	while(std::getline(inFile, line) && flag == 1)
 	{
-		line = trim(line);
+		line = n_trim(line);
+		if(line == "{")
+			continue;
 		if(line == "}")
 			break;
-		store_location(line, srv, loc);
+		if(line.empty() || line[0] == '#')
+			continue;
+		std::string s_line = s_trim(line);
+		flag = store_location(line, s_line, srv, loc, flag);
 	}
 	srv.addLocation(loc);
-	return (0);
+	return (flag);
 }
 
-int	parse_default(std::string line, server& srv)
+int	parse_default(std::string s_line,std::string line, server& srv, int flag)
 {
-	size_t start = line.rfind(" ");
-	int len = line.length() - start;
-	std::string substr = line.substr(start + 1, len);
-	std::vector<std::string> tokens = split(line);
+	flag = check_line(line);
 
-	if(!line.compare(0,15, "allowed_methods"))
+	size_t start = s_line.rfind(" ");
+	int len = s_line.length() - start;
+	std::string substr = s_line.substr(start + 1, len);
+	std::vector<std::string> tokens = split(s_line);
+
+	if(!s_line.compare(0,15, "allowed_methods"))
 	{
 		for (size_t i = 1; i < tokens.size(); ++i)
 		{
@@ -212,26 +227,32 @@ int	parse_default(std::string line, server& srv)
 		srv.setMaxBodySize(atoll(substr.c_str()));
 	else if (!line.compare(0,10, "error_page"))
 		parse_error_page(tokens, srv);
-	return (0);
+	else
+	{
+		std::cerr << "WHAT EVEN IS THIS CANT U WRITE A CONFIG FILE U IDIOT: " << line << "\n";
+		exit(1);
+	}
+	return (flag);
 }
 
-int	webserv::save_info(std::ifstream& inFile, server& srv)
+int	webserv::save_info(std::ifstream& inFile, server& srv, int flag)
 {
 	std::string line;
-	while(std::getline(inFile, line))
+	std::string s_line;
+	while(std::getline(inFile, line) && flag == 1)
 	{
-		line = trim(line);
-		std::cout<<line<<"\n";
-		if(line == "}")
+		line = n_trim(line);
+		s_line = s_trim(line);
+		if(s_line == "}")
 			return (1);
-		if(line.empty() || line[0] == '#')
+		if(s_line.empty() || s_line[0] == '#')
 			continue;
-		if(!line.compare(0,6, "listen"))
-			parse_listen(line, srv);
-		else if(!line.compare(0,8, "location"))
-			parse_location(inFile, line, srv);
+		if(!s_line.compare(0,6, "listen"))
+			flag = parse_listen(s_line,line, srv, flag);
+		else if(!s_line.compare(0,8, "location"))
+			flag = parse_location(inFile,s_line, line, srv, flag);
 		else
-			parse_default(line, srv);
+			flag = parse_default(s_line, line, srv, flag);
 	}
-	return (0);
+	return (flag);
 }

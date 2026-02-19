@@ -6,7 +6,7 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 15:21:00 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/18 13:05:40 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 #include "webserv.hpp"
+#include "client.hpp"
 struct CGIConfig //done
 {
 	std::string extension;
 	std::string path;
 };
 
-struct LocationConfig
+struct LocationConfig //was struct
 {
 	private:
 		std::string path; //done
@@ -62,6 +63,8 @@ struct LocationConfig
 		void setMaxBodySize(long long size);
 		void addCgi(const CGIConfig& c);
 		void addErrorPage(int code, const std::string& path);
+
+		void clearMethods();
 };
 
 struct ListenConfig //done
@@ -81,6 +84,7 @@ struct ListenConfig //done
 		void setHost(const std::string& h);
 		void setPort(int p);
 };
+
 class server
 {
 private:
@@ -96,8 +100,8 @@ private:
 	std::string upload_store;
 	std::string redirect;
 	std::map<std::string, CGIConfig> cgi;
-	int server_fd; // Unique identifier for the server
-
+	int server_fd;
+	std::map<int, client> client_fds;
 public:
 	server();
 	server(const server &obj);
@@ -117,6 +121,7 @@ public:
 	const std::string& getRedirect() const;
 	const std::map<std::string, CGIConfig>& getCgi() const;
 	int getServerFd() const;
+	std::map<int, client>& getClientFds();
 	// setters
 	void addListen(const ListenConfig& l);
 	void setRoot(const std::string& r);
@@ -131,6 +136,7 @@ public:
 	void addLocation(const LocationConfig& loc);
 	void addCgi(const CGIConfig& cgi);
 	void setServerFd(int fd);
+	void addClientFd(int fd, const client &c) ;
 };
 
 #endif

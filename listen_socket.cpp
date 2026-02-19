@@ -6,7 +6,7 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:01:48 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/15 18:34:50 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/18 19:52:32 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,11 @@ int create_listen_socket(const std::string& host, int port)
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	if (host == "0.0.0.0")
-    	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+		addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	else if (inet_pton(AF_INET, host.c_str(), &addr.sin_addr) <= 0)
 	{
-	    std::cerr << "Invalid host: " << host << std::endl;
-	    return -1;
+		std::cerr << "Invalid host: " << host << std::endl;
+		return -1;
 	}
 	int	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd == -1)

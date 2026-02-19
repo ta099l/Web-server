@@ -6,13 +6,13 @@
 /*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/15 15:14:11 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/18 13:14:11 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-server::server() : root(""), index(""), max_body_size(0),
+server::server() : root(""), index("index.html"), max_body_size(0),
  autoindex(false),  upload_enable(false), server_fd(-1)
 {
 }
@@ -298,4 +298,15 @@ LocationConfig::~LocationConfig()
 ListenConfig::~ListenConfig()
 {
 }
-
+void server::addClientFd(int fd, const client& c)
+{
+	client_fds[fd] = c;
+}
+std::map<int, client>& server::getClientFds()
+{
+	return client_fds;
+}
+void LocationConfig::clearMethods()
+{
+	methods.clear();
+}
