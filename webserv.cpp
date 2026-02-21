@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/21 14:53:22 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/21 22:15:32 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,15 @@ int webserv::run()
 			{
 				//handle_client_write(fd);
 			}
+			//HANDLE CGI OUTPUT
+			//fdin & fdout for CGI processes
+				//handle_cgi_output(fd);
+				//if CGI process is done, remove fd from epoll and close it
+				//epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+				//close(fd);
+				//remove CGI process from tracking data structures
+				//cgi_processes.erase(fd);
+				//remove client associated with this CGI process if needed
 			if (events[i].events & (EPOLLERR | EPOLLHUP))
 			{
 				std::cerr << "Error on fd " << fd << std::endl;
