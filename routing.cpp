@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/19 14:02:01 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/21 16:28:32 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "server.hpp"
+
 int routNOW(client &cli, server &srv, const LocationConfig& locConfig)
 {
 	std::string reqMethod = cli.getReq().getMethod();
@@ -20,20 +21,47 @@ int routNOW(client &cli, server &srv, const LocationConfig& locConfig)
 		return 1;
 	return 0;
 }
+// int get_method(client &cli, server &srv, const LocationConfig& locConfig)
+// {
+// 	std::ifstream file(locConfig.getRoot() + cli.getReq().getUri());
+// 	if(!file.is_open())
+// 		return -1;
+// 	std::string line;
+// 	while(std::getline(file, line))
+// 	{
+// 		cli.setResponseBuffer(cli.getResponseBuffer() + line + "\n");
+// 	}
+// 	return 0;
+// }
+int serializeHeader(client &cli,server &srv,int state,)
+{
+
+}
 int get_method(client &cli, server &srv, const LocationConfig& locConfig)
 {
-	std::ifstream file(locConfig.getRoot() + cli.getReq().getUri());
-	if(!file.is_open())
-		return -1;
-	std::string line;
-	while(std::getline(file, line))
+	std::string str = locConfig.getRoot() + cli.getReq().getUri();
+	const char *chr_str = str.c_str();
+	int fd = open(chr_str, O_RDONLY);
+	if(fd < 0)
+		cli.getRes().setStatusCode(404);
+	struct stat file_info;
+	if (fstat(fd, &file_info) == 0)
 	{
-		cli.setResponseBuffer(cli.getResponseBuffer() + line + "\n");
+		cli.getRes().setFileSize(file_info.st_size);
+		cli.setFileFd(fd);
+		cli.getRes().setStatusCode(200);
+
+	}
+	else
+	{
+		perror("Error getting file status");
 	}
 	return 0;
 }
 int post_method(client &cli, server &srv, const LocationConfig& locConfig)
 {
+	if(cli.getContentLength() > locConfig.getMaxBodySize())
+		return(-1); //if client sent more than allowed wrong
 	std::ofstream file(locConfig.getRoot() + cli.getReq().getUri());
 	if(!file.is_open())
 		return -1;
@@ -54,20 +82,27 @@ int handleRouting(client &cli, server &srv)
 		{
 			if(get_method(cli, srv, locConfig) == -1)
 				return 1;
+			else
+				cli.setState("SENDING RESPONSE");
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
 			if(post_method(cli, srv, locConfig) == -1)
 				return 1;
+			else
+				cli.setState("SENDING RESPONSE");
 		}
 		else if (cli.getReq().getMethod() == "DELETE")
 		{
 			if(remove((locConfig.getRoot() + cli.getReq().getUri()).c_str()) != 0)
 				return 1;
+			else
+				cli.setState("SENDING RESPONSE");
 		}
 	}
 	else
 	{
+
 	}
 	return 0;
 }

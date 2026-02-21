@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/18 12:43:29 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/21 14:29:47 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,12 @@ int checkReqLine(client &cli)
 
 
 }
+int checkUri(std::string uri)
+{
+	if(uri.find("../") != std::string::npos)
+		return -1;
+	return 1;
+}
 int parseReqLine(client &cli,std::string &reqline)
 {
 	std::string trimmedLine=ltrim(reqline);
@@ -72,6 +78,8 @@ int parseReqLine(client &cli,std::string &reqline)
 		return 1;
 	cli.getReq().setMethod(trim(trimmedLine.substr(0,pos1)));
 	cli.getReq().setUri(trim(trimmedLine.substr(pos1+1,pos2-pos1-1)));
+	if(checkUri(cli.getReq().getUri()) == -1)
+		return 1;//403
 	cli.getReq().setVersion(trim(trimmedLine.substr(pos2+1)));
 	if(checkReqLine(cli) == 1)
 		return 1;
@@ -179,7 +187,6 @@ int handleRead(client &cli,int fd)
 				cli.setState("BAD REQUEST");
 				return 1;
 			}
-
 		}
 		if(cli.isHeaderComplete())
 		{

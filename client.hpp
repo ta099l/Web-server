@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/19 11:43:19 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/21 15:41:52 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 #include "HttpReq.hpp"
+#include "webserv.hpp"
+#include "httpResponse.hpp"
 
 class client
 {
@@ -25,7 +27,13 @@ class client
 	bool headerComplete;
 	bool requestComplete;
 	HttpReq req;
+	HttpResponse res;
 	size_t bodyStart;
+	//outfile
+	size_t outFileSize;
+	int outFileFd;
+	int outFileOffset;
+	bool fileDone;
 	public:
 		client();
 		client(int fd);
@@ -41,6 +49,10 @@ class client
 		HttpReq& getReq();
 		std::string getState();
 		std::string getHeader();
+		size_t getFileSize();
+		int getFileFd();
+		int getFileOffset();
+		HttpResponse& getRes();
 		//setters
 		void setBodyStart(size_t n);
 		void setState(std::string state);
@@ -51,10 +63,16 @@ class client
 		void setRequestComplete(bool requestComplete);
 		void setHeader(const std::string &header);
 		void appendToBuffer(const std::string &data,int n);
+		void setFileSize(size_t num);
+		void setFileOffset(int num);
+		void setFileDone(bool done);
+		void setFileFd(int fd);
 		//checkers
 		bool isHeaderComplete();
 		bool isRequestComplete();
+		bool isFileDone();
 };
+
 int handleRead(client &cli,int fd);
 
 #endif

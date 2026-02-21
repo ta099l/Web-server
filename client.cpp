@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/18 19:52:08 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/21 15:42:06 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,3 +50,39 @@ void client::setBodyStart(size_t n){this->bodyStart = n;}
 std::string client::getHeader() { return header; }
 void client::setHeader(const std::string &header) { this->header = header; }
 void client::appendToBuffer(const std::string &data,int n) { buffer.append(data, 0, n); }
+size_t client::getFileSize()
+{
+	return outFileSize;
+}
+int client::getFileOffset()
+{
+	return outFileOffset;
+}
+void client::setFileSize(size_t num)
+{
+	outFileSize = num;
+}
+void client::setFileOffset(int num)
+{
+	outFileOffset = num;
+}
+bool client::isFileDone()
+{
+	return fileDone;
+}
+void client::setFileDone(bool done)
+{
+	fileDone = done;
+}
+int client::getFileFd()
+{
+	return outFileFd;
+}
+void client::setFileFd(int fd)
+{
+	outFileFd = fd;
+}
+HttpResponse& client::getRes()
+{
+	return res;
+}

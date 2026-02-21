@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/18 19:53:41 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/21 14:53:22 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ int webserv::run()
 					}
 				}
 			}
-			else if (events[i].events & EPOLLIN)
+			if (events[i].events & EPOLLIN)
 			{
 				for (size_t j = 0; j < servers.size(); ++j)
 				{
@@ -123,16 +123,17 @@ int webserv::run()
 					if (it != client_fds.end())
 					{
 						handleRead(it->second, fd);
-						handleRouting(it->second, servers[j]);
+						if(it->second.isRequestComplete())
+							handleRouting(it->second, servers[j]);
 						break;
 					}
 				}
 			}
-			else if (events[i].events & EPOLLOUT)
+			if (events[i].events & EPOLLOUT)
 			{
 				//handle_client_write(fd);
 			}
-			else if (events[i].events & (EPOLLERR | EPOLLHUP))
+			if (events[i].events & (EPOLLERR | EPOLLHUP))
 			{
 				std::cerr << "Error on fd " << fd << std::endl;
 				//   close_client_connection(fd);
