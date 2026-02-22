@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/21 12:21:37 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/22 14:03:14 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,4 +65,5 @@ std::string	n_trim(std::string &str);
 void parse_cgi(const std::vector<std::string>& tokens, LocationConfig& loc);
 std::vector<std::string> split(const std::string& line);
 void parse_error_page(const std::vector<std::string>& tokens, server& srv);
+void handle_client_write(int fd, client &cli);
 #endif

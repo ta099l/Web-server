@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/21 22:12:08 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/22 16:42:24 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,29 +32,36 @@ int routNOW(client &cli, server &srv, const LocationConfig& locConfig)
 // 		cli.setResponseBuffer(cli.getResponseBuffer() + line + "\n");
 // 	}
 // 	return 0;
-// }
-int serializeHeader(client &cli,server &srv,int state,)
-{
+// // }
+// int serializeHeader(client &cli,server &srv,int state,)
+// {
 
-}
+// }
 int get_method(client &cli, server &srv, const LocationConfig& locConfig)
 {
 	std::string str = locConfig.getRoot() + cli.getReq().getUri();
 	const char *chr_str = str.c_str();
-	int fd = open(chr_str, O_RDONLY);
-	if(fd < 0)
+	cli.setFileFd(open(chr_str, O_RDONLY));
+	//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
+	if(cli.getFileFd() < 0)
+	{
 		cli.getRes().setStatusCode(404);
+		return (-1);
+		//build error response
+	}
 	struct stat file_info;
-	if (fstat(fd, &file_info) == 0)
+	if (fstat(cli.getFileFd(), &file_info) == 0)
 	{
 		cli.getRes().setFileSize(file_info.st_size);
-		cli.setFileFd(fd);
+		// cli.getRes().setFileModifiedTime(file_info.st_mtime);
+		cli.setFileFd(cli.getFileFd());
 		cli.getRes().setStatusCode(200);
-
 	}
 	else
 	{
 		perror("Error getting file status");
+		cli.getRes().setStatusCode(500);
+		return (-1);
 	}
 	return 0;
 }
@@ -77,13 +84,19 @@ int handleRouting(client &cli, server &srv)
 	{
 		const LocationConfig& locConfig = locations.at(matchedLocation);
 		if(routNOW(cli, srv, locConfig) == 1)
-			return 1;//method not allowed 405
+		{
+			cli.getRes().setStatusCode(405);
+			return -1;//method not allowed 405
+		}
 		else if (cli.getReq().getMethod() == "GET")
 		{
 			if(get_method(cli, srv, locConfig) == -1)
 				return 1;
 			else
+			{
 				cli.setState("SENDING RESPONSE");
+				epoll_ctl(cli.getFileFd())
+			}
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
@@ -99,6 +112,7 @@ int handleRouting(client &cli, server &srv)
 			else
 				cli.setState("SENDING RESPONSE");
 		}
+
 	}
 	else
 	{

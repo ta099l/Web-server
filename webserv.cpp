@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/21 22:15:32 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/22 15:45:23 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,16 @@ int webserv::run()
 			}
 			if (events[i].events & EPOLLOUT)
 			{
-				//handle_client_write(fd);
+				for (size_t j = 0; j < servers.size(); ++j)
+				{
+					std::map<int, client>& client_fds = servers[j].getClientFds(); // reference!
+					std::map<int, client>::iterator it = client_fds.find(fd);
+					if (it != client_fds.end())
+					{
+						handle_client_write(fd, it->second);
+						break;
+					}
+
 			}
 			//HANDLE CGI OUTPUT
 			//fdin & fdout for CGI processes
