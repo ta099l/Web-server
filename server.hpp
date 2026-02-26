@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/18 13:05:40 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:50:54 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ private:
 	std::map<std::string, CGIConfig> cgi;
 	int server_fd;
 	std::map<int, client> client_fds;
+	bool isCgi; //implement
 public:
 	server();
 	server(const server &obj);
@@ -122,6 +123,7 @@ public:
 	const std::map<std::string, CGIConfig>& getCgi() const;
 	int getServerFd() const;
 	std::map<int, client>& getClientFds();
+	bool getIsCgi();
 	// setters
 	void addListen(const ListenConfig& l);
 	void setRoot(const std::string& r);
@@ -137,6 +139,7 @@ public:
 	void addCgi(const CGIConfig& cgi);
 	void setServerFd(int fd);
 	void addClientFd(int fd, const client &c) ;
+	void setIsCgi(bool val);
 };
 
 #endif

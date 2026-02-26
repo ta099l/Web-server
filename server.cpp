@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/18 13:14:11 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:52:47 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,14 @@ const std::map<std::string, CGIConfig>& server::getCgi() const
 int server::getServerFd() const
 {
 	return server_fd;
+}
+bool server::getIsCgi()
+{
+	return isCgi;
+}
+void server::setIsCgi(bool val)
+{
+	this->isCgi = val;
 }
 void server::setServerFd(int fd)
 {

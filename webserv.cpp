@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/22 15:45:23 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:46:48 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,12 @@ int webserv::initialize_epoll()
 }
 bool webserv::is_server_socket(int fd)
 {
-    for (size_t i = 0; i < servers.size(); ++i)
-    {
-        if (fd == servers[i].getServerFd())
-            return true;
-    }
-    return false;
+	for (size_t i = 0; i < servers.size(); ++i)
+	{
+		if (fd == servers[i].getServerFd())
+			return true;
+	}
+	return false;
 }
 void webserv::handle_new_connection(int fd, server& srv)
 {

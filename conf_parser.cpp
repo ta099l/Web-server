@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/18 12:15:10 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:57:24 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,7 @@ int	parse_default(std::string s_line,std::string line, server& srv, int flag)
 		cgi.extension = tokens[1];
 		cgi.path = tokens[2];
 		srv.addCgi(cgi);
+		srv.setIsCgi(true);
 	}
 	else if (!line.compare(0,9, "autoindex"))
 	{

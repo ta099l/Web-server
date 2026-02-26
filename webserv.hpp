@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/22 14:03:14 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/26 15:18:12 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,20 @@
 #include "HttpReq.hpp"
 #include "client.hpp"
 
+namespace HttpMessages
+{
+	enum Codes
+	{
+		OK = 200,
+		BAD_REQUEST = 400,
+		FORBIDDEN = 403,
+		NOT_FOUND = 404,
+		METHOD_NOT_ALLOWED = 405,
+		PAYLOAD_TOO_LARGE = 413,
+		INTERNAL_SERVER_ERROR = 500,
+		NOT_IMPLEMENTED = 501
+	};
+}
 class webserv
 {
 	private:
@@ -44,6 +58,7 @@ class webserv
 		webserv();
 		~webserv();
 		int initialize_epoll();
+		int epoll_fd;
 		int run();
 		int count;
 		std::vector<server>& getServers();
