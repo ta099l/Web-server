@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/26 14:52:16 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:19:06 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,27 +108,39 @@ int handleRouting(client &cli, server &srv)
 {
 	std::string uri = cli.getReq().getUri();
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
-	std::string matchedLocation = findLongestMatch(uri, locations);
-	if (!matchedLocation.empty())
+	const LocationConfig* loc = findLongestMatch(uri, locations);
+	if (loc != NULL)
 	{
-		if(cli.getContentLength() > loc)
+		if(cli.getContentLength() > loc->getMaxBodySize())
+		{
+			cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
+			return -1;//403
+		}
+	}
+	else
+	{
+
 	}
 }
-std::string findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
+const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
 {
-	std::string longestMatch = "";
+	const LocationConfig* longestmatch = NULL;
+	int max_size  = 0;
 	for (std::map<std::string, LocationConfig>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		const std::string& locationPath = it->first;
 		if (uri.compare(0, locationPath.size(), locationPath) == 0)
 		{
-			if (uri.size() == locationPath.size() || uri[locationPath.size()] == '/')
+			if (locationPath[locationPath.length() - 1] == '/' || uri.size() == locationPath.size() || uri[locationPath.size()] == '/')
 			{
-				if (locationPath.size() > longestMatch.size())
-					longestMatch = locationPath;
+				if (locationPath.size() > max_size)
+				{
+					max_size = locationPath.size();
+					longestmatch = &(it->second);
+				}
 			}
 		}
 	}
-	return longestMatch;
+	return longestmatch;
 }
 

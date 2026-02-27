@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/22 15:52:49 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/26 16:07:12 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,5 +58,7 @@ class HttpResponse
 		void addResHeader(const std::string& key, const std::string& value);
 		void setContentType(const std::string& contentType);
 		std::string generateResponse(client &cli, server &srv);
+		//functions
+		void buildErrorResponse(Codes code,LocationConfig *loc);
 };
 #endif

@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/23 14:46:48 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:21:08 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ int webserv::run()
 						handle_client_write(fd, it->second);
 						break;
 					}
+				}
 
 			}
 			//HANDLE CGI OUTPUT
