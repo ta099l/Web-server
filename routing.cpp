@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/27 16:23:23 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/02/28 12:05:47 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,31 +29,48 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	if(uri.find(Path) == 0) //remove location path from uri
 		uri.erase(0, Path.length());
 	std::string root = locConfig.getRoot(); //root
-	if(root[root.length() - 1] != '/' && uri[0] == '/')
+	if(root[root.length() - 1] != '/' && (uri.empty() || uri[0] != '/'))
 		root.insert(0, "/");
-	// srv.setRoot(root);
-	cli.setFileFd(open(chr_str, O_RDONLY));
-	//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
-	if(cli.getFileFd() < 0)
+	const char *str = (root + uri).c_str();
+
+	struct stat stat_buf;
+	if(stat(str, &stat_buf) == -1)
 	{
-		cli.getRes().setStatusCode(404);
+		cli.getRes().setStatusCode(NOT_FOUND);
 		return (-1);
-		//build error response
 	}
-	struct stat file_info;
-	if (fstat(cli.getFileFd(), &file_info) == 0)
+	else if (S_ISDIR(stat_buf.st_mode))
 	{
-		cli.getRes().setFileSize(file_info.st_size);
-		// cli.getRes().setFileModifiedTime(file_info.st_mtime);
-		cli.setFileFd(cli.getFileFd());
-		cli.getRes().setStatusCode(200);
+			return (0); //send to function for dir
+		//check to autoindex or check index file
+	}
+	else if(S_ISREG(stat_buf.st_mode))
+	{
+		cli.setFileFd(open(str, O_RDONLY));
+		//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
+		if(cli.getFileFd() < 0)
+		{
+			cli.getRes().setStatusCode(NOT_FOUND);
+			return (-1);
+			//build error response
+		}
+		struct stat file_info;
+		if (fstat(cli.getFileFd(), &file_info) == 0)
+		{
+			cli.getRes().setFileSize(file_info.st_size);
+			// cli.getRes().setFileModifiedTime(file_info.st_mtime);
+			cli.setFileFd(cli.getFileFd());
+			cli.getRes().setStatusCode(OK);
+		}
+		else
+		{
+			perror("Error getting file status");
+			cli.getRes().setStatusCode(500);
+			return (-1);
+		}
 	}
 	else
-	{
-		perror("Error getting file status");
-		cli.getRes().setStatusCode(500);
-		return (-1);
-	}
+		cli.getRes().setStatusCode(NOT_FOUND);
 	return 0;
 }
 
