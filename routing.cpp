@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/01 02:59:34 by tasnimsamer      ###   ########.fr       */
+/*   Updated: 2026/03/01 20:47:16 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		{
 			cli.getRes().setFileSize(file_info.st_size);
 			// cli.getRes().setFileModifiedTime(file_info.st_mtime);
-			cli.setFileFd(cli.getFileFd());
+			// cli.setFileFd(cli.getFileFd());
 			cli.getRes().setStatusCode(OK);
 		}
 		else
@@ -111,7 +111,7 @@ int handleRouting(client &cli, server &srv)
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
-			post_method(cli, srv, *loc);
+			// post_method(cli, srv, *loc);
 			cli.setState("SENDING RESPONSE");
 		}
 		else if (cli.getReq().getMethod() == "DELETE")

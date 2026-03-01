@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/27 15:21:08 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 21:44:44 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,10 @@ void webserv::handle_new_connection(int fd, server& srv)
 	client new_client(client_fd);
 	srv.addClientFd(client_fd, new_client);
 }
+void	state_machine(client &cli,server &serv)
+{
+	const char *state = cli.getState().c_str();
+}
 int webserv::run()
 {
 	struct epoll_event events[100];
@@ -102,62 +106,55 @@ int webserv::run()
 		for (int i = 0; i < num_events; ++i)
 		{
 			int fd = events[i].data.fd;
-
-			if (is_server_socket(fd))
-			{
-				for (size_t j = 0; j < servers.size(); ++j)
+				if (is_server_socket(fd))
 				{
-					if (fd == servers[j].getServerFd())
+					for (size_t j = 0; j < servers.size(); ++j)
 					{
-						handle_new_connection(fd, servers[j]);
-						break;
+						if (fd == servers[j].getServerFd())
+						{
+							handle_new_connection(fd, servers[j]);
+							break;
+						}
 					}
 				}
-			}
-			if (events[i].events & EPOLLIN)
-			{
-				for (size_t j = 0; j < servers.size(); ++j)
+				if (events[i].events & (EPOLLIN | EPOLLOUT))
 				{
-					std::map<int, client>& client_fds = servers[j].getClientFds(); // reference!
-					std::map<int, client>::iterator it = client_fds.find(fd);
-					if (it != client_fds.end())
+					for (size_t j = 0; j < servers.size(); ++j)
 					{
-						handleRead(it->second, fd);
-						if(it->second.isRequestComplete())
-							handleRouting(it->second, servers[j]);
-						break;
+						std::map<int, client>& client_fds = servers[j].getClientFds(); // reference!
+						std::map<int, client>::iterator it = client_fds.find(fd);
+						if (it != client_fds.end())
+						{
+							state_machine(it->second, servers[j]);
+							//handleRead(it->second, fd);
+							if(it->second.isRequestComplete())
+								handleRouting(it->second, servers[j]);
+							break;
+						}
 					}
 				}
-			}
-			if (events[i].events & EPOLLOUT)
-			{
-				for (size_t j = 0; j < servers.size(); ++j)
+				//HANDLE CGI OUTPUT
+				//fdin & fdout for CGI processes
+					//handle_cgi_output(fd);
+					//if CGI process is done, remove fd from epoll and close it
+					//epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+					//close(fd);
+					//remove CGI process from tracking data structures
+					//cgi_processes.erase(fd);
+					//remove client associated with this CGI process if needed
+				if (events[i].events & (EPOLLERR | EPOLLHUP))
 				{
-					std::map<int, client>& client_fds = servers[j].getClientFds(); // reference!
-					std::map<int, client>::iterator it = client_fds.find(fd);
-					if (it != client_fds.end())
-					{
-						handle_client_write(fd, it->second);
-						break;
-					}
+					std::cerr << "Error on fd " << fd << std::endl;
+					//   close_client_connection(fd);
 				}
-
 			}
-			//HANDLE CGI OUTPUT
-			//fdin & fdout for CGI processes
-				//handle_cgi_output(fd);
-				//if CGI process is done, remove fd from epoll and close it
-				//epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-				//close(fd);
-				//remove CGI process from tracking data structures
-				//cgi_processes.erase(fd);
-				//remove client associated with this CGI process if needed
-			if (events[i].events & (EPOLLERR | EPOLLHUP))
-			{
-				std::cerr << "Error on fd " << fd << std::endl;
-				//   close_client_connection(fd);
-			}
-		}
 	}
 	return 0;
 }
+/**
+- state machine implementation
+- keep returning to the loop
+- get reading in chunks and returning
+- post in chunks
+-
+ */

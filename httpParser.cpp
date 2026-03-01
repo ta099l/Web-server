@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/21 14:29:47 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 21:32:44 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int  checkHeader(client &cli)
 	}
 	return 0;
 }
-int handleRead(client &cli,int fd)
+int	handleRead(client &cli,int fd)
 {
 	char temp[4096];
 	size_t n=recv(cli.getFd(),temp,4096,0);
@@ -220,8 +220,6 @@ int handleRead(client &cli,int fd)
 		}
 	}
 	return 0;
-
-
 }
 
 
