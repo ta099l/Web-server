@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/21 15:42:06 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 01:54:35 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,22 @@ void client::setBodyStart(size_t n){this->bodyStart = n;}
 std::string client::getHeader() { return header; }
 void client::setHeader(const std::string &header) { this->header = header; }
 void client::appendToBuffer(const std::string &data,int n) { buffer.append(data, 0, n); }
+std::string client::getResBufHeader()
+{
+	return ResBufHeader;
+}
+void client::setResBufHeader(const std::string &header)
+{
+	ResBufHeader = header;
+}
+size_t client::getByt_sent()
+{
+	return byt_sent;
+}
+void client::setByt_sent(size_t n)
+{
+	byt_sent = n;
+}
 size_t client::getFileSize()
 {
 	return outFileSize;

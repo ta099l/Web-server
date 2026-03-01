@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/21 15:41:52 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 02:30:00 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class client
 		int getFileOffset();
 		HttpResponse& getRes();
 		//setters
+		void setFd(int fd);
 		void setBodyStart(size_t n);
 		void setState(std::string state);
 		void setBuffer(const std::string &buffer);

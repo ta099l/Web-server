@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/02/28 12:05:47 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 02:59:34 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,11 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	std::string root = locConfig.getRoot(); //root
 	if(root[root.length() - 1] != '/' && (uri.empty() || uri[0] != '/'))
 		root.insert(0, "/");
-	const char *str = (root + uri).c_str();
+	std::string str = root + uri;
+	const char *chr_str = str.c_str();
 
 	struct stat stat_buf;
-	if(stat(str, &stat_buf) == -1)
+	if(stat(chr_str, &stat_buf) == -1)
 	{
 		cli.getRes().setStatusCode(NOT_FOUND);
 		return (-1);
@@ -43,11 +44,11 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	{
 			return (0); //send to function for dir
 		//check to autoindex or check index file
+		//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
 	}
 	else if(S_ISREG(stat_buf.st_mode))
 	{
-		cli.setFileFd(open(str, O_RDONLY));
-		//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
+		cli.setFileFd(open(chr_str, O_RDONLY));
 		if(cli.getFileFd() < 0)
 		{
 			cli.getRes().setStatusCode(NOT_FOUND);
