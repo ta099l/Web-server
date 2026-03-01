@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser_util.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 21:03:35 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/21 11:28:39 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/01 17:00:09 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-void	parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfig& loc)
+void		parse_allowed_methods(const std::vector<std::string>& tokens, LocationConfig& loc)
 {
 	loc.clearMethods();
 	for (size_t i = 1; i < tokens.size(); ++i)
