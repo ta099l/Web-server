@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/01 20:47:16 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/02 15:28:51 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,17 @@ int routNOW(client &cli, server &srv, const LocationConfig& locConfig)
 		return 1; // 405
 	return 0;
 }
-
+void	read_file(client &cli, server &srv, const LocationConfig& locConfig)
+{
+	int byt_read = 0;
+	char *line = NULL;
+	if (cli.getFileOffset() < cli.getFileSize())
+	{
+		byt_read = read(cli.getFileFd(), line, 1024);
+		cli.setFileOffset(cli.getFileOffset() + byt_read);
+		
+	}
+}
 int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
 	//I also have uri
@@ -59,6 +69,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		if (fstat(cli.getFileFd(), &file_info) == 0)
 		{
 			cli.getRes().setFileSize(file_info.st_size);
+			read_file(cli, srv, locConfig);
 			// cli.getRes().setFileModifiedTime(file_info.st_mtime);
 			// cli.setFileFd(cli.getFileFd());
 			cli.getRes().setStatusCode(OK);
@@ -96,28 +107,28 @@ int handleRouting(client &cli, server &srv)
 		if(routNOW(cli, srv, *loc) == 1)
 		{
 			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
-			cli.setState("SENDING RESPONSE");
+			// cli.setState("SENDING RESPONSE");
 			return -1; //405
 		}
 		if(cli.getContentLength() > loc->getMaxBodySize())
 		{
-			cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
+			// cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
 			return -1;//403
 		}
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *loc, uri);
-			cli.setState("SENDING RESPONSE"); // Ready to send the file back!
+			// cli.setState("SENDING RESPONSE"); // Ready to send the file back!
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
 			// post_method(cli, srv, *loc);
-			cli.setState("SENDING RESPONSE");
+			// cli.setState("SENDING RESPONSE");
 		}
 		else if (cli.getReq().getMethod() == "DELETE")
 		{
 			//delete_method(cli, srv, *loc);
-			cli.setState("SENDING RESPONSE");
+			// cli.setState("SENDING RESPONSE");
 		}
 	}
 	else

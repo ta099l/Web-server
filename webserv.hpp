@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/26 16:00:32 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/02 16:16:37 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,10 @@ enum Codes
 	INTERNAL_SERVER_ERROR = 500,
 	NOT_IMPLEMENTED = 501
 };
+// enum States
+// {
+
+// };
 class webserv
 {
 	private:
@@ -65,7 +69,7 @@ class webserv
 		int		save_info(std::ifstream& inFile, server& s, int flag);
 		void	printConfig() const;
 		bool is_server_socket(int fd);
-	void handle_new_connection(int fd, server& srv);
+	int handle_new_connection(int fd, server& srv);
 std::vector<std::string> split(const std::string& line);
 };
 int handleRouting(client &cli, server &srv);

@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/01 21:44:44 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/02 16:18:21 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ bool webserv::is_server_socket(int fd)
 	}
 	return false;
 }
-void webserv::handle_new_connection(int fd, server& srv)
+int webserv::handle_new_connection(int fd, server& srv)
 {
 	struct sockaddr_in client_addr;
 	socklen_t client_len = sizeof(client_addr);
@@ -71,7 +71,7 @@ void webserv::handle_new_connection(int fd, server& srv)
 	if (client_fd == -1)
 	{
 		std::cerr << "Failed to accept new connection" << std::endl;
-		return;
+		return 0;
 	}
 	fcntl(client_fd, F_SETFL, O_NONBLOCK);
 	struct epoll_event event;
@@ -81,14 +81,25 @@ void webserv::handle_new_connection(int fd, server& srv)
 	{
 		std::cerr << "Failed to add client socket to epoll" << std::endl;
 		close(client_fd);
-		return;
+		return 0;
 	}
 	client new_client(client_fd);
 	srv.addClientFd(client_fd, new_client);
+	return 1;
 }
-void	state_machine(client &cli,server &serv)
+void	state_machine(client &cli,server &serv, int fd)
 {
 	const char *state = cli.getState().c_str();
+	if(cli.getState() == "READING")
+		handleRead(cli, fd);
+	else if (cli.getState() == "ROUTING")
+	{
+		if(cli.isRequestComplete())
+			handleRouting(cli, serv);
+	}
+	else if (cli.getState() == "SENDING RESPONSE")
+		handle_client_write(fd, cli);
+	// else
 }
 int webserv::run()
 {
@@ -106,18 +117,21 @@ int webserv::run()
 		for (int i = 0; i < num_events; ++i)
 		{
 			int fd = events[i].data.fd;
+			int handled = 0;
 				if (is_server_socket(fd))
 				{
 					for (size_t j = 0; j < servers.size(); ++j)
 					{
 						if (fd == servers[j].getServerFd())
 						{
-							handle_new_connection(fd, servers[j]);
+							int handled = handle_new_connection(fd, servers[j]);
 							break;
 						}
 					}
+					if(handled)
+						continue;
 				}
-				if (events[i].events & (EPOLLIN | EPOLLOUT))
+				else if (events[i].events & (EPOLLIN | EPOLLOUT))
 				{
 					for (size_t j = 0; j < servers.size(); ++j)
 					{
@@ -125,10 +139,7 @@ int webserv::run()
 						std::map<int, client>::iterator it = client_fds.find(fd);
 						if (it != client_fds.end())
 						{
-							state_machine(it->second, servers[j]);
-							//handleRead(it->second, fd);
-							if(it->second.isRequestComplete())
-								handleRouting(it->second, servers[j]);
+							state_machine(it->second, servers[j], fd);
 							break;
 						}
 					}
