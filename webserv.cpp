@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/02 16:18:21 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/03 18:26:30 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,43 +63,78 @@ bool webserv::is_server_socket(int fd)
 	}
 	return false;
 }
-int webserv::handle_new_connection(int fd, server& srv)
+int webserv::handle_new_connection(int listen_fd, server& srv)
 {
-	struct sockaddr_in client_addr;
-	socklen_t client_len = sizeof(client_addr);
-	int client_fd = accept(fd, (struct sockaddr *)&client_addr, &client_len);
-	if (client_fd == -1)
+	while (true)
 	{
-		std::cerr << "Failed to accept new connection" << std::endl;
-		return 0;
+		sockaddr_in client_addr;
+		socklen_t client_len = sizeof(client_addr);
+		int client_fd = accept(listen_fd, (sockaddr*)&client_addr, &client_len);
+		if (client_fd == -1)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break;
+			std::cerr << "accept() failed" << std::endl;
+			break;
+		}
+		int flags = fcntl(client_fd, F_GETFL, 0);
+		if (flags != -1)
+			fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+		epoll_event event;
+		event.events = EPOLLIN;
+		event.data.fd = client_fd;
+		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event) == -1)
+		{
+			close(client_fd);
+			continue;
+		}
+		client new_client(client_fd);
+		srv.addClientFd(client_fd, new_client);
 	}
-	fcntl(client_fd, F_SETFL, O_NONBLOCK);
-	struct epoll_event event;
-	event.events = EPOLLIN;
-	event.data.fd = client_fd;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event) == -1)
-	{
-		std::cerr << "Failed to add client socket to epoll" << std::endl;
-		close(client_fd);
-		return 0;
-	}
-	client new_client(client_fd);
-	srv.addClientFd(client_fd, new_client);
 	return 1;
 }
-void	state_machine(client &cli,server &serv, int fd)
+
+void	state_machine(client &cli,server &serv, int fd, uint32_t events)
 {
-	const char *state = cli.getState().c_str();
-	if(cli.getState() == "READING")
-		handleRead(cli, fd);
-	else if (cli.getState() == "ROUTING")
+	ClientState state=cli.getState();
+	if(state == READING && (events & EPOLLIN))
 	{
-		if(cli.isRequestComplete())
-			handleRouting(cli, serv);
+		if(handleRead(cli,fd) == 1)
+		{
+			cli.setState(DONE);
+			return;
+		}
 	}
-	else if (cli.getState() == "SENDING RESPONSE")
-		handle_client_write(fd, cli);
-	// else
+	if(state == ROUTING)
+	{
+		if(handleRouting(cli,serv) == 1)
+		{
+			cli.setState(DONE);
+			return;
+		}
+	}
+	// if(state == SENDING_RESPONSE && (events & EPOLLOUT))
+	// {
+	// 	if(handleWrite(cli,fd) == 1)
+	// 	{
+	// 		cli.setState(DONE);
+	// 		return;
+	// 	}
+	// }
+}
+void webserv::close_client_connection(int fd)
+{
+	close(fd);
+	for (size_t j = 0; j < servers.size(); ++j)
+	{
+	    std::map<int, client>& client_fds = servers[j].getClientFds();
+	    std::map<int, client>::iterator it = client_fds.find(fd);
+	    if (it != client_fds.end())
+	    {
+	        client_fds.erase(it);
+	        break;
+	    }
+	}
 }
 int webserv::run()
 {
@@ -117,19 +152,21 @@ int webserv::run()
 		for (int i = 0; i < num_events; ++i)
 		{
 			int fd = events[i].data.fd;
-			int handled = 0;
 				if (is_server_socket(fd))
 				{
 					for (size_t j = 0; j < servers.size(); ++j)
 					{
 						if (fd == servers[j].getServerFd())
 						{
-							int handled = handle_new_connection(fd, servers[j]);
-							break;
+							handle_new_connection(fd, servers[j]);
+							continue;
 						}
 					}
-					if(handled)
-						continue;
+				}
+				if (events[i].events & (EPOLLERR | EPOLLHUP))
+				{
+					std::cerr << "Error on fd " << fd << std::endl;
+					close_client_connection(fd);
 				}
 				else if (events[i].events & (EPOLLIN | EPOLLOUT))
 				{
@@ -139,25 +176,20 @@ int webserv::run()
 						std::map<int, client>::iterator it = client_fds.find(fd);
 						if (it != client_fds.end())
 						{
-							state_machine(it->second, servers[j], fd);
+							state_machine(it->second, servers[j], fd,events[i].events);
 							break;
 						}
 					}
 				}
 				//HANDLE CGI OUTPUT
 				//fdin & fdout for CGI processes
-					//handle_cgi_output(fd);
-					//if CGI process is done, remove fd from epoll and close it
-					//epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-					//close(fd);
-					//remove CGI process from tracking data structures
-					//cgi_processes.erase(fd);
-					//remove client associated with this CGI process if needed
-				if (events[i].events & (EPOLLERR | EPOLLHUP))
-				{
-					std::cerr << "Error on fd " << fd << std::endl;
-					//   close_client_connection(fd);
-				}
+				//handle_cgi_output(fd);
+				//if CGI process is done, remove fd from epoll and close it
+				//epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+				//close(fd);
+				//remove CGI process from tracking data structures
+				//cgi_processes.erase(fd);
+				//remove client associated with this CGI process if needed
 			}
 	}
 	return 0;

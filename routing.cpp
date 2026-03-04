@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/02 15:28:51 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/03 20:29:15 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	read_file(client &cli, server &srv, const LocationConfig& locConfig)
 	{
 		byt_read = read(cli.getFileFd(), line, 1024);
 		cli.setFileOffset(cli.getFileOffset() + byt_read);
-		
+
 	}
 }
 int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
@@ -99,42 +99,63 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig)
 int handleRouting(client &cli, server &srv)
 {
 	std::string uri = cli.getReq().getUri();
-	// TODO later: Check Host header here to see if we need to swap 'srv' for a virtual server
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
-	const LocationConfig* loc = findLongestMatch(uri, locations);
-	if (loc != NULL)
+	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
+	if (matchedLocation)
 	{
-		if(routNOW(cli, srv, *loc) == 1)
+		if(routNOW(cli, srv, *matchedLocation) == 1)
 		{
 			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
-			// cli.setState("SENDING RESPONSE");
-			return -1; //405
+			cli.
+			return -1;//method not allowed 405
 		}
-		if(cli.getContentLength() > loc->getMaxBodySize())
+		else if (cli.getReq().getMethod() == "GET")
 		{
-			// cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
-			return -1;//403
-		}
-		if (cli.getReq().getMethod() == "GET")
-		{
-			get_method(cli, srv, *loc, uri);
-			// cli.setState("SENDING RESPONSE"); // Ready to send the file back!
+			if(get_method(cli, srv, *matchedLocation, uri) == -1)
+				return 1;
+			else
+			{
+				cli.setState(SENDING_RESPONSE);
+				return 0;
+				// epoll_ctl(, )
+			}
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
-			// post_method(cli, srv, *loc);
-			// cli.setState("SENDING RESPONSE");
+			if(post_method(cli, srv, *matchedLocation) == -1)
+				return 1;
+			else
+			{
+				cli.setState(SENDING_RESPONSE);
+				return 0;
+			}
 		}
 		else if (cli.getReq().getMethod() == "DELETE")
 		{
-			//delete_method(cli, srv, *loc);
-			// cli.setState("SENDING RESPONSE");
+			std::string filePath = matchedLocation->getRoot() + uri;
+			if(remove(filePath.c_str()) != 0)
+				return 1;
+			else
+			{
+				cli.setState(SENDING_RESPONSE);
+				return 0;
+			}
 		}
 	}
 	else
 	{
-		//go to srv defaults
+		if(routNOW(cli, srv, LocationConfig()) == 1) //check default location
+		{
+			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
+			return -1;//method not allowed 405
+		}
 	}
+	  //handle default location
+	  //similar to get method but with default location config
+	  //if no default location => return 404 not found
+	  cli.getRes().setStatusCode(NOT_FOUND);
+	  return -1;
+
 }
 const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
 {

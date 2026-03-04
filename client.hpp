@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/01 02:30:00 by tasnimsamer      ###   ########.fr       */
+/*   Updated: 2026/03/03 20:19:35 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,21 @@
 #include "HttpReq.hpp"
 #include "webserv.hpp"
 #include "httpResponse.hpp"
+enum ClientState
+{
+	READING,
+	ROUTING,
+	CGI_WRITING_STDIN,
+	CGI_READING_STDOUT,
+	SENDING_RESPONSE,
+	DONE
+};
 
 class client
 {
 	int fd;
-	std::string state;
+	ClientState state;
+	int code;
 	std::string buffer;
 	std::string responseBuffer;
 	std::string header;
@@ -47,16 +57,17 @@ class client
 		std::string getResponseBuffer();
 		size_t getContentLength();
 		HttpReq& getReq();
-		std::string getState();
+		ClientState getState();
 		std::string getHeader();
 		size_t getFileSize();
 		int getFileFd();
 		int getFileOffset();
+		int getCode();
 		HttpResponse& getRes();
 		//setters
 		void setFd(int fd);
 		void setBodyStart(size_t n);
-		void setState(std::string state);
+		void setState(ClientState state);
 		void setBuffer(const std::string &buffer);
 		void setResponseBuffer(const std::string &responseBuffer);
 		void setContentLength(size_t contentLength);
@@ -67,6 +78,7 @@ class client
 		void setFileSize(size_t num);
 		void setFileOffset(int num);
 		void setFileDone(bool done);
+		void setCode(int code);
 		void setFileFd(int fd);
 		//checkers
 		bool isHeaderComplete();

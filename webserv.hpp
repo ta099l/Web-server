@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/02 16:16:37 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/03 18:02:18 by balhamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ class webserv
 		webserv();
 		~webserv();
 		int initialize_epoll();
-		int epoll_fd;
 		int run();
 		int count;
 		std::vector<server>& getServers();
@@ -69,8 +68,9 @@ class webserv
 		int		save_info(std::ifstream& inFile, server& s, int flag);
 		void	printConfig() const;
 		bool is_server_socket(int fd);
-	int handle_new_connection(int fd, server& srv);
-std::vector<std::string> split(const std::string& line);
+		int handle_new_connection(int fd, server& srv);
+		void close_client_connection(int fd);
+		std::vector<std::string> split(const std::string& line);
 };
 int handleRouting(client &cli, server &srv);
 int	check_line(std::string line);
