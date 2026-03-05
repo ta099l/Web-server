@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/05 15:45:52 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 18:09:58 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,36 +183,30 @@ int handleRouting(client &cli, server &srv)
 		//if(cgi)
 		else if (cli.getReq().getMethod() == "GET")
 		{
-			if(get_method(cli, srv, *matchedLocation, uri) == -1)
-				return 1;
-			else
-			{
-				cli.setState(SENDING_RESPONSE);
-				return 0;
-				// epoll_ctl(, )
-			}
+			get_method(cli, srv, *matchedLocation, uri);
 		}
-		else if (cli.getReq().getMethod() == "POST")
-		{
-			if(post_method(cli, srv, *matchedLocation) == -1)
-				return 1;
-			else
-			{
-				cli.setState(SENDING_RESPONSE);
-				return 0;
-			}
-		}
-		else if (cli.getReq().getMethod() == "DELETE")
-		{
-			std::string filePath = matchedLocation->getRoot() + uri;
-			if(remove(filePath.c_str()) != 0)
-				return 1;
-			else
-			{
-				cli.setState(SENDING_RESPONSE);
-				return 0;
-			}
-		}
+		// else if (cli.getReq().getMethod() == "POST")
+		// {
+		// 	if(post_method(cli, srv, *matchedLocation) == -1)
+		// 		return 1;
+		// 	else
+		// 	{
+		// 		cli.setState(SENDING_RESPONSE);
+		// 		return 0;
+		// 	}
+		// }
+		// else if (cli.getReq().getMethod() == "DELETE")
+		// {
+		// 	std::string filePath = matchedLocation->getRoot() + uri;
+		// 	if(remove(filePath.c_str()) != 0)
+		// 		return 1;
+		// 	else
+		// 	{
+		// 		cli.setState(SENDING_RESPONSE);
+		// 		return 0;
+		// 	}
+		// }
+		craftResponse(cli,srv,*matchedLocation);
 	}
 	else
 	{
