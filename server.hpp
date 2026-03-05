@@ -3,18 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/23 14:50:54 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/05 12:34:26 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
-#include "webserv.hpp"
+
+#include <string>
+#include <vector>
+#include <map>
+
 #include "client.hpp"
+
 struct CGIConfig //done
 {
 	std::string extension;

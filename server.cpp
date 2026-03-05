@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/23 14:52:47 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/05 12:31:38 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-
+#include "server.hpp"
 server::server() : root(""), index("index.html"), max_body_size(0),
  autoindex(false),  upload_enable(false), server_fd(-1)
 {
@@ -175,6 +175,7 @@ LocationConfig::LocationConfig()
 	autoindex = false;
 	upload_enable = false;
 	max_body_size = 0;
+	take_default
 }
 
 // LocationConfig Getters

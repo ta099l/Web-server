@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/04 16:28:41 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 10:58:05 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-
+#include "client.hpp"
 webserv::webserv()
 {
 }
@@ -97,8 +97,7 @@ int webserv::handle_new_connection(int listen_fd, server& srv)
 void	state_machine(client &cli,server &serv, int fd, uint32_t events)
 {
 	ClientState state=cli.getState();
-	if(state == READING && (ev
-		ents & EPOLLIN))
+	if(state == READING && (events & EPOLLIN))
 	{
 		if(handleRead(cli,fd) == 1)
 		{

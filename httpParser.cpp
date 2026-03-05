@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/04 16:27:01 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 12:09:19 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ int	handleRead(client &cli,int fd)
 	else
 	{
 		if(errno == EWOULDBLOCK || errno == EAGAIN)
-			return 0;
+			return 0;//this is forbidden
 		else
 		{
 			cli.setState(DONE);

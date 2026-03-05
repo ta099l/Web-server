@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser_util.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 21:03:35 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/21 11:28:39 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/05 12:23:29 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ void parse_error_page(const std::vector<std::string>& tokens, server& srv)
 
 int	take_default(std::string line, server& srv, LocationConfig &loc)
 {
-	std::cout<<line<<"\n";
 	// Copy methods from server to location
 	const std::vector<std::string>& methods = srv.getMethods();
 	for (size_t i = 0; i < methods.size(); ++i)

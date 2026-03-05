@@ -3,58 +3,124 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/03 20:29:15 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 14:53:06 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "server.hpp"
 
-int routNOW(client &cli, server &srv, const LocationConfig& locConfig)
+int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfig)
 {
 	std::string reqMethod = cli.getReq().getMethod();
 	const std::vector<std::string>&allowedMethods= locConfig.getMethods();
 	if (std::find(allowedMethods.begin(), allowedMethods.end(), reqMethod) == allowedMethods.end())
-		return 1; // 405
+	{
+		cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
+		cli.setState(SENDING_RESPONSE);
+		return 1;
+	}
+	else if(cli.getContentLength()>locConfig.getMaxBodySize())
+	{
+		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
+		cli.setState(SENDING_RESPONSE);
+		return 1;
+	}
+	else if(cli.getRes().getStatusCode()!=0)
+	{
+		cli.setState(SENDING_RESPONSE);
+		return 1;
+	}
 	return 0;
 }
-void	read_file(client &cli, server &srv, const LocationConfig& locConfig)
-{
-	int byt_read = 0;
-	char *line = NULL;
-	if (cli.getFileOffset() < cli.getFileSize())
-	{
-		byt_read = read(cli.getFileFd(), line, 1024);
-		cli.setFileOffset(cli.getFileOffset() + byt_read);
 
-	}
-}
-int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
+std::string setupRootPath(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
-	//I also have uri
 	std::string Path = locConfig.getPath(); //location path
 	if(uri.find(Path) == 0) //remove location path from uri
 		uri.erase(0, Path.length());
-	std::string root = locConfig.getRoot(); //root
-	if(root[root.length() - 1] != '/' && (uri.empty() || uri[0] != '/'))
-		root.insert(0, "/");
-	std::string str = root + uri;
+	std::string root = locConfig.getRoot();
+	if (!root.empty() && root[root.size()-1] != '/')
+	    root += '/';
+
+	if (!uri.empty() && uri[0] == '/')
+	    uri.erase(0, 1);
+
+	return root + uri;
+	// std::string root = locConfig.getRoot(); //root
+	// if(root[root.length() - 1] != '/' && (uri.empty() || uri[0] != '/'))
+	// 	root.insert(0, "/");
+	// std::string str = root + uri;
+	// return (str);
+}
+int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
+{
+	std::string str = setupRootPath(cli, srv, locConfig, uri);
 	const char *chr_str = str.c_str();
 
 	struct stat stat_buf;
 	if(stat(chr_str, &stat_buf) == -1)
 	{
 		cli.getRes().setStatusCode(NOT_FOUND);
+		cli.setState(SENDING_RESPONSE);
 		return (-1);
 	}
 	else if (S_ISDIR(stat_buf.st_mode))
 	{
-			return (0); //send to function for dir
-		//check to autoindex or check index file
-		//if directory => handle index/autoindex (not implemented yet, but don’t treat as file
+		cli.setIsDir(true);
+		if (!uri.empty() && uri[uri.size()-1] != '/')
+		{
+			cli.getRes().setStatusCode(301);
+			cli.getRes().addResHeader("Location", uri + "/");
+			cli.setState(SENDING_RESPONSE);
+			return -1;
+
+		}
+		if(!locConfig.getAutoindex())
+		{
+			if(locConfig.getIndex().empty())
+			{
+				cli.setState(SENDING_RESPONSE);
+				cli.getRes().setStatusCode(FORBIDDEN);
+				return (-1);
+			}
+			else
+			{
+				std::string indexPath = str;
+				if (!indexPath.empty() && indexPath[indexPath.size()-1] != '/')
+				    indexPath += '/';
+				indexPath += locConfig.getIndex();
+				cli.setFileFd(open(indexPath.c_str(), O_RDONLY));
+				if(cli.getFileFd() < 0)
+				{
+					cli.getRes().setStatusCode(NOT_FOUND);
+					cli.setState(SENDING_RESPONSE);
+					return -1;
+				}
+				if (fstat(cli.getFileFd(), &stat_buf) == -1)
+        		{
+        		    close(cli.getFileFd());
+        		    cli.getRes().setStatusCode(500);
+        		    cli.setState(SENDING_RESPONSE);
+        		    return -1;
+        		}
+				cli.getRes().setFileSize(stat_buf.st_size);
+				cli.setState(SENDING_RESPONSE);
+				cli.getRes().setStatusCode(OK);
+			}
+		}
+		else
+		{
+			cli.setState(SENDING_RESPONSE);
+			cli.getRes().setHasFileBody(false);
+			//res.setMemoryBody(html_or_error);
+			cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
+			cli.getRes().setStatusCode(OK);
+			return(0);
+		}
 	}
 	else if(S_ISREG(stat_buf.st_mode))
 	{
@@ -62,27 +128,32 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		if(cli.getFileFd() < 0)
 		{
 			cli.getRes().setStatusCode(NOT_FOUND);
+			cli.setState(SENDING_RESPONSE);
 			return (-1);
-			//build error response
 		}
-		struct stat file_info;
-		if (fstat(cli.getFileFd(), &file_info) == 0)
+		if (fstat(cli.getFileFd(), &stat_buf) == 0)
 		{
-			cli.getRes().setFileSize(file_info.st_size);
-			read_file(cli, srv, locConfig);
-			// cli.getRes().setFileModifiedTime(file_info.st_mtime);
-			// cli.setFileFd(cli.getFileFd());
+			cli.getRes().setFileSize(stat_buf.st_size);
 			cli.getRes().setStatusCode(OK);
+			cli.setState(SENDING_RESPONSE);
+			return 0;
 		}
 		else
 		{
+			close(cli.getFileFd());
 			perror("Error getting file status");
+			cli.setState(SENDING_RESPONSE);
 			cli.getRes().setStatusCode(500);
 			return (-1);
 		}
 	}
 	else
+	{
+		cli.setState(SENDING_RESPONSE);
 		cli.getRes().setStatusCode(NOT_FOUND);
+		return (-1);
+	}
+
 	return 0;
 }
 
@@ -103,12 +174,10 @@ int handleRouting(client &cli, server &srv)
 	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
 	if (matchedLocation)
 	{
-		if(routNOW(cli, srv, *matchedLocation) == 1)
-		{
-			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
-			cli.
-			return -1;//method not allowed 405
-		}
+		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
+			return -1;
+
+		//if(cgi)
 		else if (cli.getReq().getMethod() == "GET")
 		{
 			if(get_method(cli, srv, *matchedLocation, uri) == -1)
@@ -144,7 +213,7 @@ int handleRouting(client &cli, server &srv)
 	}
 	else
 	{
-		if(routNOW(cli, srv, LocationConfig()) == 1) //check default location
+		if(checkValidLocConfig(cli, srv, LocationConfig()) == 1) //check default location
 		{
 			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
 			return -1;//method not allowed 405

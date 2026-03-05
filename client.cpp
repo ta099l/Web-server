@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/03 20:19:47 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 13:14:39 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.hpp"
-client::client() : fd(-1), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), outFileFd(-1), outFileSize(0), outFileOffset(0), fileDone(false),bodyStart(0) {}
-client::client(int fd) : fd(fd), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), outFileFd(-1), outFileSize(0), outFileOffset(0), fileDone(false) {}
-client::client(const client &other) : fd(other.fd), state(other.state), buffer(other.buffer), responseBuffer(other.responseBuffer), contentLength(other.contentLength), headerComplete(other.headerComplete), requestComplete(other.requestComplete), req(other.req), bodyStart(other.bodyStart) , fileDone(other.fileDone) ,outFileFd(other.outFileFd){}
+client::client() : isDir(false),fd(-1), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), outFileFd(-1), outFileSize(0), outFileOffset(0), fileDone(false),bodyStart(0) {}
+client::client(int fd) :isDir(false), fd(fd), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), outFileFd(-1), outFileSize(0), outFileOffset(0), fileDone(false) {}
+client::client(const client &other) :isDir(other.isDir), fd(other.fd), state(other.state), buffer(other.buffer), responseBuffer(other.responseBuffer), contentLength(other.contentLength), headerComplete(other.headerComplete), requestComplete(other.requestComplete), req(other.req), bodyStart(other.bodyStart) , fileDone(other.fileDone) ,outFileFd(other.outFileFd){}
 client& client::operator=(const client &other) {
 	if (this != &other) {
 		fd = other.fd;
@@ -29,6 +29,7 @@ client& client::operator=(const client &other) {
 		outFileOffset = other.outFileOffset;
 		fileDone = other.fileDone;
 		req = other.req;
+		isDir = other.isDir;
 	}
 	return *this;
 }
@@ -82,6 +83,14 @@ void client::setFileOffset(int num)
 bool client::isFileDone()
 {
 	return fileDone;
+}
+bool client::getIsDir()
+{
+	return getIsDir;
+}
+void client::setIsDir(bool val)
+{
+	isDir=val;
 }
 void client::setFileDone(bool done)
 {

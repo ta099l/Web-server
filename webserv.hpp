@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/03 18:02:18 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 10:58:46 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,13 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include "server.hpp"
 #include <sys/epoll.h>
 #include <unistd.h>
-#include "HttpReq.hpp"
-#include "client.hpp"
+// #include "HttpReq.hpp"
+// #include "client.hpp"
+#include "server.hpp"
+
+class client;
 
 enum Codes
 {

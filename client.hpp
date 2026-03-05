@@ -3,17 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/03 20:19:35 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/05 13:13:28 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
+
+#include <string>
+#include <cstddef> // size_t
+
 #include "HttpReq.hpp"
-#include "webserv.hpp"
 #include "httpResponse.hpp"
 enum ClientState
 {
@@ -44,6 +47,7 @@ class client
 	int outFileFd;
 	int outFileOffset;
 	bool fileDone;
+	bool isDir;
 	public:
 		client();
 		client(int fd);
@@ -64,6 +68,7 @@ class client
 		int getFileOffset();
 		int getCode();
 		HttpResponse& getRes();
+		bool getIsDir();
 		//setters
 		void setFd(int fd);
 		void setBodyStart(size_t n);
@@ -80,10 +85,12 @@ class client
 		void setFileDone(bool done);
 		void setCode(int code);
 		void setFileFd(int fd);
+		void setIsDir(bool val);
 		//checkers
 		bool isHeaderComplete();
 		bool isRequestComplete();
 		bool isFileDone();
+
 };
 
 int handleRead(client &cli,int fd);
