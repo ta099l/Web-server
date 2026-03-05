@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/05 18:09:58 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 22:15:26 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			cli.getRes().setStatusCode(301);
 			cli.getRes().addResHeader("Location", uri + "/");
 			cli.setState(SENDING_RESPONSE);
-			return -1;
+			return 0;
 
 		}
 		if(!locConfig.getAutoindex())
@@ -101,12 +101,13 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 					return -1;
 				}
 				if (fstat(cli.getFileFd(), &stat_buf) == -1)
-        		{
-        		    close(cli.getFileFd());
-        		    cli.getRes().setStatusCode(500);
-        		    cli.setState(SENDING_RESPONSE);
-        		    return -1;
-        		}
+				{
+					close(cli.getFileFd());
+					cli.setFileFd(-1);
+					cli.getRes().setStatusCode(500);
+					cli.setState(SENDING_RESPONSE);
+					return -1;
+				}
 				cli.getRes().setFileSize(stat_buf.st_size);
 				cli.getRes().setHasFileBody(true);
 				cli.getRes().setContentType(indexPath);
@@ -117,7 +118,8 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		else
 		{
 			cli.setState(SENDING_RESPONSE);
-			cli.getRes().setHasMemoryBody(true);
+			cli.getRes().setNeedsAutoindex(true);
+			cli.getRes().setAutoindexFsPath(str);
 			cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
 			cli.getRes().setStatusCode(OK);
 			return(0);
@@ -144,6 +146,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		else
 		{
 			close(cli.getFileFd());
+			cli.setFileFd(-1);
 			perror("Error getting file status");
 			cli.setState(SENDING_RESPONSE);
 			cli.getRes().setStatusCode(500);
@@ -206,7 +209,7 @@ int handleRouting(client &cli, server &srv)
 		// 		return 0;
 		// 	}
 		// }
-		craftResponse(cli,srv,*matchedLocation);
+		// craftResponse(cli,srv,*matchedLocation);
 	}
 	else
 	{

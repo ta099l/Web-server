@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 15:34:40 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 22:16:10 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpResponse.hpp"
-HttpResponse::HttpResponse() : fileFd(-1), fileSize(0), fileOffset(0), hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
+HttpResponse::HttpResponse() : fileFd(-1), fileSize(0), fileOffset(0),hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
 {
 	_initMimeTypes();
 }
@@ -69,14 +69,7 @@ void HttpResponse::_initMimeTypes()
 	_mimeTypes[".txt"]  = "text/plain";
 	_mimeTypes[".json"] = "application/json";
 }
-bool HttpResponse::getMemoryBodyBool()
-{
-	return hasMemoryBody;
-}
-void HttpResponse::setHasMemoryBody(bool val)
-{
-	hasFileBody = val;
-}
+
 // std::string HttpResponse::generateResponse(client &cli, server &srv)
 // {
 // 	std::string response = version + " " + std::to_string(statusCode) + " " + reason + "\r\n";
@@ -89,3 +82,11 @@ void HttpResponse::setHasMemoryBody(bool val)
 // 	return response;
 // }
 
+void HttpResponse::setAutoindexFsPath(const std::string& path)
+{
+	AutoIndexpath = path;
+}
+std::string HttpResponse::getAutoindexFsPath()
+{
+	return AutoIndexpath;
+}
