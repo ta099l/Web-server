@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 11:00:22 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 15:34:19 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class HttpResponse
 		size_t fileSize;
 		size_t fileOffset;
 		bool hasFileBody;
+		bool hasMemoryBody;
 		std::string version;
 		int statusCode;
 		std::string reason;
@@ -31,6 +32,8 @@ class HttpResponse
 		std::string fileBody;
 		std::string contentType;
 		std::map<std::string, std::string> resHeaders;
+		std::map<std::string, std::string> _mimeTypes;
+		void _initMimeTypes();
 	public:
 		HttpResponse();
 		~HttpResponse();
@@ -38,6 +41,7 @@ class HttpResponse
 		size_t getFileSize();
 		size_t getFileOffset();
 		bool getHasFileBody();
+		bool getMemoryBodyBool();
 		std::string getVersion();
 		int getStatusCode();
 		std::string getReason();
@@ -51,6 +55,7 @@ class HttpResponse
 		void setFileSize(size_t size);
 		void setFileOffset(size_t offset);
 		void setHasFileBody(bool hasFileBody);
+		void setHasMemoryBody(bool val);
 		void setVersion(const std::string& version);
 		void setStatusCode(int statusCode);
 		void setReason(const std::string& reason);

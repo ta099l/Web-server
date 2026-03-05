@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 12:31:38 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 14:59:47 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,6 @@ LocationConfig::LocationConfig()
 	autoindex = false;
 	upload_enable = false;
 	max_body_size = 0;
-	take_default
 }
 
 // LocationConfig Getters

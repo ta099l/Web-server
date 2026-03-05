@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/05 14:53:06 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 15:45:52 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,15 +108,16 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
         		    return -1;
         		}
 				cli.getRes().setFileSize(stat_buf.st_size);
-				cli.setState(SENDING_RESPONSE);
+				cli.getRes().setHasFileBody(true);
+				cli.getRes().setContentType(indexPath);
 				cli.getRes().setStatusCode(OK);
+				cli.setState(SENDING_RESPONSE);
 			}
 		}
 		else
 		{
 			cli.setState(SENDING_RESPONSE);
-			cli.getRes().setHasFileBody(false);
-			//res.setMemoryBody(html_or_error);
+			cli.getRes().setHasMemoryBody(true);
 			cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
 			cli.getRes().setStatusCode(OK);
 			return(0);
@@ -134,7 +135,9 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		if (fstat(cli.getFileFd(), &stat_buf) == 0)
 		{
 			cli.getRes().setFileSize(stat_buf.st_size);
+			cli.getRes().setHasFileBody(true);
 			cli.getRes().setStatusCode(OK);
+			cli.getRes().setContentType(str);
 			cli.setState(SENDING_RESPONSE);
 			return 0;
 		}
@@ -150,7 +153,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	else
 	{
 		cli.setState(SENDING_RESPONSE);
-		cli.getRes().setStatusCode(NOT_FOUND);
+		cli.getRes().setStatusCode(500);
 		return (-1);
 	}
 

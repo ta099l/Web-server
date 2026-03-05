@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 10:58:46 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/05 15:06:09 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,10 @@ enum Codes
 	PAYLOAD_TOO_LARGE = 413,
 	INTERNAL_SERVER_ERROR = 500,
 	NOT_IMPLEMENTED = 501
+};
+enum Mime
+{
+	
 };
 // enum States
 // {
