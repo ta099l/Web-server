@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/05 22:15:26 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/06 18:12:41 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,17 +44,12 @@ std::string setupRootPath(client &cli, server &srv, const LocationConfig& locCon
 		uri.erase(0, Path.length());
 	std::string root = locConfig.getRoot();
 	if (!root.empty() && root[root.size()-1] != '/')
-	    root += '/';
+		root += '/';
 
 	if (!uri.empty() && uri[0] == '/')
-	    uri.erase(0, 1);
+		uri.erase(0, 1);
 
-	return root + uri;
-	// std::string root = locConfig.getRoot(); //root
-	// if(root[root.length() - 1] != '/' && (uri.empty() || uri[0] != '/'))
-	// 	root.insert(0, "/");
-	// std::string str = root + uri;
-	// return (str);
+	return (root + uri);
 }
 int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
@@ -163,14 +158,81 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	return 0;
 }
 
-int post_method(client &cli, server &srv, const LocationConfig& locConfig)
+int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
 	if(cli.getContentLength() > locConfig.getMaxBodySize())
+	{
+		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE); //413
+		cli.setState(SENDING_RESPONSE);
 		return(-1); //if client sent more than allowed wrong
-	std::ofstream file(locConfig.getRoot() + cli.getReq().getUri());
-	if(!file.is_open())
-		return -1;
-	file << cli.getReq().getBody();
+	}
+	//if(cgi)
+	if(!locConfig.getUploadEnable()) //and not CGI
+	{
+		cli.getRes().setStatusCode(FORBIDDEN);
+		cli.setState(SENDING_RESPONSE);
+		return (-1);
+	}
+	else if (locConfig.getUploadEnable() && locConfig.getUploadStore() != "")
+	{
+		std::string path =  setupRootPath(cli, srv, locConfig, uri);
+	}
+	else if (locConfig.getUploadEnable())
+	{
+		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// std ::string path = setupRootPath(cli,srv, locConfig, uri);
+	// //cgi check ??
+	// struct stat stat_buf;
+	// if(stat(path.c_str(), &stat_buf) == -1)
+	// {
+	// 	cli.getRes().setStatusCode(NOT_FOUND);
+	// 	cli.setState(SENDING_RESPONSE);
+	// 	return (-1);
+	// }
+	// else if (S_ISDIR(stat_buf.st_mode))
+	// {
+
+	// cli.setFileFd(open(path.c_str(), O_WRONLY));
+	// if(cli.getFileFd() < 0)
+	// {
+		// cli.getRes().setStatusCode(NOT_FOUND);
+		// cli.setState(SENDING_RESPONSE);
+	// }
+
+	// cli.setState();
+	// std::ofstream file(locConfig.getRoot() + cli.getReq().getUri());
+	// if(!file.is_open())
+	// 	return -1;
+	// file << cli.getReq().getBody();
 	return 0;
 }
 int handleRouting(client &cli, server &srv)
@@ -182,22 +244,15 @@ int handleRouting(client &cli, server &srv)
 	{
 		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
 			return -1;
-
 		//if(cgi)
 		else if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);
 		}
-		// else if (cli.getReq().getMethod() == "POST")
-		// {
-		// 	if(post_method(cli, srv, *matchedLocation) == -1)
-		// 		return 1;
-		// 	else
-		// 	{
-		// 		cli.setState(SENDING_RESPONSE);
-		// 		return 0;
-		// 	}
-		// }
+		else if (cli.getReq().getMethod() == "POST")
+		{
+			post_method(cli, srv, *matchedLocation, uri);
+		}
 		// else if (cli.getReq().getMethod() == "DELETE")
 		// {
 		// 	std::string filePath = matchedLocation->getRoot() + uri;
@@ -292,3 +347,5 @@ const LocationConfig* findLongestMatch(const std::string& uri, const std::map<st
 // 	}
 // 	return 0;
 // }
+adEnable() && locConfig.getUploadStore() == "")
+	{

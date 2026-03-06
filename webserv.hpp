@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 15:06:09 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/06 16:18:48 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,8 @@ enum Codes
 };
 enum Mime
 {
-	
-};
-// enum States
-// {
 
-// };
+};
 class webserv
 {
 	private:
