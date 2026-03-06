@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/06 18:12:41 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/06 20:46:55 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,9 +179,8 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	}
 	else if (locConfig.getUploadEnable())
 	{
-		
 	}
-}
+
 
 
 
@@ -347,5 +346,4 @@ const LocationConfig* findLongestMatch(const std::string& uri, const std::map<st
 // 	}
 // 	return 0;
 // }
-adEnable() && locConfig.getUploadStore() == "")
-	{
+
