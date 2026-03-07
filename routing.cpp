@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/06 20:46:55 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/07 17:00:18 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,16 +157,19 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 
 	return 0;
 }
+std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocationConfig, std::string upload)
+{
 
+}
 int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
+	std::string path;
 	if(cli.getContentLength() > locConfig.getMaxBodySize())
 	{
 		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE); //413
 		cli.setState(SENDING_RESPONSE);
 		return(-1); //if client sent more than allowed wrong
 	}
-	//if(cgi)
 	if(!locConfig.getUploadEnable()) //and not CGI
 	{
 		cli.getRes().setStatusCode(FORBIDDEN);
@@ -174,11 +177,10 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 		return (-1);
 	}
 	else if (locConfig.getUploadEnable() && locConfig.getUploadStore() != "")
+		path =  setupUploadPath(cli, srv, locConfig, uri);
+	else if (locConfig.getUploadEnable() && locConfig.getUploadStore() == "")
 	{
-		std::string path =  setupRootPath(cli, srv, locConfig, uri);
-	}
-	else if (locConfig.getUploadEnable())
-	{
+		path = locConfig.getUploadStore();
 	}
 
 
