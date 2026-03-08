@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 12:34:26 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/08 21:00:55 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ private:
 	std::string upload_store;
 	std::string redirect;
 	std::map<std::string, CGIConfig> cgi;
-	int server_fd;
+	std::vector<int> listenFds;
 	std::map<int, client> client_fds;
 	bool isCgi; //implement
 public:
@@ -126,7 +126,7 @@ public:
 	const std::string& getUploadStore() const;
 	const std::string& getRedirect() const;
 	const std::map<std::string, CGIConfig>& getCgi() const;
-	int getServerFd() const;
+	std::vector<int> getServerFd() const;
 	std::map<int, client>& getClientFds();
 	bool getIsCgi();
 	// setters
@@ -142,7 +142,7 @@ public:
 	void addErrorPage(int code, const std::string& path);
 	void addLocation(const LocationConfig& loc);
 	void addCgi(const CGIConfig& cgi);
-	void setServerFd(int fd);
+	void addServerFd(int fd);
 	void addClientFd(int fd, const client &c) ;
 	void setIsCgi(bool val);
 };

@@ -6,14 +6,14 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 14:59:47 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/08 21:00:09 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "server.hpp"
 server::server() : root(""), index("index.html"), max_body_size(0),
- autoindex(false),  upload_enable(false), server_fd(-1)
+ autoindex(false),  upload_enable(false)
 {
 }
 server::server(const server &obj)
@@ -29,7 +29,7 @@ server::server(const server &obj)
 	upload_store(obj.upload_store),
 	redirect(obj.redirect),
 	cgi(obj.cgi),
-	server_fd(obj.server_fd)
+	listenFds(obj.listenFds)
 {
 }
 server& server::operator=(const server &obj)
@@ -48,7 +48,7 @@ server& server::operator=(const server &obj)
 		upload_store = obj.upload_store;
 		redirect = obj.redirect;
 		cgi = obj.cgi;
-		server_fd = obj.server_fd;
+		listenFds = obj.listenFds;
 	}
 	return *this;
 }
@@ -101,9 +101,9 @@ const std::map<std::string, CGIConfig>& server::getCgi() const
 {
 	return cgi;
 }
-int server::getServerFd() const
+std::vector<int>  server::getServerFd() const
 {
-	return server_fd;
+	return listenFds ;
 }
 bool server::getIsCgi()
 {
@@ -113,9 +113,9 @@ void server::setIsCgi(bool val)
 {
 	this->isCgi = val;
 }
-void server::setServerFd(int fd)
+void server::addServerFd(int fd)
 {
-	server_fd = fd;
+	listenFds.push_back(fd);
 }
 void server::addListen(const ListenConfig& l)
 {

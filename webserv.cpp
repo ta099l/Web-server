@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 10:58:05 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/08 21:18:13 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,19 @@ int webserv::initialize_epoll()
 	}
 	for(size_t i=0;i<getServers().size();i++)
 	{
-		int server_fd = getServers()[i].getServerFd();
-		struct epoll_event event;
-		event.events = EPOLLIN;
-		event.data.fd = server_fd;
-		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_fd, &event) == -1)
+		const std::vector<int>& listenfds = servers[i].getServerFd();
+		for(size_t j=0;j<listenfds.size();j++)
 		{
-			std::cerr << "Failed to add server socket to epoll" << std::endl;
-			close(epoll_fd);
-			return -1;
+			int fd = listenfds[j];
+			struct epoll_event event;
+			event.events = EPOLLIN;
+			event.data.fd = fd;
+			if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) == -1)
+			{
+				std::cerr << "Failed to add server socket to epoll" << std::endl;
+				close(epoll_fd);
+				return -1;
+			}
 		}
 	}
 	return(0);
@@ -58,8 +62,12 @@ bool webserv::is_server_socket(int fd)
 {
 	for (size_t i = 0; i < servers.size(); ++i)
 	{
-		if (fd == servers[i].getServerFd())
-			return true;
+		const std::vector<int>& listenFds = servers[i].getServerFd();
+		for (size_t j = 0; j < listenFds.size(); ++j)
+		{
+			if (fd == listenFds[j])
+				return true;
+		}
 	}
 	return false;
 }
@@ -78,8 +86,11 @@ int webserv::handle_new_connection(int listen_fd, server& srv)
 			break;
 		}
 		int flags = fcntl(client_fd, F_GETFL, 0);
-		if (flags != -1)
-			fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+		if (flags == -1 || fcntl(client_fd, F_SETFL, flags | O_NONBLOCK) == -1)
+		{
+			close(client_fd);
+			continue;
+		}
 		epoll_event event;
 		event.events = EPOLLIN;
 		event.data.fd = client_fd;
@@ -113,6 +124,14 @@ void	state_machine(client &cli,server &serv, int fd, uint32_t events)
 			return;
 		}
 	}
+	if(state == UPLOADING)
+	{
+		//handleUpload(cli,serv);
+	}
+	if(state == OVERWRITE)
+	{
+		//handleoverwrite(cli,srv);
+	}
 	// if(state == SENDING_RESPONSE && (events & EPOLLOUT))
 	// {
 	// 	if(handleWrite(cli,fd) == 1)
@@ -124,6 +143,7 @@ void	state_machine(client &cli,server &serv, int fd, uint32_t events)
 }
 void webserv::close_client_connection(int fd)
 {
+	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	for (size_t j = 0; j < servers.size(); ++j)
 	{
@@ -156,10 +176,14 @@ int webserv::run()
 				{
 					for (size_t j = 0; j < servers.size(); ++j)
 					{
-						if (fd == servers[j].getServerFd())
+						const std::vector<int>& listenFds = servers[j].getServerFd();
+						for (size_t k = 0; k < listenFds.size(); ++k)
 						{
-							handle_new_connection(fd, servers[j]);
-							continue;
+							if (fd == listenFds[k])
+							{
+								handle_new_connection(fd, servers[j]);
+								continue;
+							}
 						}
 					}
 				}

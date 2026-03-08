@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/07 17:00:18 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/08 20:41:02 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,83 +157,68 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 
 	return 0;
 }
-std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocationConfig, std::string upload)
+
+std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocConfig, std::string uri)
 {
+	size_t pos = uri.rfind('/');
+	if(pos ==std::string::npos)
+		return "";
+	std::string fileName=uri.substr(pos+1);
+	if(fileName.empty())
+		return "";
+	return(LocConfig.getUploadStore()+"/"+fileName);
 
 }
 int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
 	std::string path;
-	if(cli.getContentLength() > locConfig.getMaxBodySize())
-	{
-		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE); //413
-		cli.setState(SENDING_RESPONSE);
-		return(-1); //if client sent more than allowed wrong
-	}
+	struct stat st;
 	if(!locConfig.getUploadEnable()) //and not CGI
 	{
 		cli.getRes().setStatusCode(FORBIDDEN);
 		cli.setState(SENDING_RESPONSE);
 		return (-1);
 	}
-	else if (locConfig.getUploadEnable() && locConfig.getUploadStore() != "")
-		path =  setupUploadPath(cli, srv, locConfig, uri);
-	else if (locConfig.getUploadEnable() && locConfig.getUploadStore() == "")
+	if (locConfig.getUploadStore().empty())
 	{
-		path = locConfig.getUploadStore();
+		cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
+		cli.setState(SENDING_RESPONSE);
+		return (-1);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// std ::string path = setupRootPath(cli,srv, locConfig, uri);
-	// //cgi check ??
-	// struct stat stat_buf;
-	// if(stat(path.c_str(), &stat_buf) == -1)
-	// {
-	// 	cli.getRes().setStatusCode(NOT_FOUND);
-	// 	cli.setState(SENDING_RESPONSE);
-	// 	return (-1);
-	// }
-	// else if (S_ISDIR(stat_buf.st_mode))
-	// {
-
-	// cli.setFileFd(open(path.c_str(), O_WRONLY));
-	// if(cli.getFileFd() < 0)
-	// {
-		// cli.getRes().setStatusCode(NOT_FOUND);
-		// cli.setState(SENDING_RESPONSE);
-	// }
-
-	// cli.setState();
-	// std::ofstream file(locConfig.getRoot() + cli.getReq().getUri());
-	// if(!file.is_open())
-	// 	return -1;
-	// file << cli.getReq().getBody();
+	if (locConfig.getUploadStore() != "")
+	{
+		if(stat(locConfig.getUploadStore().c_str(),&st) == -1||!S_ISDIR(st.st_mode))
+		{
+			cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
+			cli.setState(SENDING_RESPONSE);
+			return (-1);
+		}
+		path =  setupUploadPath(cli, srv, locConfig, uri);
+		if(path.empty())
+		{
+			cli.getRes().setStatusCode(BAD_REQUEST);
+			cli.setState(SENDING_RESPONSE);
+			return (-1);
+		}
+		if(stat(path.c_str(),&st) == 0)
+		{
+			if(S_ISDIR(st.st_mode))
+			{
+				cli.getRes().setStatusCode(FORBIDDEN);
+				cli.setState(SENDING_RESPONSE);
+				return (-1);
+			}
+			cli.setUploadPath(path);
+			cli.setState(OVERWRITE);
+			return (0);
+		}
+		else
+		{
+			cli.setUploadPath(path);
+			cli.setState(UPLOADING);
+			return (0);
+		}
+	}
 	return 0;
 }
 int handleRouting(client &cli, server &srv)
@@ -246,7 +231,7 @@ int handleRouting(client &cli, server &srv)
 		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
 			return -1;
 		//if(cgi)
-		else if (cli.getReq().getMethod() == "GET")
+		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);
 		}
@@ -261,8 +246,8 @@ int handleRouting(client &cli, server &srv)
 		// 		return 1;
 		// 	else
 		// 	{
-		// 		cli.setState(SENDING_RESPONSE);
-		// 		return 0;
+		// 		cli.setStte(SENDING_RESPONSE);
+		// 		return 0;a
 		// 	}
 		// }
 		// craftResponse(cli,srv,*matchedLocation);
@@ -304,48 +289,4 @@ const LocationConfig* findLongestMatch(const std::string& uri, const std::map<st
 	return longestmatch;
 }
 
-
-// int handleRouting(client &cli, server &srv)
-// {
-// 	std::string uri = cli.getReq().getUri();
-// 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
-// 	std::string matchedLocation = findLongestMatch(uri, locations);
-// 	if (!matchedLocation.empty())
-// 	{
-// 		const LocationConfig& locConfig = locations.at(matchedLocation);
-// 		if(routNOW(cli, srv, locConfig) == 1)
-// 		{
-// 			cli.getRes().setStatusCode(405);
-// 			return -1;//method not allowed 405
-// 		}
-// 		else if (cli.getReq().getMethod() == "GET")
-// 		{
-// 			if(get_method(cli, srv, locConfig) == -1)
-// 				return 1;
-// 			else
-// 			{
-// 				cli.setState("SENDING RESPONSE");
-// 				epoll_ctl(, )
-// 			}
-// 		}
-// 		else if (cli.getReq().getMethod() == "POST")
-// 		{
-// 			if(post_method(cli, srv, locConfig) == -1)
-// 				return 1;
-// 			else
-// 				cli.setState("SENDING RESPONSE");
-// 		}
-// 		else if (cli.getReq().getMethod() == "DELETE")
-// 		{
-// 			if(remove((locConfig.getRoot() + cli.getReq().getUri()).c_str()) != 0)
-// 				return 1;
-// 			else
-// 				cli.setState("SENDING RESPONSE");
-// 		}
-// 	}
-// 	else
-// 	{
-// 	}
-// 	return 0;
-// }
 

@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/05 13:14:39 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/08 16:25:47 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,16 @@ int client::getCode()
 {
 	return code;
 }
+std::string client::getUploadPath() const
+{
+	return uploadPath;
+
+}
+void client::setUploadPath(std::string path)
+{
+	uploadPath=path;
+}
+
 void client::setCode(int code)
 {
 	this->code = code;

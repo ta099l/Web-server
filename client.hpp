@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/05 13:13:28 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/08 20:40:23 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ enum ClientState
 	ROUTING,
 	CGI_WRITING_STDIN,
 	CGI_READING_STDOUT,
+	UPLOADING,
+	OVERWRITE,
+	READINGFILE,
 	SENDING_RESPONSE,
 	DONE
 };
@@ -48,6 +51,7 @@ class client
 	int outFileOffset;
 	bool fileDone;
 	bool isDir;
+	std::string uploadPath;
 	public:
 		client();
 		client(int fd);
@@ -56,19 +60,20 @@ class client
 		~client();
 		//getters
 		int getFd();
+		int getFileFd();
+		int getFileOffset();
+		int getCode();
+		bool getIsDir();
 		size_t getBodyStart();
-		std::string getBuffer();
-		std::string getResponseBuffer();
 		size_t getContentLength();
 		HttpReq& getReq();
 		ClientState getState();
 		std::string getHeader();
 		size_t getFileSize();
-		int getFileFd();
-		int getFileOffset();
-		int getCode();
 		HttpResponse& getRes();
-		bool getIsDir();
+		std::string getBuffer();
+		std::string getResponseBuffer();
+		std::string getUploadPath() const;
 		//setters
 		void setFd(int fd);
 		void setBodyStart(size_t n);
@@ -86,6 +91,7 @@ class client
 		void setCode(int code);
 		void setFileFd(int fd);
 		void setIsDir(bool val);
+		void setUploadPath(std::string path);
 		//checkers
 		bool isHeaderComplete();
 		bool isRequestComplete();

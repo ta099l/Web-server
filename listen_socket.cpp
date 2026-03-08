@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   listen_socket.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:01:48 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/03 16:39:34 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/03/08 20:52:25 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,22 +26,26 @@ int init_sockets(webserv& spiderweb)
 				std::cerr << "Server " << i << " has no listen directive\n";
 				return -1;
 			}
-			const ListenConfig& l = listens[0];
-			int fd = create_listen_socket(l.getHost(),l.getPort());
-
-			if (fd == -1)
+			for(size_t j=0;j<listens.size();j++)
 			{
-				std::cerr << "Failed to create listen socket for server "
-							<< i << std::endl;
-				return -1;
+
+				const ListenConfig& l = listens[j];
+				int fd = create_listen_socket(l.getHost(),l.getPort());
+
+				if (fd == -1)
+				{
+					std::cerr << "Failed to create listen socket for server "
+								<< i << std::endl;
+					return -1;
+				}
+				servers[i].addServerFd(fd);
+				printf("Server %zu listening on %s:%d (fd: %d)\n",
+					i,
+					l.getHost().c_str(),
+					l.getPort(),
+					fd
+				);
 			}
-			servers[i].setServerFd(fd);
-			printf("Server %zu listening on %s:%d (fd: %d)\n",
-				i,
-				l.getHost().c_str(),
-				l.getPort(),
-				fd
-			);
 		}
 	return 0;
 }
