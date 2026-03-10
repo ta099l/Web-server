@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bushra <bushra@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/08 20:41:02 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/10 00:12:31 by bushra           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,13 +115,19 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			cli.setState(SENDING_RESPONSE);
 			cli.getRes().setNeedsAutoindex(true);
 			cli.getRes().setAutoindexFsPath(str);
-			cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
+			//cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
 			cli.getRes().setStatusCode(OK);
 			return(0);
 		}
 	}
 	else if(S_ISREG(stat_buf.st_mode))
 	{
+		if (access(chr_str, R_OK) != 0)
+		{
+		    cli.getRes().setStatusCode(FORBIDDEN);
+		    cli.setState(SENDING_RESPONSE);
+		    return -1;
+		}
 		cli.setFileFd(open(chr_str, O_RDONLY));
 		if(cli.getFileFd() < 0)
 		{
@@ -239,32 +245,47 @@ int handleRouting(client &cli, server &srv)
 		{
 			post_method(cli, srv, *matchedLocation, uri);
 		}
-		// else if (cli.getReq().getMethod() == "DELETE")
-		// {
-		// 	std::string filePath = matchedLocation->getRoot() + uri;
-		// 	if(remove(filePath.c_str()) != 0)
-		// 		return 1;
-		// 	else
-		// 	{
-		// 		cli.setStte(SENDING_RESPONSE);
-		// 		return 0;a
-		// 	}
-		// }
-		// craftResponse(cli,srv,*matchedLocation);
-	}
-	else
-	{
-		if(checkValidLocConfig(cli, srv, LocationConfig()) == 1) //check default location
+		else if (cli.getReq().getMethod() == "DELETE")
 		{
-			cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
-			return -1;//method not allowed 405
+			struct stat st;
+			std::string filePath = setupRootPath(cli, srv, *matchedLocation, uri);
+			if(stat(filePath.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+			{
+			    cli.getRes().setStatusCode(FORBIDDEN);
+			    cli.setState(SENDING_RESPONSE);
+			    return -1;
+			}
+			if(remove(filePath.c_str()) != 0)
+			{
+				cli.getRes().setStatusCode(404);
+				cli.setState(SENDING_RESPONSE);
+				return 1;
+			}
+			else
+			{
+				cli.getRes().setStatusCode(204);
+				cli.setState(SENDING_RESPONSE);
+				return 0;
+			}
 		}
 	}
+	// else
+	// {
+	// 	if(checkValidLocConfig(cli, srv, LocationConfig()) == 1) //check default location
+	// 	{
+	// 		cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
+	// 		return -1;//method not allowed 405
+	// 	}
+	// }
 	  //handle default location
 	  //similar to get method but with default location config
 	  //if no default location => return 404 not found
-	  cli.getRes().setStatusCode(NOT_FOUND);
-	  return -1;
+	else
+	{
+	    cli.getRes().setStatusCode(NOT_FOUND);
+	    cli.setState(SENDING_RESPONSE);
+	    return -1;
+	}
 
 }
 const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
