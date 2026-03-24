@@ -6,12 +6,14 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/05 12:09:19 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/15 15:54:46 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpReq.hpp"
 #include "client.hpp"
+#include <algorithm>
+#include <ctype.h>
 
 std::string toLower(const std::string& input)
 {
@@ -149,6 +151,8 @@ int parseHeader(client &cli)
 			cli.setContentLength(len);
 
 		}
+		if(realKey == "Transfer-Encoding")
+			cli.setIsChunkedEncoded(true);
 	}
 	return 0;
 }
@@ -180,6 +184,68 @@ int  checkHeader(client &cli)
 	}
 	return 0;
 }
+
+bool isHexString(const std::string& s)
+{
+    return std::all_of(s.begin(), s.end(), ::isxdigit);
+}
+
+ssize_t convertHexa(client &cli)
+{
+    size_t pos = cli.getBuffer().find("\r\n");
+    if (pos == std::string::npos)
+        return -2;
+    std::string hexLine = cli.getBuffer().substr(0, pos);
+	size_t semi = hexLine.find(';');
+	if (semi != std::string::npos)
+	    hexLine = hexLine.substr(0, semi);
+	if (hexLine.empty() || !isHexString(hexLine))
+    	return -1;
+    size_t size = std::strtol(hexLine.c_str(), NULL, 16);
+    cli.setBuffer(cli.getBuffer().erase(0, pos + 2));
+    return size;
+}
+int readChunks(client &cli)
+{
+	ssize_t chunkSize;
+	size_t pos;
+	while(true)
+	{
+
+		if(cli.getChunkState()==READCHUNK)
+		{
+			chunkSize = convertHexa(cli);
+			if(chunkSize == -2)
+				return 0;
+			if(chunkSize < 0)
+				return -1;
+			if(chunkSize == 0)
+			{
+				cli.setChunkState(DONECHUNKING);
+				return 1;
+			}
+			cli.setChunkSize(chunkSize);
+			cli.setChunkState(READDATA);
+		}
+		if(cli.getChunkState()==READDATA)
+		{
+			size_t needed=cli.getChunkSize()+2;
+			if(cli.getBuffer().size()<needed)
+				return 0;
+			if (cli.getBuffer()[cli.getChunkSize()] != '\r'||cli.getBuffer()[cli.getChunkSize() + 1] != '\n')
+				return -1;
+			cli.getReq().appendBody(cli.getBuffer().substr(0,cli.getChunkSize()));
+			cli.setBuffer(cli.getBuffer().erase(0,needed));
+			if(cli.getReq().getBody().size() > cli.getServer().getMaxBodySize())
+			{
+				cli.getRes().setStatusCode(403);
+				return -1;
+			}
+			cli.setChunkState(READCHUNK);
+		}
+	}
+	return 0;
+}
 int	handleRead(client &cli,int fd)
 {
 	char temp[4096];
@@ -203,7 +269,23 @@ int	handleRead(client &cli,int fd)
 		}
 		if(cli.isHeaderComplete())
 		{
-			if(cli.getContentLength() > 0)
+			if(cli.isChunkedEncode())
+			{
+				int checker = readChunks(cli);
+				if(checker == -1)
+				{
+					if(cli.getCode() == 0)
+						cli.getRes().setStatusCode(400);
+					return 1;
+				}
+				if(checker == 1)
+				{
+					cli.setRequestComplete(true);
+					cli.setBodySize(cli.getReq().getBody().size());
+					cli.setState(ROUTING);
+				}
+			}
+			else if(cli.getContentLength() > 0)
 			{
 				if(cli.getBuffer().size() >= cli.getBodyStart() + cli.getContentLength())
 				{

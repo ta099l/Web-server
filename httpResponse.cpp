@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "httpResponse.hpp"
-HttpResponse::HttpResponse() : fileFd(-1), fileSize(0), fileOffset(0),hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
+HttpResponse::HttpResponse() : generatedResponseHeader(false), fileFd(-1), fileSize(0), fileOffset(0),hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
 {
 	_initMimeTypes();
 }
@@ -38,24 +38,24 @@ void HttpResponse::setContentLength(size_t contentLength) { this->contentLength 
 void HttpResponse::setMemoryBody(const std::string& memoryBody) { this->memoryBody = memoryBody; }
 void HttpResponse::setFileBody(const std::string& fileBody) { this->fileBody = fileBody; }
 void HttpResponse::addResHeader(const std::string& key, const std::string& value) { resHeaders[key] = value; }
+void HttpResponse::appendFileBody(const std::string &body,ssize_t n)
+{
+	fileBody.append(body,n);
+}
 void HttpResponse::setContentType(const std::string& filepath)
 {
 	size_t dotPos = filepath.find_last_of(".");
-	std::string type = "application/octet-stream"; // Default
-
+	std::string type = "application/octet-stream";
 	if (dotPos != std::string::npos)
 	{
 		std::string ext = filepath.substr(dotPos);
-		// Convert to lowercase for case-insensitive matching
 		for (size_t i = 0; i < ext.length(); ++i) ext[i] = std::tolower(ext[i]);
 
 		if (_mimeTypes.count(ext))
 			type = _mimeTypes[ext];
 	}
-
 	this->contentType = type;
 	addResHeader("Content-Type", type);
-	// addResHeader("Content-Type", contentType);
 }
 std::string HttpResponse::getContentType() { return contentType; }
 void HttpResponse::_initMimeTypes()
@@ -69,7 +69,6 @@ void HttpResponse::_initMimeTypes()
 	_mimeTypes[".txt"]  = "text/plain";
 	_mimeTypes[".json"] = "application/json";
 }
-
 // std::string HttpResponse::generateResponse(client &cli, server &srv)
 // {
 // 	std::string response = version + " " + std::to_string(statusCode) + " " + reason + "\r\n";

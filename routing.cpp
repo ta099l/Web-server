@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bushra <bushra@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/10 00:12:31 by bushra           ###   ########.fr       */
+/*   Updated: 2026/03/15 20:10:37 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,11 @@ std::string setupRootPath(client &cli, server &srv, const LocationConfig& locCon
 }
 int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
-	std::string str = setupRootPath(cli, srv, locConfig, uri);
-	const char *chr_str = str.c_str();
-
+	std::string rootPath = setupRootPath(cli, srv, locConfig, uri);
+	const char *chr_str = rootPath.c_str();
 	struct stat stat_buf;
-	if(stat(chr_str, &stat_buf) == -1)
+
+	if (stat(chr_str, &stat_buf) == -1)
 	{
 		cli.getRes().setStatusCode(NOT_FOUND);
 		cli.setState(SENDING_RESPONSE);
@@ -66,102 +66,118 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	else if (S_ISDIR(stat_buf.st_mode))
 	{
 		cli.setIsDir(true);
-		if (!uri.empty() && uri[uri.size()-1] != '/')
+		if (!uri.empty() && uri[uri.size() - 1] != '/')
 		{
 			cli.getRes().setStatusCode(301);
 			cli.getRes().addResHeader("Location", uri + "/");
 			cli.setState(SENDING_RESPONSE);
-			return 0;
-
+			return (0);
 		}
-		if(!locConfig.getAutoindex())
+		bool indexUsable = false;
+		std::string indexPath;
+		struct stat indexStat;
+		if (!locConfig.getIndex().empty())
 		{
-			if(locConfig.getIndex().empty())
+			indexPath = rootPath;
+			if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
+				indexPath += '/';
+			indexPath += locConfig.getIndex();
+
+			if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode) && access(indexPath.c_str(), R_OK) == 0)
+				indexUsable = true;
+		}
+		if (indexUsable)
+		{
+			cli.setGetFileFd(open(indexPath.c_str(), O_RDONLY));
+			if (cli.getGetFileFd() < 0)
 			{
+				cli.getRes().setStatusCode(500);
 				cli.setState(SENDING_RESPONSE);
-				cli.getRes().setStatusCode(FORBIDDEN);
 				return (-1);
 			}
-			else
+			if (fstat(cli.getGetFileFd(), &indexStat) == -1)
 			{
-				std::string indexPath = str;
-				if (!indexPath.empty() && indexPath[indexPath.size()-1] != '/')
-				    indexPath += '/';
-				indexPath += locConfig.getIndex();
-				cli.setFileFd(open(indexPath.c_str(), O_RDONLY));
-				if(cli.getFileFd() < 0)
-				{
-					cli.getRes().setStatusCode(NOT_FOUND);
-					cli.setState(SENDING_RESPONSE);
-					return -1;
-				}
-				if (fstat(cli.getFileFd(), &stat_buf) == -1)
-				{
-					close(cli.getFileFd());
-					cli.setFileFd(-1);
-					cli.getRes().setStatusCode(500);
-					cli.setState(SENDING_RESPONSE);
-					return -1;
-				}
-				cli.getRes().setFileSize(stat_buf.st_size);
-				cli.getRes().setHasFileBody(true);
-				cli.getRes().setContentType(indexPath);
-				cli.getRes().setStatusCode(OK);
+				close(cli.getGetFileFd());
+				cli.setGetFileFd(-1);
+				cli.getRes().setStatusCode(500);
 				cli.setState(SENDING_RESPONSE);
+				return (-1);
 			}
+			if (!S_ISREG(indexStat.st_mode))
+			{
+				close(cli.getGetFileFd());
+				cli.setGetFileFd(-1);
+				cli.getRes().setStatusCode(FORBIDDEN);
+				cli.setState(SENDING_RESPONSE);
+				return (-1);
+			}
+			cli.getRes().setFileSize(indexStat.st_size);
+			cli.getRes().setHasFileBody(true);
+			cli.getRes().setContentType(indexPath);
+			cli.getRes().setStatusCode(OK);
+			cli.setState(READINGFILE);
+			return (0);
+		}
+		else if (locConfig.getAutoindex())
+		{
+			generateAutoindexListing(cli, uri, rootPath);
+			cli.getRes().setContentType("text/html");
+			cli.getRes().setStatusCode(OK);
+			cli.setState(SENDING_RESPONSE);
+			return (0);
 		}
 		else
 		{
+			cli.getRes().setStatusCode(FORBIDDEN);
 			cli.setState(SENDING_RESPONSE);
-			cli.getRes().setNeedsAutoindex(true);
-			cli.getRes().setAutoindexFsPath(str);
-			//cli.getRes().setContentLength(cli.getRes().getMemoryBody().size());
-			cli.getRes().setStatusCode(OK);
-			return(0);
+			return (-1);
 		}
 	}
-	else if(S_ISREG(stat_buf.st_mode))
+	else if (S_ISREG(stat_buf.st_mode))
 	{
 		if (access(chr_str, R_OK) != 0)
 		{
-		    cli.getRes().setStatusCode(FORBIDDEN);
-		    cli.setState(SENDING_RESPONSE);
-		    return -1;
+			cli.getRes().setStatusCode(FORBIDDEN);
+			cli.setState(SENDING_RESPONSE);
+			return (-1);
 		}
-		cli.setFileFd(open(chr_str, O_RDONLY));
-		if(cli.getFileFd() < 0)
+		cli.setGetFileFd(open(chr_str, O_RDONLY));
+		if (cli.getGetFileFd() < 0)
 		{
 			cli.getRes().setStatusCode(NOT_FOUND);
 			cli.setState(SENDING_RESPONSE);
 			return (-1);
 		}
-		if (fstat(cli.getFileFd(), &stat_buf) == 0)
+		if (fstat(cli.getGetFileFd(), &stat_buf) == -1)
 		{
-			cli.getRes().setFileSize(stat_buf.st_size);
-			cli.getRes().setHasFileBody(true);
-			cli.getRes().setStatusCode(OK);
-			cli.getRes().setContentType(str);
-			cli.setState(SENDING_RESPONSE);
-			return 0;
-		}
-		else
-		{
-			close(cli.getFileFd());
-			cli.setFileFd(-1);
-			perror("Error getting file status");
-			cli.setState(SENDING_RESPONSE);
+			close(cli.getGetFileFd());
+			cli.setGetFileFd(-1);
 			cli.getRes().setStatusCode(500);
+			cli.setState(SENDING_RESPONSE);
 			return (-1);
 		}
+		if (!S_ISREG(stat_buf.st_mode))
+		{
+			close(cli.getGetFileFd());
+			cli.setGetFileFd(-1);
+			cli.getRes().setStatusCode(FORBIDDEN);
+			cli.setState(SENDING_RESPONSE);
+			return (-1);
+		}
+
+		cli.getRes().setFileSize(stat_buf.st_size);
+		cli.getRes().setHasFileBody(true);
+		cli.getRes().setStatusCode(OK);
+		cli.getRes().setContentType(rootPath);
+		cli.setState(READINGFILE);
+		return (0);
 	}
 	else
 	{
+		cli.getRes().setStatusCode(FORBIDDEN);
 		cli.setState(SENDING_RESPONSE);
-		cli.getRes().setStatusCode(500);
 		return (-1);
 	}
-
-	return 0;
 }
 
 std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocConfig, std::string uri)
@@ -232,6 +248,7 @@ int handleRouting(client &cli, server &srv)
 	std::string uri = cli.getReq().getUri();
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
 	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
+	cli.setLocation(matchedLocation);
 	if (matchedLocation)
 	{
 		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
@@ -286,6 +303,7 @@ int handleRouting(client &cli, server &srv)
 	    cli.setState(SENDING_RESPONSE);
 	    return -1;
 	}
+	return 1;
 
 }
 const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj

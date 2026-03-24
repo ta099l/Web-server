@@ -47,6 +47,7 @@ class HttpReq
 		std::string setUri(const std::string &uri);
 		std::string setVersion(const std::string &version);
 		std::string setBody(const std::string &body);
+		void appendBody(std::string str);
 		int setHeader(const std::string &key, const std::string &value);
 };
 #endif

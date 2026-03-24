@@ -31,7 +31,10 @@ std::string HttpReq::setMethod(const std::string &method) { this->method = metho
 std::string HttpReq::setUri(const std::string &uri) { this->uri = uri; return this->uri; }
 std::string HttpReq::setVersion(const std::string &version) { this->version = version; return this->version; }
 std::string HttpReq::setBody(const std::string &body) { this->body = body; return this->body; }
-
+void HttpReq::appendBody(std::string str)
+{
+	body.append(str);
+}
 
 const std::map<std::string, std::string>& HttpReq::getHeaders() const
 {

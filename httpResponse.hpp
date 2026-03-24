@@ -24,6 +24,7 @@ class HttpResponse
 		size_t fileOffset;
 		bool hasFileBody;
 		bool NeedsAutoindex;
+		bool generatedResponseHeader;
 		std::string version;
 		int statusCode;
 		std::string reason;
@@ -51,6 +52,7 @@ class HttpResponse
 		std::string getFileBody();
 		std::string getContentType();
 		std::map<std::string, std::string> getResHeaders();
+		bool getGeneratedResponseHeader(){return generatedResponseHeader;}
 		//setters
 		void setFileFd(int fd);
 		void setAutoindexFsPath(const std::string& path);
@@ -65,8 +67,10 @@ class HttpResponse
 		void setContentLength(size_t contentLength);
 		void setMemoryBody(const std::string& memoryBody);
 		void setFileBody(const std::string& fileBody);
+		void appendFileBody(const std::string &fileBody,ssize_t n);
 		void addResHeader(const std::string& key, const std::string& value);
 		void setContentType(const std::string& contentType);
+		void setGeneratedResponseHeader(bool val){generatedResponseHeader = val; }
 		//std::string generateResponse(client &cli, server &srv);
 		//functions
 		//void buildErrorResponse(Codes code,LocationConfig *loc);

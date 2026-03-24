@@ -48,10 +48,6 @@ enum Codes
 	INTERNAL_SERVER_ERROR = 500,
 	NOT_IMPLEMENTED = 501
 };
-enum Mime
-{
-
-};
 class webserv
 {
 	private:
@@ -72,6 +68,10 @@ class webserv
 		bool is_server_socket(int fd);
 		int handle_new_connection(int fd, server& srv);
 		void close_client_connection(int fd);
+		void webserv::setEpoll(int epollFd, int clientFd,int flag);
+		void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events);
+
+
 		std::vector<std::string> split(const std::string& line);
 };
 int handleRouting(client &cli, server &srv);
