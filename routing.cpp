@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/15 20:10:37 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/17 17:06:45 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,18 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 	if (std::find(allowedMethods.begin(), allowedMethods.end(), reqMethod) == allowedMethods.end())
 	{
 		cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return 1;
 	}
 	else if(cli.getContentLength()>locConfig.getMaxBodySize())
 	{
 		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return 1;
 	}
 	else if(cli.getRes().getStatusCode()!=0)
 	{
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return 1;
 	}
 	return 0;
@@ -60,7 +60,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	if (stat(chr_str, &stat_buf) == -1)
 	{
 		cli.getRes().setStatusCode(NOT_FOUND);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return (-1);
 	}
 	else if (S_ISDIR(stat_buf.st_mode))
@@ -70,7 +70,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		{
 			cli.getRes().setStatusCode(301);
 			cli.getRes().addResHeader("Location", uri + "/");
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (0);
 		}
 		bool indexUsable = false;
@@ -92,7 +92,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			if (cli.getGetFileFd() < 0)
 			{
 				cli.getRes().setStatusCode(500);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return (-1);
 			}
 			if (fstat(cli.getGetFileFd(), &indexStat) == -1)
@@ -100,7 +100,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 				close(cli.getGetFileFd());
 				cli.setGetFileFd(-1);
 				cli.getRes().setStatusCode(500);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return (-1);
 			}
 			if (!S_ISREG(indexStat.st_mode))
@@ -108,7 +108,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 				close(cli.getGetFileFd());
 				cli.setGetFileFd(-1);
 				cli.getRes().setStatusCode(FORBIDDEN);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return (-1);
 			}
 			cli.getRes().setFileSize(indexStat.st_size);
@@ -120,7 +120,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		}
 		else if (locConfig.getAutoindex())
 		{
-			generateAutoindexListing(cli, uri, rootPath);
+			// generateAutoindexListing(cli, uri, rootPath);
 			cli.getRes().setContentType("text/html");
 			cli.getRes().setStatusCode(OK);
 			cli.setState(SENDING_RESPONSE);
@@ -129,7 +129,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		else
 		{
 			cli.getRes().setStatusCode(FORBIDDEN);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 	}
@@ -138,14 +138,14 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		if (access(chr_str, R_OK) != 0)
 		{
 			cli.getRes().setStatusCode(FORBIDDEN);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 		cli.setGetFileFd(open(chr_str, O_RDONLY));
 		if (cli.getGetFileFd() < 0)
 		{
 			cli.getRes().setStatusCode(NOT_FOUND);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 		if (fstat(cli.getGetFileFd(), &stat_buf) == -1)
@@ -153,7 +153,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			close(cli.getGetFileFd());
 			cli.setGetFileFd(-1);
 			cli.getRes().setStatusCode(500);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 		if (!S_ISREG(stat_buf.st_mode))
@@ -161,7 +161,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			close(cli.getGetFileFd());
 			cli.setGetFileFd(-1);
 			cli.getRes().setStatusCode(FORBIDDEN);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 
@@ -175,7 +175,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	else
 	{
 		cli.getRes().setStatusCode(FORBIDDEN);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return (-1);
 	}
 }
@@ -198,13 +198,13 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	if(!locConfig.getUploadEnable()) //and not CGI
 	{
 		cli.getRes().setStatusCode(FORBIDDEN);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return (-1);
 	}
 	if (locConfig.getUploadStore().empty())
 	{
 		cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 		return (-1);
 	}
 	if (locConfig.getUploadStore() != "")
@@ -212,14 +212,14 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 		if(stat(locConfig.getUploadStore().c_str(),&st) == -1||!S_ISDIR(st.st_mode))
 		{
 			cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 		path =  setupUploadPath(cli, srv, locConfig, uri);
 		if(path.empty())
 		{
 			cli.getRes().setStatusCode(BAD_REQUEST);
-			cli.setState(SENDING_RESPONSE);
+			cli.setState(ERROR);
 			return (-1);
 		}
 		if(stat(path.c_str(),&st) == 0)
@@ -227,7 +227,7 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 			if(S_ISDIR(st.st_mode))
 			{
 				cli.getRes().setStatusCode(FORBIDDEN);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return (-1);
 			}
 			cli.setUploadPath(path);
@@ -269,19 +269,19 @@ int handleRouting(client &cli, server &srv)
 			if(stat(filePath.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
 			{
 			    cli.getRes().setStatusCode(FORBIDDEN);
-			    cli.setState(SENDING_RESPONSE);
+			    cli.setState(ERROR);
 			    return -1;
 			}
 			if(remove(filePath.c_str()) != 0)
 			{
 				cli.getRes().setStatusCode(404);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return 1;
 			}
 			else
 			{
 				cli.getRes().setStatusCode(204);
-				cli.setState(SENDING_RESPONSE);
+				cli.setState(ERROR);
 				return 0;
 			}
 		}
@@ -300,7 +300,7 @@ int handleRouting(client &cli, server &srv)
 	else
 	{
 	    cli.getRes().setStatusCode(NOT_FOUND);
-	    cli.setState(SENDING_RESPONSE);
+	    cli.setState(ERROR);
 	    return -1;
 	}
 	return 1;

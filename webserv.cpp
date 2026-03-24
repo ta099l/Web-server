@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/15 18:05:45 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/17 17:11:44 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,8 +109,8 @@ void handleUpload(client &cli,server &serv,const ClientState &state)
 	cli.setPostFileFd(open(cli.getUploadPath().c_str(),O_CREAT|O_WRONLY|O_TRUNC,0644));
 	if(cli.getPostFileFd()<0)
 	{
-		cli.setState(SENDING_RESPONSE);
 		cli.getRes().setStatusCode(500);
+		cli.setState(ERROR);
 		return ;
 	}
 	write(cli.getPostFileFd(),cli.getReq().getBody().c_str(),cli.getContentLength());
@@ -142,8 +142,17 @@ void handleFileReading(client &cli,server &srv)
 	{
 		close(cli.getGetFileFd());
 		cli.getRes().setStatusCode(500);
-		cli.setState(SENDING_RESPONSE);
+		cli.setState(ERROR);
 	}
+}
+std::string buildErrorPath(const LocationConfig& loc, std::string path)
+{
+	std::string root = loc.getRoot();
+	if (!root.empty() && root[root.size() - 1] != '/')
+		root += '/';
+	if (!path.empty() && path[0] == '/')
+		path.erase(0, 1);
+	return root + path;
 }
 void generateErrorResponse(client &cli,server &serv)
 {
@@ -153,20 +162,21 @@ void generateErrorResponse(client &cli,server &serv)
 	{
 		if(cli.getRes().getStatusCode() == it->first)
 
+
 	    int code = it->first;
 	    std::string path = it->second;
 	}
 }
 void generateResponseHeader(client &cli,server &srv)
 {
-	if(cli.getRes().getStatusCode() != 200)
+	if(cli.getState() == ERROR)
 		generateErrorResponse(cli,srv);
 }
 void handleWrite(client &cli,server &serv)
 {
 	if(!cli.getRes().getGeneratedResponseHeader())
 		generateResponseHeader(cli,serv);
-	
+
 }
 void webserv::setEpoll(int epollFd, int clientFd,int flag)
 {

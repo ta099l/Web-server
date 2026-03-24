@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/15 15:54:46 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/17 16:12:50 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,7 @@ int readChunks(client &cli)
 				return -1;
 			cli.getReq().appendBody(cli.getBuffer().substr(0,cli.getChunkSize()));
 			cli.setBuffer(cli.getBuffer().erase(0,needed));
-			if(cli.getReq().getBody().size() > cli.getServer().getMaxBodySize())
+			if(cli.getReq().getBody().size() > cli.getServer()->getMaxBodySize())
 			{
 				cli.getRes().setStatusCode(403);
 				return -1;
@@ -264,6 +264,7 @@ int	handleRead(client &cli,int fd)
 			{
 				if(cli.getCode() == 0)
 					cli.getRes().setStatusCode(400);
+				cli.setState(ERROR);
 				return 1;
 			}
 		}
@@ -276,6 +277,7 @@ int	handleRead(client &cli,int fd)
 				{
 					if(cli.getCode() == 0)
 						cli.getRes().setStatusCode(400);
+					cli.setState(ERROR);
 					return 1;
 				}
 				if(checker == 1)

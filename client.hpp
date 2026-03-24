@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/03/15 18:04:21 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/17 16:07:46 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ enum ClientState
 	OVERWRITE,
 	READINGFILE,
 	SENDING_RESPONSE,
-
+	ERROR,
 	DONE
 };
 enum chunksStates
