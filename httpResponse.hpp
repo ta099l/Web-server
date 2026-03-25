@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/08 16:32:36 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/25 19:35:52 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class HttpResponse
 		std::string fileBody;
 		std::string contentType;
 		std::string AutoIndexpath;
-		std::map<std::string, std::string> resHeaders;
+		// std::map<std::string, std::string> resHeaders;
 		std::map<std::string, std::string> _mimeTypes;
 		void _initMimeTypes();
 	public:
@@ -51,7 +51,7 @@ class HttpResponse
 		std::string getMemoryBody();
 		std::string getFileBody();
 		std::string getContentType();
-		std::map<std::string, std::string> getResHeaders();
+		// std::map<std::string, std::string> getResHeaders();
 		bool getGeneratedResponseHeader(){return generatedResponseHeader;}
 		//setters
 		void setFileFd(int fd);
@@ -68,7 +68,7 @@ class HttpResponse
 		void setMemoryBody(const std::string& memoryBody);
 		void setFileBody(const std::string& fileBody);
 		void appendFileBody(const std::string &fileBody,ssize_t n);
-		void addResHeader(const std::string& key, const std::string& value);
+		// void addResHeader(const std::string& key, const std::string& value);
 		void setContentType(const std::string& contentType);
 		void setGeneratedResponseHeader(bool val){generatedResponseHeader = val; }
 		//std::string generateResponse(client &cli, server &srv);

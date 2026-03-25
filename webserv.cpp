@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/17 17:11:44 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/25 19:40:40 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,28 +154,125 @@ std::string buildErrorPath(const LocationConfig& loc, std::string path)
 		path.erase(0, 1);
 	return root + path;
 }
+std::string getReasonPhrase(int code)
+{
+    switch (code)
+    {
+        case 200: return "OK";
+        case 400: return "Bad Request";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 413: return "Payload Too Large";
+        case 500: return "Internal Server Error";
+        case 501: return "Not Implemented";
+        default:  return "Unknown Error";
+    }
+}
+std::string genHtml(int code,std::string reason)
+{
+	std::string reason = getReasonPhrase(code);
+
+	std::stringstream ss;
+	ss << "<!DOCTYPE html>\n"
+		<< "<html lang=\"en\">\n"
+		<< "<head>\n"
+		<< "    <meta charset=\"UTF-8\">\n"
+		<< "    <title>" << code << " " << reason << "</title>\n"
+		<< "</head>\n"
+		<< "<body style=\"font-family: Arial; text-align:center; margin-top:50px;\">\n"
+		<< "    <h1>" << code << "</h1>\n"
+		<< "    <h2>" << reason << "</h2>\n"
+		<< "    <hr>\n"
+		<< "    <p>The server encountered an error and could not complete your request.</p>\n"
+		<< "</body>\n"
+		<< "</html>";
+
+    return ss.str();
+}
 void generateErrorResponse(client &cli,server &serv)
 {
 	const LocationConfig* loc = cli.getLocation();
+	bool genError = false;
 	const std::map<int, std::string>& errorPages = loc->getErrorPages();
+	int code;
+	std::string reason;
 	for (std::map<int, std::string>::const_iterator it = errorPages.begin();it != errorPages.end();it++)
 	{
 		if(cli.getRes().getStatusCode() == it->first)
+	    {
+	    	std::string path = buildErrorPath(*loc,it->second);
+			cli.setGetFileFd(open(path.c_str(), O_RDONLY));
+			if (cli.getGetFileFd() < 0)
+			{
+				genError = true;
+				break;
+			}
+			struct stat pathStat;
+			if (fstat(cli.getGetFileFd(), &pathStat) == -1)
+			{
+				close(cli.getGetFileFd());
+				cli.setGetFileFd(-1);
+				genError = true;
+				break;
 
-
-	    int code = it->first;
-	    std::string path = it->second;
+			}
+			if (!S_ISREG(pathStat.st_mode))
+			{
+				close(cli.getGetFileFd());
+				cli.setGetFileFd(-1);
+				genError = true;
+				break;
+			}
+			cli.getRes().setContentLength(pathStat.st_size);
+			cli.getRes().setHasFileBody(true);
+			cli.getRes().setContentType(path);
+			cli.setState(READINGFILE);
+			break;
+		}
 	}
+	if(genError)
+	{
+		cli.getRes().setFileBody(genHtml(code,reason));
+		cli.getRes().setContentLength(cli.getRes().getFileBody().size());
+	}
+	cli.getRes().setVersion(cli.getReq().getVersion());
+	cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
 }
 void generateResponseHeader(client &cli,server &srv)
 {
 	if(cli.getState() == ERROR)
 		generateErrorResponse(cli,srv);
+	else
+	{
+		cli.getRes().setVersion(cli.getReq().getVersion());
+		cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
+	}
+
+	std::string header;
+	std::stringstream ss;
+	ss << cli.getRes"\r\n"
+		<< "<html lang=\"en\">\n"
+		<< "<head>\n"
+		<< "    <meta charset=\"UTF-8\">\n"
+		<< "    <title>" << code << " " << reason << "</title>\n"
+		<< "</head>\n"
+		<< "<body style=\"font-family: Arial; text-align:center; margin-top:50px;\">\n"
+		<< "    <h1>" << code << "</h1>\n"
+		<< "    <h2>" << reason << "</h2>\n"
+		<< "    <hr>\n"
+		<< "    <p>The server encountered an error and could not complete your request.</p>\n"
+		<< "</body>\n"
+		<< "</html>";
+
+    header= ss.str();
+
 }
 void handleWrite(client &cli,server &serv)
 {
 	if(!cli.getRes().getGeneratedResponseHeader())
 		generateResponseHeader(cli,serv);
+
 
 }
 void webserv::setEpoll(int epollFd, int clientFd,int flag)
@@ -194,7 +291,6 @@ void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events)
 	{
 		if(handleRead(cli,fd) == 1)
 		{
-			cli.setState(DONE);
 			return;
 		}
 	}
@@ -209,6 +305,7 @@ void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events)
 	if(cli.getState() == UPLOADING || cli.getState() == OVERWRITE)
 	{
 		handleUpload(cli,serv,cli.getState());
+		return;
 	}
 	if(events & EPOLLOUT)
 	{
@@ -216,7 +313,7 @@ void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events)
 		{
 			handleFileReading(cli,serv);
 		}
-		if(cli.getState()==SENDING_RESPONSE)
+		if(cli.getState()==SENDING_RESPONSE || cli.getState()==ERROR)
 		{
 			handleWrite(cli,serv);
 		}

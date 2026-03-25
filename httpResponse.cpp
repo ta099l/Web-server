@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/05 22:16:10 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/25 19:36:15 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ std::string HttpResponse::getReason() { return reason; }
 size_t HttpResponse::getContentLength() { return contentLength; }
 std::string HttpResponse::getMemoryBody() { return memoryBody; }
 std::string HttpResponse::getFileBody() { return fileBody; }
-std::map<std::string, std::string> HttpResponse::getResHeaders() { return resHeaders; }
+// std::map<std::string, std::string> HttpResponse::getResHeaders() { return resHeaders; }
 void HttpResponse::setFileFd(int fd) { fileFd = fd; }
 void HttpResponse::setFileSize(size_t size) { fileSize = size; }
 void HttpResponse::setFileOffset(size_t offset) { fileOffset = offset; }
@@ -37,7 +37,7 @@ void HttpResponse::setReason(const std::string& reason) { this->reason = reason;
 void HttpResponse::setContentLength(size_t contentLength) { this->contentLength = contentLength; }
 void HttpResponse::setMemoryBody(const std::string& memoryBody) { this->memoryBody = memoryBody; }
 void HttpResponse::setFileBody(const std::string& fileBody) { this->fileBody = fileBody; }
-void HttpResponse::addResHeader(const std::string& key, const std::string& value) { resHeaders[key] = value; }
+// void HttpResponse::addResHeader(const std::string& key, const std::string& value) { resHeaders[key] = value; }
 void HttpResponse::appendFileBody(const std::string &body,ssize_t n)
 {
 	fileBody.append(body,n);
@@ -55,7 +55,6 @@ void HttpResponse::setContentType(const std::string& filepath)
 			type = _mimeTypes[ext];
 	}
 	this->contentType = type;
-	addResHeader("Content-Type", type);
 }
 std::string HttpResponse::getContentType() { return contentType; }
 void HttpResponse::_initMimeTypes()
