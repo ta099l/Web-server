@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 11:17:30 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/17 17:06:45 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/03/26 16:53:11 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,10 @@ std::string setupRootPath(client &cli, server &srv, const LocationConfig& locCon
 
 	return (root + uri);
 }
+void generateAutoindexListing(client &cli, std::string uri,std::string rootpath)
+{
+	
+}
 int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
 	std::string rootPath = setupRootPath(cli, srv, locConfig, uri);
@@ -69,7 +73,6 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		if (!uri.empty() && uri[uri.size() - 1] != '/')
 		{
 			cli.getRes().setStatusCode(301);
-			cli.getRes().addResHeader("Location", uri + "/");
 			cli.setState(ERROR);
 			return (0);
 		}
@@ -111,7 +114,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 				cli.setState(ERROR);
 				return (-1);
 			}
-			cli.getRes().setFileSize(indexStat.st_size);
+			cli.getRes().setContentLength(indexStat.st_size);
 			cli.getRes().setHasFileBody(true);
 			cli.getRes().setContentType(indexPath);
 			cli.getRes().setStatusCode(OK);
@@ -120,7 +123,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		}
 		else if (locConfig.getAutoindex())
 		{
-			// generateAutoindexListing(cli, uri, rootPath);
+			generateAutoindexListing(cli, uri, rootPath);
 			cli.getRes().setContentType("text/html");
 			cli.getRes().setStatusCode(OK);
 			cli.setState(SENDING_RESPONSE);
@@ -165,7 +168,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			return (-1);
 		}
 
-		cli.getRes().setFileSize(stat_buf.st_size);
+		cli.getRes().setContentLength(stat_buf.st_size);
 		cli.getRes().setHasFileBody(true);
 		cli.getRes().setStatusCode(OK);
 		cli.getRes().setContentType(rootPath);
