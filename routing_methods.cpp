@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing_methods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/06 18:27:04 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 21:02:40 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 
 std::string setupRootPath(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
+	(void)cli;
+	(void)srv;
 	std::string Path = locConfig.getPath();
 	if(uri.find(Path) == 0)
 		uri.erase(0, Path.length());
@@ -238,6 +240,8 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 
 std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocConfig, std::string uri)
 {
+	(void)cli;
+	(void)srv;
 	size_t pos = uri.rfind('/');
 	if(pos ==std::string::npos)
 		return "";

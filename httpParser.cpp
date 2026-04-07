@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/06 11:05:51 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 21:08:14 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,12 @@ int  checkHeader(client &cli)
 
 bool isHexString(const std::string& s)
 {
-    return all_of(s.begin(), s.end(), ::isxdigit);
+	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
+	{
+		if (!isxdigit(*it))
+			return false;
+	}
+	return true;
 }
 
 ssize_t convertHexa(client &cli)
@@ -208,7 +213,7 @@ ssize_t convertHexa(client &cli)
 int readChunks(client &cli)
 {
 	ssize_t chunkSize;
-	size_t pos;
+	// size_t pos;
 	while(true)
 	{
 
@@ -236,7 +241,7 @@ int readChunks(client &cli)
 				return -1;
 			cli.getReq().appendBody(cli.getBuffer().substr(0,cli.getChunkSize()));
 			cli.setBuffer(cli.getBuffer().erase(0,needed));
-			if(cli.getReq().getBody().size() > cli.getServer()->getMaxBodySize())
+			if(cli.getReq().getBody().size() > (size_t)cli.getServer()->getMaxBodySize())
 			{
 				cli.getRes().setStatusCode(403);
 				return -1;
@@ -248,13 +253,14 @@ int readChunks(client &cli)
 }
 int	handleRead(client &cli,int fd)
 {
+	(void) fd;
 	char temp[4096];
 	ssize_t n=recv(cli.getFd(),temp,4096,0);
 	if(n == 0)
 		return 1;
 	else if(n > 0)
 	{
-		cli.appendToBuffer(temp,n);
+		cli.appendToResBuffer(temp,n);
 		if(!cli.isHeaderComplete())
 		{
 			if(checkHeader(cli) == 1)

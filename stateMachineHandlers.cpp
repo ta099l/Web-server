@@ -72,6 +72,7 @@ void generatePostSuccessPage(client &cli)
 }
 void handleUpload(client &cli,server &serv,const ClientState &state)
 {
+	(void)serv;
 	cli.setPostFileFd(open(cli.getUploadPath().c_str(),O_CREAT|O_WRONLY|O_TRUNC,0644));
 	if(cli.getPostFileFd()<0)
 	{
@@ -92,6 +93,7 @@ void handleUpload(client &cli,server &serv,const ClientState &state)
 }
 void handleFileReading(client &cli,server &srv)
 {
+	(void)srv;
 	char readBuffer[8192];
 	ssize_t n=read(cli.getGetFileFd(),readBuffer,sizeof(readBuffer));
 	if(n>0)

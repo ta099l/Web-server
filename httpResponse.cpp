@@ -3,15 +3,36 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/06 18:56:25 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 20:57:42 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "httpResponse.hpp"
-HttpResponse::HttpResponse() : generatedResponseHeader(false), fileFd(-1), fileSize(0), Bytes_Sent(0),hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
+// HttpResponse::HttpResponse() : generatedResponseHeader(false), fileFd(-1), fileSize(0), Bytes_Sent(0),hasFileBody(false), version("HTTP/1.1"), statusCode(200), reason("OK"), contentLength(0)
+// {
+// 	_initMimeTypes();
+// }
+HttpResponse::HttpResponse() :
+	fileFd(-1),
+	fileSize(0),
+	Bytes_Sent(0),
+	hasFileBody(false),
+	hasMemoryBody(false),
+	NeedsAutoindex(false),
+	generatedResponseHeader(false),
+	version("HTTP/1.1"),
+	statusCode(200),
+	reason("OK"),
+	contentLength(0),
+	memoryBody(""),
+	fileBody(""),
+	contentType(""),
+	AutoIndexpath(""),
+	resHeaders(),
+	_mimeTypes()
 {
 	_initMimeTypes();
 }

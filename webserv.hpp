@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/06 19:45:55 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 20:32:41 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 // #include "HttpReq.hpp"
-// #include "client.hpp"
+#include "client.hpp"
 #include "server.hpp"
 
 class client;
@@ -68,8 +68,8 @@ class webserv
 		bool is_server_socket(int fd);
 		int handle_new_connection(int fd, server& srv);
 		void close_client_connection(int fd);
-		void webserv::setEpoll(int epollFd, int clientFd,int flag);
-		void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events);
+		void setEpoll(int epollFd, int clientFd,int flag);
+		void	state_machine(client &cli,server &serv, int fd, uint32_t events);
 
 
 		std::vector<std::string> split(const std::string& line);

@@ -3,18 +3,99 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/07 18:14:09 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 21:10:40 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.hpp"
 #include "server.hpp"
-client::client() :_server(NULL), bodySize(0), getFileFd(-1),BytesSent(0), chunkSize(0), cstate(READCHUNK), chunkedEncoded(false), isDir(false),fd(-1), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), postFileFd(-1), postFileSize(0), fileDone(false),bodyStart(0) {}
-client::client(int fd,server *srv) :_server(srv),bodySize(0),getFileFd(-1),BytesSent(0),chunkSize(0),cstate(READCHUNK),chunkedEncoded(false),isDir(false), fd(fd), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), postFileFd(-1), postFileSize(0), fileDone(false) {}
-client::client(const client &other) :BytesSent(0),chunkedEncoded(other.chunkedEncoded), isDir(other.isDir), fd(other.fd), state(other.state), buffer(other.buffer), responseBuffer(other.responseBuffer), contentLength(other.contentLength), headerComplete(other.headerComplete), requestComplete(other.requestComplete), req(other.req), bodyStart(other.bodyStart) , fileDone(other.fileDone) ,postFileFd(other.postFileFd){}
+// client::client() :_server(NULL), bodySize(0), getFileFd(-1),BytesSent(0), chunkSize(0), cstate(READCHUNK), chunkedEncoded(false), isDir(false),fd(-1), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), postFileFd(-1), postFileSize(0), fileDone(false),bodyStart(0) {}
+client::client() :
+	fd(-1),
+	_server(NULL),
+	location(NULL),
+	state(READING),
+	cstate(READCHUNK),
+	code(0),
+	buffer(""),
+	responseBuffer(""),
+	header(""),
+	contentLength(0),
+	headerComplete(false),
+	requestComplete(false),
+	req(),
+	res(),
+	bodyStart(0),
+	postFileSize(0),
+	postFileFd(-1),
+	getFileFd(-1),
+	BytesSent(0),
+	fileDone(false),
+	isDir(false),
+	chunkedEncoded(false),
+	uploadPath(""),
+	chunkSize(0),
+	bodySize(0)
+{}
+// client::client(int fd,server *srv) :_server(srv),bodySize(0),getFileFd(-1),BytesSent(0),chunkSize(0),cstate(READCHUNK),chunkedEncoded(false),isDir(false), fd(fd), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), postFileFd(-1), postFileSize(0), fileDone(false) {}
+client::client(int fd, server *srv) :
+	fd(fd),
+	_server(srv),
+	location(NULL),
+	state(READING),
+	cstate(READCHUNK),
+	code(0),
+	buffer(""),
+	responseBuffer(""),
+	header(""),
+	contentLength(0),
+	headerComplete(false),
+	requestComplete(false),
+	req(),
+	res(),
+	bodyStart(0),
+	postFileSize(0),
+	postFileFd(-1),
+	getFileFd(-1),
+	BytesSent(0),
+	fileDone(false),
+	isDir(false),
+	chunkedEncoded(false),
+	uploadPath(""),
+	chunkSize(0),
+	bodySize(0)
+{}
+// client::client(const client &other) :BytesSent(0),chunkedEncoded(other.chunkedEncoded), isDir(other.isDir), fd(other.fd), state(other.state), buffer(other.buffer), responseBuffer(other.responseBuffer), contentLength(other.contentLength), headerComplete(other.headerComplete), requestComplete(other.requestComplete), req(other.req), bodyStart(other.bodyStart) , fileDone(other.fileDone) ,postFileFd(other.postFileFd){}
+client::client(const client &other) :
+	fd(other.fd),
+	_server(other._server),
+	location(other.location),
+	state(other.state),
+	cstate(other.cstate),
+	code(other.code),
+	buffer(other.buffer),
+	responseBuffer(other.responseBuffer),
+	header(other.header),
+	contentLength(other.contentLength),
+	headerComplete(other.headerComplete),
+	requestComplete(other.requestComplete),
+	req(other.req),
+	res(other.res),
+	bodyStart(other.bodyStart),
+	postFileSize(other.postFileSize),
+	postFileFd(other.postFileFd),
+	getFileFd(other.getFileFd),
+	BytesSent(other.BytesSent),
+	fileDone(other.fileDone),
+	isDir(other.isDir),
+	chunkedEncoded(other.chunkedEncoded),
+	uploadPath(other.uploadPath),
+	chunkSize(other.chunkSize),
+	bodySize(other.bodySize)
+{}
 client& client::operator=(const client &other) {
 	if (this != &other) {
 		fd = other.fd;
@@ -65,7 +146,7 @@ bool client::isRequestComplete() { return requestComplete; }
 HttpReq& client::getReq() { return req; }
 ClientState client::getState() { return state; }
 void client::setState(ClientState state) { this->state = state;}
-// void client::setBuffer(const std::string &buffer) { this->buffer = buffer; }
+void client::setBuffer(const std::string &buffer) { this->buffer = buffer; }
 void client::setResponseBuffer(const std::string &responseBuffer) { this->responseBuffer = responseBuffer; }
 void client::setContentLength(size_t contentLength) { this->contentLength = contentLength; }
 void client::setHeaderComplete(bool headerComplete) { this->headerComplete = headerComplete  ; }
@@ -76,6 +157,12 @@ void client::setHeader(const std::string &header) { this->header = header; }
 void client::appendToResBuffer(const std::string &data,size_t n)
 {
 	responseBuffer.append(data, n);
+}
+chunksStates client::getChunkState(){
+    return cstate;
+}
+void client::setChunkState(chunksStates state) {
+    cstate = state;
 }
 void client::setBytesSent(size_t n)
 {
@@ -121,7 +208,7 @@ bool client::isFileDone()
 }
 bool client::getIsDir()
 {
-	return getIsDir;
+	return isDir;
 }
 void client::setIsDir(bool val)
 {

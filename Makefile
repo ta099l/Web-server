@@ -2,7 +2,10 @@ CXX = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g -I.
 
 TARGET = webserv
-SRCS = main.cpp conf_parser.cpp conf_parser_util.cpp webserv.cpp server.cpp utils.cpp listen_socket.cpp client.cpp httpParser.cpp HttpReq.cpp
+SRCS = client.cpp	      HttpReq.cpp	 responseGeneration.cpp  stateMachineHandlers.cpp \
+conf_parser.cpp       httpResponse.cpp	 routing.cpp		 utils.cpp \
+conf_parser_util.cpp  listen_socket.cpp  routing_methods.cpp	 webserv.cpp \
+httpParser.cpp	      main.cpp		 server.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)

@@ -3,19 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/06 18:56:25 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/07 20:58:57 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPRESPONSE_HPP
 #define HTTPRESPONSE_HPP
-#include "client.hpp"
+// #include "client.hpp"
 #include <string>
 #include <map>
 #include <cstddef>
+#include <unistd.h>
+class client;
 class HttpResponse
 {
 	private:
@@ -74,7 +76,7 @@ class HttpResponse
 		void addResHeader(const std::string& key, const std::string& value);
 		void setContentType(const std::string& contentType);
 		void setGeneratedResponseHeader(bool val){generatedResponseHeader = val; }
-	void HttpResponse::setContentTypeString(const std::string& str);
+	void setContentTypeString(const std::string& str);
 
 		//std::string generateResponse(client &cli, server &srv);
 		//functions

@@ -27,7 +27,7 @@ std::string getReasonPhrase(int code)
 }
 std::string genHtml(int code,std::string reason)
 {
-	std::string reason = getReasonPhrase(code);
+	reason = getReasonPhrase(code);
 
 	std::stringstream ss;
 	ss << "<!DOCTYPE html>\n"
@@ -48,10 +48,11 @@ std::string genHtml(int code,std::string reason)
 }
 void generateErrorResponse(client &cli,server &serv)
 {
+	(void)serv;
 	const LocationConfig* loc = cli.getLocation();
 	bool genError = false;
 	const std::map<int, std::string>& errorPages = loc->getErrorPages();
-	int code;
+	int code = 0;
 	std::string reason;
 	for (std::map<int, std::string>::const_iterator it = errorPages.begin();it != errorPages.end();it++)
 	{
@@ -97,6 +98,7 @@ void generateErrorResponse(client &cli,server &serv)
 }
 void generateResponseHeader(client &cli,server &srv)
 {
+	(void)srv;
 	std::stringstream resHeader;
 	resHeader<< cli.getReq().getVersion()<<" "<<cli.getRes().getStatusCode()<<" "<<getReasonPhrase(cli.getRes().getStatusCode())<<"\r\n";
 	if(cli.getRes().getHasFileBody()||cli.getRes().getHasMemoryBody())

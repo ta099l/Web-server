@@ -15,9 +15,31 @@
 #include <sstream>
 #include "webserv.hpp"
 #include "server.hpp"
+const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
+{
+	const LocationConfig* longestmatch = NULL;
+	int max_size  = 0;
+	for (std::map<std::string, LocationConfig>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		const std::string& locationPath = it->first;
+		if (uri.compare(0, locationPath.size(), locationPath) == 0)
+		{
+			if (locationPath[locationPath.length() - 1] == '/' || uri.size() == locationPath.size() || uri[locationPath.size()] == '/')
+			{
+				if (locationPath.size() > (unsigned long)max_size)
+				{
+					max_size = locationPath.size();
+					longestmatch = &(it->second);
+				}
+			}
+		}
+	}
+	return longestmatch;
+}
 
 int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfig)
 {
+	(void)srv;
 	std::string reqMethod = cli.getReq().getMethod();
 	const std::vector<std::string>&allowedMethods= locConfig.getMethods();
 	if (std::find(allowedMethods.begin(), allowedMethods.end(), reqMethod) == allowedMethods.end())
@@ -26,7 +48,7 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 		cli.setState(ERROR);
 		return 1;
 	}
-	else if(cli.getContentLength()>locConfig.getMaxBodySize())
+	else if((long long)cli.getContentLength()>locConfig.getMaxBodySize())
 	{
 		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
 		cli.setState(ERROR);
@@ -103,27 +125,6 @@ int handleRouting(client &cli, server &srv)
 	}
 	return 1;
 
-}
-const LocationConfig* findLongestMatch(const std::string& uri, const std::map<std::string, LocationConfig>& locations) //or locationobj
-{
-	const LocationConfig* longestmatch = NULL;
-	int max_size  = 0;
-	for (std::map<std::string, LocationConfig>::const_iterator it = locations.begin(); it != locations.end(); ++it)
-	{
-		const std::string& locationPath = it->first;
-		if (uri.compare(0, locationPath.size(), locationPath) == 0)
-		{
-			if (locationPath[locationPath.length() - 1] == '/' || uri.size() == locationPath.size() || uri[locationPath.size()] == '/')
-			{
-				if (locationPath.size() > max_size)
-				{
-					max_size = locationPath.size();
-					longestmatch = &(it->second);
-				}
-			}
-		}
-	}
-	return longestmatch;
 }
 
 
