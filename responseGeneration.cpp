@@ -46,7 +46,7 @@ std::string genHtml(int code,std::string reason)
 
 	return ss.str();
 }
-void generateErrorResponse(client &cli,server &serv)
+bool generateErrorResponse(client &cli,server &serv)
 {
 	(void)serv;
 	const LocationConfig* loc = cli.getLocation();
@@ -90,11 +90,12 @@ void generateErrorResponse(client &cli,server &serv)
 			cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
 			cli.getRes().setContentType(path);
 			cli.setState(READINGFILE);
-			break;
+			return false;
 		}
 	}
 	if(genError)
 		cli.getRes().setFileBody(genHtml(code,reason));
+	return true;
 }
 void generateResponseHeader(client &cli,server &srv)
 {

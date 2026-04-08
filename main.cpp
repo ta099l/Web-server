@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 13:36:19 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/18 12:15:21 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/04/08 19:21:14 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,10 @@ int	main(int argc, char **argv)
 	}
 	webserv spiderweb;
 	flag = spiderweb.conf_pars(argv[1], flag);
+	std::cerr<< "***************************spider:"<<spiderweb.getServers().size()<<std::endl;
 	if(flag == 0)
 		return (0);
-	//spiderweb.printConfig();
+	// spiderweb.printConfig();
 	if (init_sockets(spiderweb) == -1)
 	{
 		std::cerr << "Failed to initialize sockets\n";
@@ -38,5 +39,6 @@ int	main(int argc, char **argv)
 		return(1);
 	}
 	spiderweb.run();
+
 	return 0;
 }

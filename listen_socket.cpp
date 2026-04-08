@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:01:48 by balhamad          #+#    #+#             */
-/*   Updated: 2026/03/08 20:52:25 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/08 19:25:43 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ int init_sockets(webserv& spiderweb)
 		for (size_t i = 0; i < servers.size(); ++i)
 		{
 			const std::vector<ListenConfig>& listens = servers[i].getListens();
-
 			if (listens.empty())
 			{
 				std::cerr << "Server " << i << " has no listen directive\n";
@@ -47,6 +46,7 @@ int init_sockets(webserv& spiderweb)
 				);
 			}
 		}
+
 	return 0;
 }
 

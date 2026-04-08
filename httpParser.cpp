@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/07 21:08:14 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/08 18:08:53 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "client.hpp"
 #include <algorithm>
 #include <ctype.h>
+#include<stdio.h>
 
 std::string toLower(const std::string& input)
 {
@@ -80,6 +81,7 @@ int checkUri(std::string uri)
 }
 int parseReqLine(client &cli,std::string &reqline)
 {
+	// printf("%s\n",reqline.c_str());
 	std::string trimmedLine=ltrim(reqline);
 	size_t pos1=trimmedLine.find(" ");
 	if(pos1==std::string::npos)
@@ -175,12 +177,16 @@ int  checkHeader(client &cli)
 	size_t pos = cli.getBuffer().find("\r\n\r\n");
 	if(pos!=std::string::npos)
 	{
+		std::cout << "---------\n"<<cli.getBuffer()<< "---------\n"<<std::endl;
 		cli.setHeaderComplete(true);
 		cli.setHeader(cli.getBuffer().substr(0,pos+2));
 		if(parseReq(cli) == 1)
 			return 1;
 		if(cli.getContentLength() > 0)
 			cli.setBodyStart(pos+4);
+		std::cout<<cli.getReq().getMethod()<<std::endl;
+		// std::cout<<cli.getReq().getVersion();
+		// std::cout<<cli.getReq().getHeaders();
 	}
 	return 0;
 }
@@ -260,14 +266,15 @@ int	handleRead(client &cli,int fd)
 		return 1;
 	else if(n > 0)
 	{
-		cli.appendToResBuffer(temp,n);
+		cli.appendtobuff(temp,n);
 		if(!cli.isHeaderComplete())
 		{
+			std::cout<<"hehe\n";
 			if(checkHeader(cli) == 1)
 			{
 				if(cli.getCode() == 0)
 					cli.getRes().setStatusCode(400);
-				return 1;
+				return 0;
 			}
 		}
 		if(cli.isHeaderComplete())
@@ -280,7 +287,7 @@ int	handleRead(client &cli,int fd)
 					if(cli.getCode() == 0)
 						cli.getRes().setStatusCode(400);
 					cli.setState(ERROR);
-					return 1;
+					return 0;
 				}
 				if(checker == 1)
 				{

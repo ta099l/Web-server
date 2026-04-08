@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/02/23 14:57:24 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/08 19:19:22 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ int	webserv::conf_pars(char *file, int flag)
 				server new_srv;
 				flag = save_info(inFile, new_srv, flag);
 				servers.push_back(new_srv);
+				std::cerr<< "***************************"<<servers.size()<<std::endl;
 			}
 			count++;
 		}
@@ -165,6 +166,7 @@ int	parse_location(std::ifstream& inFile,std::string s_line, std::string line, s
 		flag = store_location(line, s_line, srv, loc, flag);
 	}
 	srv.addLocation(loc);
+	std::cerr <<"----------------------"<< srv.getLocations().size()<<std::endl;
 	return (flag);
 }
 

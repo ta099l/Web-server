@@ -19,6 +19,8 @@ const LocationConfig* findLongestMatch(const std::string& uri, const std::map<st
 {
 	const LocationConfig* longestmatch = NULL;
 	int max_size  = 0;
+			std::cerr<<" <> "<< locations.size() << std::endl;
+
 	for (std::map<std::string, LocationConfig>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		const std::string& locationPath = it->first;
@@ -67,6 +69,7 @@ int handleRouting(client &cli, server &srv)
 {
 	std::string uri = cli.getReq().getUri();
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
+	std::cerr << "--------fhgsufgihduighjfdgb---------------" << srv.getLocations().size() << std::endl;
 	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
 	cli.setLocation(matchedLocation);
 	if (matchedLocation)
@@ -77,6 +80,7 @@ int handleRouting(client &cli, server &srv)
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);
+			std::cout<<"in get nowwww\n";
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{

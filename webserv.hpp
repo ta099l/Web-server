@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/07 20:32:41 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/08 19:00:05 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void handleUpload(client &cli,server &serv,const ClientState &state);
 void handleFileReading(client &cli,server &srv);
 bool handleWrite(client &cli,server &serv);
 void generateResponseHeader(client &cli,server &srv);
-void generateErrorResponse(client &cli,server &serv);
+bool generateErrorResponse(client &cli,server &serv);
 
 
 #endif
