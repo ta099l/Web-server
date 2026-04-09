@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/08 18:08:53 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:21:28 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ int countLines(const std::string &buffer)  // Add const reference
 int parseHeader(client &cli)
 {
 	std::string copy = cli.getHeader();
-	std::cout<<"Header to parse:\n"<<copy<<std::endl;
 	int num = countLines(copy);
 	for(int i=0;i<num;i++)
 	{
@@ -177,16 +176,12 @@ int  checkHeader(client &cli)
 	size_t pos = cli.getBuffer().find("\r\n\r\n");
 	if(pos!=std::string::npos)
 	{
-		std::cout << "---------\n"<<cli.getBuffer()<< "---------\n"<<std::endl;
 		cli.setHeaderComplete(true);
 		cli.setHeader(cli.getBuffer().substr(0,pos+2));
 		if(parseReq(cli) == 1)
 			return 1;
 		if(cli.getContentLength() > 0)
 			cli.setBodyStart(pos+4);
-		std::cout<<cli.getReq().getMethod()<<std::endl;
-		// std::cout<<cli.getReq().getVersion();
-		// std::cout<<cli.getReq().getHeaders();
 	}
 	return 0;
 }
@@ -269,7 +264,6 @@ int	handleRead(client &cli,int fd)
 		cli.appendtobuff(temp,n);
 		if(!cli.isHeaderComplete())
 		{
-			std::cout<<"hehe\n";
 			if(checkHeader(cli) == 1)
 			{
 				if(cli.getCode() == 0)

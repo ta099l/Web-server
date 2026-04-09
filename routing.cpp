@@ -19,7 +19,6 @@ const LocationConfig* findLongestMatch(const std::string& uri, const std::map<st
 {
 	const LocationConfig* longestmatch = NULL;
 	int max_size  = 0;
-			std::cerr<<" <> "<< locations.size() << std::endl;
 
 	for (std::map<std::string, LocationConfig>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
@@ -43,30 +42,24 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 {
 	(void)srv;
 	std::string reqMethod = cli.getReq().getMethod();
-	std::cout<< locConfig.getPath() << std::endl;
 	const std::vector<std::string>&allowedMethods= locConfig.getMethods();
-	std::cout<<"allowed methods size: "<<allowedMethods.size() << std::endl;
 	if (std::find(allowedMethods.begin(), allowedMethods.end(), reqMethod) == allowedMethods.end())
 	{
-		std::cout<<"method not allowed\n";
 		cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
 		cli.setState(ERROR);
 		return 1;
 	}
 	else if((long long)cli.getContentLength()>locConfig.getMaxBodySize())
 	{
-		std::cout<<"payload too large\n";
 		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
 		cli.setState(ERROR);
 		return 1;
 	}
 	else if(cli.getRes().getStatusCode()!=0)
 	{
-		std::cout<<"other error\n";
 		cli.setState(ERROR);
 		return 1;
 	}
-	std::cout<<"valid location config\n";
 	return 0;
 }
 
@@ -77,19 +70,15 @@ int handleRouting(client &cli, server &srv)
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
 	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
 	cli.setLocation(matchedLocation);
-	std::cout<<"in routnow\n";
 	if (matchedLocation)
 	{
 		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
 		{
-			std::cout<<matchedLocation->getPath() << std::endl;
 			return 1;
 		}
 		//if(cgi)
 		if (cli.getReq().getMethod() == "GET")
 		{
-			std::cerr << cli.getLocation()->getPath() << std::endl;
-			
 			get_method(cli, srv, *matchedLocation, uri);
 		}
 		else if (cli.getReq().getMethod() == "POST")
@@ -123,7 +112,7 @@ int handleRouting(client &cli, server &srv)
 	else
 	{
 		std::cout<<"out matched locatio\n";
-		
+
 	}
 	// else
 	// {

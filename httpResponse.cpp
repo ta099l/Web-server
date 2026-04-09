@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 14:15:08 by tasnimsamer      ###   ########.fr       */
+/*   Updated: 2026/04/09 15:11:47 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,9 @@ void HttpResponse::setFileBody(const std::string& fileBody) { this->fileBody = f
 void HttpResponse::addResHeader(const std::string& key, const std::string& value) { resHeaders[key] = value; }
 void HttpResponse::appendFileBody(const std::string &body,ssize_t n)
 {
-	fileBody.append(body,n);
+	(void)n;
+	fileBody+=body;
+	// fileBody.append(body,n);
 }
 void HttpResponse::setContentTypeString(const std::string& str)
 {

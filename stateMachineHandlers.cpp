@@ -217,7 +217,6 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 		{
 			cli.setState(ROUTING);
 		}
-		printf("%u\n", cli.getState());
         return;
     }
 
@@ -226,7 +225,6 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
     {
         handleRouting(cli, serv);
         setEpoll(epoll_fd, cli.getFd(), 1);
-	std::cerr<< cli.getState() << std::endl;
         return;
     }
 
@@ -239,10 +237,7 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 
     if(cli.getState() == READINGFILE)
     {
-	std::cerr<<"in reading file state\n";
-        handleFileReading(cli, serv);
-	std::cout << cli.getResponseBuffer().c_str()<<"jkfhjk"<<std::endl;
-	std::cout<<cli.getRes().getFileBody().c_str()<<"jhj"<<std::endl;
+    	handleFileReading(cli, serv);
         return;
     }
 
