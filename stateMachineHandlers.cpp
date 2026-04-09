@@ -102,6 +102,7 @@ void handleFileReading(client &cli,server &srv)
 	std::cerr<<"here"<<cli.getFileOffset()<<std::endl;
 	if(cli.getRes().getContentLength()==cli.getFileOffset())
 	{
+		cli.getRes().appendFileBody(readBuffer,n);
 		std::cerr<<"=="<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
@@ -128,6 +129,7 @@ void handleFileReading(client &cli,server &srv)
 		cli.getRes().setStatusCode(500);
 		cli.setState(ERROR);
 	}
+	std::cerr<<cli.getRes().getFileBody()<<"weeeee"<<std::endl;
 }
 // bool handleWrite(client &cli, server &serv)
 // {
@@ -170,46 +172,44 @@ void handleFileReading(client &cli,server &srv)
 // }
 bool handleWrite(client &cli, server &serv)
 {
-    // 1. Ensure the header exists in the buffer if we haven't started sending yet
-    if (!cli.getRes().getGeneratedResponseHeader()) {
-        generateResponseHeader(cli, serv);
-    }
+	if (!cli.getRes().getGeneratedResponseHeader()) {
+		generateResponseHeader(cli, serv);
+	}
+	std::string &buffer = cli.getResponseBuffer();
+	std::cerr<<cli.getRes().getFileBody()<<"eeeeeeeeeeeeeee"<<std::endl;
+	if(!cli.getRes().getFileBody().empty())
+	{
+		std::cerr<<cli.getRes().getFileBody();
+		buffer+=cli.getRes().getFileBody();
+		// cli.getRes().setFileBody("");
 
-    // 2. ALWAYS try to send what is currently in the buffer
-    std::string buffer = cli.getResponseBuffer();
-    if (!buffer.empty())
-    {
-        size_t remaining = buffer.size() - cli.getBytesSent();
-        ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
-		std::cout<<cli.getResponseBuffer()<<std::endl;
-        if (sent < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
-            return true; // Actual error, close connection
-        }
-        cli.addBytesSent(sent);
-    }
-
-    // 3. Check if we finished sending the current chunk/buffer
-    if (cli.getBytesSent() >= buffer.size())
-    {
-        // Clear the buffer because it's fully sent
-        cli.setResponseBuffer("");
-        cli.setBytesSent(0);
-
-        // 4. NOW check: do we need more data from a file?
-        if (cli.getRes().getHasFileBody() && !cli.isFileDone())
-        {
-            cli.setState(READINGFILE);
-            // We return false because the whole response isn't finished
-            return false;
-        }
-
-        // No more file data and buffer is empty? We are DONE.
-        return true;
-    }
-
-    // Buffer not empty yet, stay in SENDING_RESPONSE
-    return false;
+	}
+	if (!buffer.empty())
+	{
+		size_t remaining = buffer.size() - cli.getBytesSent();
+		ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
+		std::cerr<<cli.getResponseBuffer()<<std::endl;
+		if (sent < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
+			return true;
+		}
+		cli.addBytesSent(sent);
+	}
+	if (cli.getBytesSent() >= buffer.size())
+	{
+		std::cerr<<cli.getBytesSent()<<std::endl;
+		std::cerr<<cli.getResponseBuffer()<<std::endl;
+		cli.setResponseBuffer("");
+		cli.setBytesSent(0);
+		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
+		{
+			cli.setState(READINGFILE);
+			// cli.getRes().setFileBody("");
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 void webserv::setEpoll(int epollFd, int clientFd,int flag)
 {

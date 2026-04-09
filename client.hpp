@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/09 15:32:31 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 16:23:54 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ class client
 	size_t chunkSize;
 	size_t bodySize;
 	size_t fileOffset;
+	size_t bytesTosend;
 	public:
 		client();
 		client(int fd,server *srv);
@@ -80,6 +81,7 @@ class client
 		~client();
 		//getters
 		int getFd();
+		size_t getBytesToSend();
 		chunksStates getChunkState();
 		int getGetFileFd();
 		int getPostFileFd();
@@ -95,11 +97,14 @@ class client
 		size_t getFileSize();
 		HttpResponse& getRes();
 		std::string getBuffer();
-		std::string getResponseBuffer();
+		// std::string getResponseBuffer();
+		std::string& getResponseBuffer();              // modify
+		const std::string& getResponseBuffer() const;  // read-only
 		std::string getUploadPath() const;
 		size_t getBodySize();
 		size_t getFileOffset();
 		//setters
+		void setBytesToSend(size_t n);
 		void setFileOffset(size_t n);
 		void setBodySize(size_t s);
 		void setFd(int fd);
@@ -110,6 +115,7 @@ class client
 		void setState(ClientState state);
 		void setBuffer(const std::string &buffer);
 		void setResponseBuffer(const std::string &responseBuffer);
+		// std::string& getResponseBuffer() const;
 		void setContentLength(size_t contentLength);
 		void setHeaderComplete(bool headerComplete);
 		void setRequestComplete(bool requestComplete);
