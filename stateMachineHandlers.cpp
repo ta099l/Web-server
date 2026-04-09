@@ -184,7 +184,7 @@ bool handleWrite(client &cli, server &serv)
 	{
 		std::cerr<<cli.getRes().getFileBody();
 		buffer+=cli.getRes().getFileBody();
-		// cli.getRes().setFileBody("");
+		cli.getRes().setFileBody("");
 
 	}
 	if (!buffer.empty())

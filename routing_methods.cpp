@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 17:24:01 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 18:40:57 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	}
 }
 
-std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocConfig, std::string uri)
+std::string setupUploadPath(client &cli, server &srv, std::string newuploadstore, std::string uri)
 {
 	(void)cli;
 	(void)srv;
@@ -249,8 +249,29 @@ std::string setupUploadPath(client &cli, server &srv, const LocationConfig& LocC
 	std::string fileName=uri.substr(pos+1);
 	if(fileName.empty())
 		return "";
-	return(LocConfig.getUploadStore()+"/"+fileName);
+	return(newuploadstore+"/"+fileName);
 
+}
+std::string setupUploadStore(const LocationConfig& loc)
+{
+    std::string root = loc.getRoot();
+    std::string store = loc.getUploadStore();
+
+    // Remove leading '.' or './' from store if it's meant to be relative to root
+    if (store.size() >= 2 && store.substr(0, 2) == "./")
+        store.erase(0, 2);
+    else if (store.size() >= 1 && store[0] == '.')
+        store.erase(0, 1);
+
+    // Ensure root ends with a slash
+    if (!root.empty() && root[root.size() - 1] != '/')
+        root += '/';
+
+    // Ensure store doesn't start with a slash (to avoid //)
+    if (!store.empty() && store[0] == '/')
+        store.erase(0, 1);
+
+    return (root + store);
 }
 int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
@@ -258,6 +279,7 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	struct stat st;
 	if(!locConfig.getUploadEnable()) //and not CGI
 	{
+		std::cerr<<cli.getState()<<std::endl;
 		cli.getRes().setStatusCode(FORBIDDEN);
 		cli.setState(ERROR);
 		return (-1);
@@ -271,13 +293,18 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	}
 	if (locConfig.getUploadStore() != "")
 	{
-		if(stat(locConfig.getUploadStore().c_str(),&st) == -1||!S_ISDIR(st.st_mode))
+		std::cerr<<"not empty"<<std::endl;
+		std::cerr<<locConfig.getUploadStore()<<std::endl;
+		std::string newUploadStore = setupUploadStore(locConfig);
+		if(stat(newUploadStore.c_str(),&st) == -1||!S_ISDIR(st.st_mode))
 		{
+			std::cerr<<"not is dir"<<std::endl;
+
 			cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
 			cli.setState(ERROR);
 			return (-1);
 		}
-		path =  setupUploadPath(cli, srv, locConfig, uri);
+		path =  setupUploadPath(cli, srv, newUploadStore, uri);
 		if(path.empty())
 		{
 			cli.getRes().setStatusCode(BAD_REQUEST);
