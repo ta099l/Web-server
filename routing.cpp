@@ -91,7 +91,6 @@ int handleRouting(client &cli, server &srv)
 			std::cerr << cli.getLocation()->getPath() << std::endl;
 			
 			get_method(cli, srv, *matchedLocation, uri);
-			std::cout<<"in get nowwww\n";
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{

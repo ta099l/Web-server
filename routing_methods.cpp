@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing_methods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/07 21:02:40 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 14:46:14 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,6 +170,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 				return (-1);
 			}
 			cli.getRes().setFileSize(indexStat.st_size);
+			cli.getRes().setContentLength(indexStat.st_size);
 			cli.getRes().setHasFileBody(true);
 			cli.getRes().setContentType(indexPath);
 			cli.getRes().setStatusCode(OK);
@@ -182,6 +183,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			cli.getRes().setContentTypeString("text/html");
 			cli.getRes().setHasMemoryBody(true);
 			cli.getRes().setStatusCode(OK);
+			std::cout<<"generated autoindex listing\n";
 			cli.setState(SENDING_RESPONSE);
 			return (0);
 		}
@@ -225,6 +227,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		}
 		cli.getRes().setContentLength(stat_buf.st_size);
 		cli.getRes().setHasFileBody(true);
+		std::cout<<"file size: "<<stat_buf.st_size<<std::endl;
 		cli.getRes().setStatusCode(OK);
 		cli.getRes().setContentType(rootPath);
 		cli.setState(READINGFILE);

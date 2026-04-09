@@ -227,6 +227,7 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 		printf("%s\n", cli.getReq().getVersion().c_str());
         handleRouting(cli, serv);
         setEpoll(epoll_fd, cli.getFd(), 1);
+	std::cerr<< cli.getState() << std::endl;
         return;
     }
 
@@ -239,6 +240,7 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 
     if(cli.getState() == READINGFILE)
     {
+	std::cerr<<"in reading file state\n";
         handleFileReading(cli, serv);
         return;
     }
