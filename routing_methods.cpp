@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 15:19:41 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 17:24:01 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,6 +264,7 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	}
 	if (locConfig.getUploadStore().empty())
 	{
+		std::cerr<<"in empty"<<std::endl;
 		cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
 		cli.setState(ERROR);
 		return (-1);

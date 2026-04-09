@@ -83,6 +83,7 @@ int handleRouting(client &cli, server &srv)
 		}
 		else if (cli.getReq().getMethod() == "POST")
 		{
+			std::cerr<<"in post hereeeeeeeeee"<<std::endl;
 			post_method(cli, srv, *matchedLocation, uri);
 		}
 		else if (cli.getReq().getMethod() == "DELETE")

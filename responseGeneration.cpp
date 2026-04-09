@@ -43,7 +43,6 @@ std::string genHtml(int code,std::string reason)
 		<< " <p>The server encountered an error and could not complete your request.</p>\n"
 		<< "</body>\n"
 		<< "</html>";
-
 	return ss.str();
 }
 bool generateErrorResponse(client &cli,server &serv)
@@ -94,7 +93,11 @@ bool generateErrorResponse(client &cli,server &serv)
 		}
 	}
 	if(genError)
-		cli.getRes().setFileBody(genHtml(code,reason));
+	{
+		std::string html =genHtml(code,reason);
+		cli.getRes().setContentLength(html.size());
+		cli.getRes().setFileBody(html);
+	}
 	return true;
 }
 void generateResponseHeader(client &cli,server &srv)

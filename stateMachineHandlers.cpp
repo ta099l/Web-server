@@ -175,8 +175,11 @@ bool handleWrite(client &cli, server &serv)
 	if (!cli.getRes().getGeneratedResponseHeader()) {
 		generateResponseHeader(cli, serv);
 	}
+	if(cli.getState() == ERROR)
+	{
+		generateErrorResponse(cli,serv);
+	}
 	std::string &buffer = cli.getResponseBuffer();
-	std::cerr<<cli.getRes().getFileBody()<<"eeeeeeeeeeeeeee"<<std::endl;
 	if(!cli.getRes().getFileBody().empty())
 	{
 		std::cerr<<cli.getRes().getFileBody();
