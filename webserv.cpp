@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bushra <bushra@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 13:49:31 by bushra           ###   ########.fr       */
+/*   Updated: 2026/04/09 14:52:24 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,7 +205,7 @@ int webserv::run()
                 if (it != client_fds.end())
                 {
                     state_machine(it->second, *sit, fd, 0);
-
+                    std::cerr<<"After 2nd state machine"<<std::endl;
                     if (it->second.getState() == DONE)
                         close_client_connection(fd);
 
