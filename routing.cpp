@@ -55,15 +55,18 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 	}
 	else if((long long)cli.getContentLength()>locConfig.getMaxBodySize())
 	{
+		std::cout<<"payload too large\n";
 		cli.getRes().setStatusCode(PAYLOAD_TOO_LARGE);
 		cli.setState(ERROR);
 		return 1;
 	}
 	else if(cli.getRes().getStatusCode()!=0)
 	{
+		std::cout<<"other error\n";
 		cli.setState(ERROR);
 		return 1;
 	}
+	std::cout<<"valid location config\n";
 	return 0;
 }
 

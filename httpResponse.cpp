@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tasnimsamer <tasnimsamer@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/07 20:57:42 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 14:15:08 by tasnimsamer      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ HttpResponse::HttpResponse() :
 	NeedsAutoindex(false),
 	generatedResponseHeader(false),
 	version("HTTP/1.1"),
-	statusCode(200),
+	statusCode(0),
 	reason("OK"),
 	contentLength(0),
 	memoryBody(""),
