@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bushra <bushra@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/08 19:00:05 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/09 13:36:39 by bushra           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ enum Codes
 class webserv
 {
 	private:
-		std::vector<server> servers;
+		std::list<server> servers;
 		int epoll_fd;
 	public:
 		webserv();
@@ -59,8 +59,8 @@ class webserv
 		int initialize_epoll();
 		int run();
 		int count;
-		std::vector<server>& getServers();
-		const	std::vector<server>& getServers() const;
+		std::list<server>& getServers();
+		const	std::list<server>& getServers() const;
 		void	setServers(const server& s);
 		int	conf_pars(char *file, int flag);
 		int		save_info(std::ifstream& inFile, server& s, int flag);
