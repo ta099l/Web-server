@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/08 19:02:53 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:50:32 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ client::client() :
 	chunkedEncoded(false),
 	uploadPath(""),
 	chunkSize(0),
-	bodySize(0)
+	bodySize(0),
+	fileOffset(0)
 {}
 // client::client(int fd,server *srv) :_server(srv),bodySize(0),getFileFd(-1),BytesSent(0),chunkSize(0),cstate(READCHUNK),chunkedEncoded(false),isDir(false), fd(fd), state(READING), buffer(""), responseBuffer(""), contentLength(0), headerComplete(false), requestComplete(false), code(0), postFileFd(-1), postFileSize(0), fileDone(false) {}
 client::client(int fd, server *srv) :
@@ -66,7 +67,8 @@ client::client(int fd, server *srv) :
 	chunkedEncoded(false),
 	uploadPath(""),
 	chunkSize(0),
-	bodySize(0)
+	bodySize(0),
+	fileOffset(0)
 {}
 // client::client(const client &other) :BytesSent(0),chunkedEncoded(other.chunkedEncoded), isDir(other.isDir), fd(other.fd), state(other.state), buffer(other.buffer), responseBuffer(other.responseBuffer), contentLength(other.contentLength), headerComplete(other.headerComplete), requestComplete(other.requestComplete), req(other.req), bodyStart(other.bodyStart) , fileDone(other.fileDone) ,postFileFd(other.postFileFd){}
 client::client(const client &other) :
@@ -94,7 +96,8 @@ client::client(const client &other) :
 	chunkedEncoded(other.chunkedEncoded),
 	uploadPath(other.uploadPath),
 	chunkSize(other.chunkSize),
-	bodySize(other.bodySize)
+	bodySize(other.bodySize),
+	fileOffset(other.fileOffset)
 {}
 client& client::operator=(const client &other) {
 	if (this != &other) {
@@ -113,6 +116,8 @@ client& client::operator=(const client &other) {
 		req = other.req;
 		isDir = other.isDir;
 		chunkedEncoded = other.chunkedEncoded;
+		bodySize = other.bodySize;
+		fileOffset = other.fileOffset;
 	}
 	return *this;
 }
@@ -120,6 +125,14 @@ client::~client() {}
 int client::getFd()
 {
 	return fd;
+}
+size_t client::getFileOffset()
+{
+	return fileOffset;
+}
+void client::setFileOffset(size_t n)
+{
+	fileOffset+=n;
 }
 size_t client::getChunkSize()
 {
@@ -156,7 +169,9 @@ std::string client::getHeader() { return header; }
 void client::setHeader(const std::string &header) { this->header = header; }
 void client::appendToResBuffer(const std::string &data,size_t n)
 {
-	responseBuffer.append(data, n);
+	(void)n;
+	responseBuffer+=data;
+	// responseBuffer.append(data, n);
 }
 chunksStates client::getChunkState(){
     return cstate;

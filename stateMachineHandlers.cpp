@@ -97,13 +97,26 @@ void handleFileReading(client &cli,server &srv)
 	(void)srv;
 	char readBuffer[8192];
 	ssize_t n=read(cli.getGetFileFd(),readBuffer,sizeof(readBuffer));
-	if(n>0)
+	std::cerr<<"here"<<n<<std::endl;
+	cli.setFileOffset(n);
+	std::cerr<<"here"<<cli.getFileOffset()<<std::endl;
+	if(cli.getRes().getContentLength()==cli.getFileOffset())
 	{
+		std::cerr<<"=="<<std::endl;
+		close(cli.getGetFileFd());
+		cli.setFileDone(true);
+		cli.getRes().setStatusCode(200);
+		cli.setState(SENDING_RESPONSE);
+	}
+	else if(n>0)
+	{
+		std::cerr<<">"<<std::endl;
 		cli.getRes().appendFileBody(readBuffer,n);
 		cli.setState(SENDING_RESPONSE);
 	}
 	else if(n==0)
 	{
+		std::cerr<<"==0"<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
@@ -168,7 +181,7 @@ bool handleWrite(client &cli, server &serv)
     {
         size_t remaining = buffer.size() - cli.getBytesSent();
         ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
-
+		std::cout<<cli.getResponseBuffer()<<std::endl;
         if (sent < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
             return true; // Actual error, close connection
@@ -244,6 +257,7 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
     // 4. Handle Writing
     if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
     {
+		std::cout<<"about to send"<<std::endl;
         if(handleWrite(cli, serv))
         {
             cli.setState(DONE);

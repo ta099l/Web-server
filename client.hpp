@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/08 17:39:04 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:32:31 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ class client
 	std::string uploadPath;
 	size_t chunkSize;
 	size_t bodySize;
+	size_t fileOffset;
 	public:
 		client();
 		client(int fd,server *srv);
@@ -97,7 +98,9 @@ class client
 		std::string getResponseBuffer();
 		std::string getUploadPath() const;
 		size_t getBodySize();
+		size_t getFileOffset();
 		//setters
+		void setFileOffset(size_t n);
 		void setBodySize(size_t s);
 		void setFd(int fd);
 		void setBytesSent(size_t n);

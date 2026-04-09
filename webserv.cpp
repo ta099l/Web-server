@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 15:20:46 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:46:25 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,6 +180,7 @@ int webserv::run()
                 if (it != client_fds.end())
                 {
                     state_machine(it->second, *sit, fd, events[i].events);
+					std::cerr<<"first"<<it->second.getState()<<std::endl;
 
                     if (it->second.getState() == ROUTING)
                         r_cli.push_back(fd);
@@ -205,8 +206,11 @@ int webserv::run()
                 if (it != client_fds.end())
                 {
                     state_machine(it->second, *sit, fd, 0);
+					std::cerr<<"second"<<it->second.getState()<<std::endl;
                     if (it->second.getState() == DONE)
+					{
                         close_client_connection(fd);
+					}
 
                     break;
                 }
