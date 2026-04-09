@@ -43,9 +43,12 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 {
 	(void)srv;
 	std::string reqMethod = cli.getReq().getMethod();
+	std::cout<< locConfig.getPath() << std::endl;
 	const std::vector<std::string>&allowedMethods= locConfig.getMethods();
+	std::cout<<"allowed methods size: "<<allowedMethods.size() << std::endl;
 	if (std::find(allowedMethods.begin(), allowedMethods.end(), reqMethod) == allowedMethods.end())
 	{
+		std::cout<<"method not allowed\n";
 		cli.getRes().setStatusCode(METHOD_NOT_ALLOWED);
 		cli.setState(ERROR);
 		return 1;
@@ -69,16 +72,21 @@ int handleRouting(client &cli, server &srv)
 {
 	std::string uri = cli.getReq().getUri();
 	const std::map<std::string, LocationConfig>& locations = srv.getLocations();
-	std::cerr << "--------fhgsufgihduighjfdgb---------------" << srv.getLocations().size() << std::endl;
 	const LocationConfig* matchedLocation = findLongestMatch(uri, locations);
 	cli.setLocation(matchedLocation);
+	std::cout<<"in routnow\n";
 	if (matchedLocation)
 	{
 		if(checkValidLocConfig(cli, srv, *matchedLocation) == 1)
+		{
+			std::cout<<matchedLocation->getPath() << std::endl;
 			return 1;
+		}
 		//if(cgi)
 		if (cli.getReq().getMethod() == "GET")
 		{
+			std::cerr << cli.getLocation()->getPath() << std::endl;
+			
 			get_method(cli, srv, *matchedLocation, uri);
 			std::cout<<"in get nowwww\n";
 		}
@@ -110,6 +118,11 @@ int handleRouting(client &cli, server &srv)
 			}
 		}
 	}
+	else
+	{
+		std::cout<<"out matched locatio\n";
+		
+	}
 	// else
 	// {
 	// 	if(checkValidLocConfig(cli, srv, LocationConfig()) == 1) //check default location
@@ -121,12 +134,12 @@ int handleRouting(client &cli, server &srv)
 	  //handle default location
 	  //similar to get method but with default location config
 	  //if no default location => return 404 not found
-	else
-	{
-		cli.getRes().setStatusCode(NOT_FOUND);
-		cli.setState(ERROR);
-		return 1;
-	}
+	// else
+	// {
+	// 	cli.getRes().setStatusCode(NOT_FOUND);
+	// 	cli.setState(ERROR);
+	// 	return 1;
+	// }
 	return 1;
 
 }
