@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 18:40:57 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/10 15:53:01 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,6 +305,7 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 			return (-1);
 		}
 		path =  setupUploadPath(cli, srv, newUploadStore, uri);
+		std::cerr<<"Path = " << path <<std::endl;
 		if(path.empty())
 		{
 			cli.getRes().setStatusCode(BAD_REQUEST);
