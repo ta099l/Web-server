@@ -226,47 +226,43 @@ void webserv::setEpoll(int epollFd, int clientFd,int flag)
 }
 void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 {
-    // 1. Handle Reading
-    if(cli.getState() == READING && (events & EPOLLIN))
-    {
+	if(cli.getState() == READING && (events & EPOLLIN))
+	{
 		if(handleRead(cli, fd) == 0)
 		{
 			cli.setState(ROUTING);
 		}
-        return;
-    }
+		return;
+	}
 
-    // 2. Handle Routing (Internal Logic)
-    if(cli.getState() == ROUTING)
-    {
-        handleRouting(cli, serv);
-        setEpoll(epoll_fd, cli.getFd(), 1);
-        return;
-    }
+	if(cli.getState() == ROUTING)
+	{
+		handleRouting(cli, serv);
+		setEpoll(epoll_fd, cli.getFd(), 1);
+		return;
+	}
 
-    // 3. Handle File Operations / Uploads
-    if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
-    {
-        handleUpload(cli, serv, cli.getState());
-        return;
-    }
+	if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
+	{
+		handleUpload(cli, serv, cli.getState());
+		return;
+	}
 
-    if(cli.getState() == READINGFILE)
-    {
-    	handleFileReading(cli, serv);
-        return;
-    }
+	if(cli.getState() == READINGFILE)
+	{
+		handleFileReading(cli, serv);
+		return;
+	}
 
-    // 4. Handle Writing
-    if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
-    {
+	if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
+	{
 		std::cout<<"about to send"<<std::endl;
-        if(handleWrite(cli, serv))
-        {
-            cli.setState(DONE);
-        }
-        return;
-    }
+		if(handleWrite(cli, serv))
+		{
+			cli.setState(DONE);
+		}
+		return;
+	}
 }
 // void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events)
 // {

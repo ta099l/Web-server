@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/10 15:53:01 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/10 20:47:47 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,24 +254,24 @@ std::string setupUploadPath(client &cli, server &srv, std::string newuploadstore
 }
 std::string setupUploadStore(const LocationConfig& loc)
 {
-    std::string root = loc.getRoot();
-    std::string store = loc.getUploadStore();
+	std::string root = loc.getRoot();
+	std::string store = loc.getUploadStore();
 
-    // Remove leading '.' or './' from store if it's meant to be relative to root
-    if (store.size() >= 2 && store.substr(0, 2) == "./")
-        store.erase(0, 2);
-    else if (store.size() >= 1 && store[0] == '.')
-        store.erase(0, 1);
+	// Remove leading '.' or './' from store if it's meant to be relative to root
+	if (store.size() >= 2 && store.substr(0, 2) == "./")
+		store.erase(0, 2);
+	else if (store.size() >= 1 && store[0] == '.')
+		store.erase(0, 1);
 
-    // Ensure root ends with a slash
-    if (!root.empty() && root[root.size() - 1] != '/')
-        root += '/';
+	// Ensure root ends with a slash
+	if (!root.empty() && root[root.size() - 1] != '/')
+		root += '/';
 
-    // Ensure store doesn't start with a slash (to avoid //)
-    if (!store.empty() && store[0] == '/')
-        store.erase(0, 1);
+	// Ensure store doesn't start with a slash (to avoid //)
+	if (!store.empty() && store[0] == '/')
+		store.erase(0, 1);
 
-    return (root + store);
+	return (root + store);
 }
 int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::string uri)
 {
