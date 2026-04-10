@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 15:22:56 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/10 20:43:32 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ int	store_location(std::string line,std::string s_line, server& srv, LocationCon
 		loc.setUploadStore(substr);
 	else if (!line.compare(0,5, "index"))
 		loc.setIndex(substr);
-	else if (!line.compare(0,8, "redirect"))
+	else if (!line.compare(0,6, "return"))
 		loc.setRedirect(substr);
 	else if (!line.compare(0,4, "root"))
 		loc.setRoot(substr);
@@ -140,6 +140,7 @@ int	store_location(std::string line,std::string s_line, server& srv, LocationCon
 		std::cerr << "WHAT EVEN IS THIS CANT U WRITE A CONFIG FILE YOU IDIOT: " << line << "\n";
 		exit(1);
 	}
+
 	return (flag);
 }
 
@@ -220,7 +221,7 @@ int	parse_default(std::string s_line,std::string line, server& srv, int flag)
 		srv.setUploadStore(substr);
 	else if (!line.compare(0,5, "index"))
 		srv.setIndex(substr);
-	else if (!line.compare(0,8, "redirect"))
+	else if (!line.compare(0,6, "return"))
 		srv.setRedirect(substr);
 	else if (!line.compare(0,4, "root"))
 		srv.setRoot(substr);
@@ -255,5 +256,6 @@ int	webserv::save_info(std::ifstream& inFile, server& srv, int flag)
 		else
 			flag = parse_default(s_line, line, srv, flag);
 	}
+
 	return (flag);
 }
