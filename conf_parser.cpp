@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parser.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/11 16:58:13 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/11 17:55:10 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ int	webserv::conf_pars(char *file, int flag)
 			{
 				server new_srv;
 				flag = save_info(inFile, new_srv, flag);
-				std::cout<<"server\n";
-				const std::map<int, std::string>& pages = new_srv.getErrorPages();
-				for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
-				{
-					std::cerr << "Error code: " << it->first
-							<< " -> Page: " << it->second << std::endl;
-				}
+				// std::cout<<"server\n";
+				// const std::map<int, std::string>& pages = new_srv.getErrorPages();
+				// for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+				// {
+				// 	std::cerr << "Error code: " << it->first
+				// 			<< " -> Page: " << it->second << std::endl;
+				// }
 				servers.push_back(new_srv);
 			}
 			count++;
@@ -163,13 +163,13 @@ int	parse_location(std::ifstream& inFile,std::string s_line, std::string line, s
 		flag = store_location(line, s_line, srv, loc, flag);
 	}
 	srv.addLocation(loc);
-	std::cout<<"LOCATIONNNNN "<<loc.getPath()<<"\n";
-	const std::map<int, std::string>& pages = loc.getErrorPages();
-	for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
-	{
-	    std::cerr <<"IN "<<loc.getPath()<< "Error code: " << it->first
-	              << " -> Page: " << it->second << std::endl;
-	}
+	// std::cout<<"LOCATIONNNNN "<<loc.getPath()<<"\n";
+	// const std::map<int, std::string>& pages = loc.getErrorPages();
+	// for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+	// {
+	//     std::cerr <<"IN "<<loc.getPath()<< "Error code: " << it->first
+	//               << " -> Page: " << it->second << std::endl;
+	// }
 	return (flag);
 }
 

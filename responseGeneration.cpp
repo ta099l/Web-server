@@ -113,6 +113,11 @@ bool generateErrorResponse(client &cli,server &serv)
 			cli.setState(READINGFILE);
 			return false;
 		}
+		else
+		{
+			cli.getRes().setHasMemoryBody(true);
+			genError = true;
+		}
 	}
 	if(genError)
 	{

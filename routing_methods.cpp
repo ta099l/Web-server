@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing_methods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 18:40:57 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/11 18:00:18 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,7 @@ void generateAutoindexListing(client &cli, const std::string& uri, const std::st
 		cli.getRes().setStatusCode(500);
 		return;
 	}
-
 	std::stringstream html;
-
-	// Header and CSS (C++98 compatible)
 	html << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n";
 	html << "<meta charset=\"UTF-8\">\n";
 	html << "<title>✨ Index of " << uri << " ✨</title>\n";
@@ -66,7 +63,6 @@ void generateAutoindexListing(client &cli, const std::string& uri, const std::st
 		<< ".dir { font-weight: bold; }\n"
 		<< "</style>\n</head>\n<body>\n";
 
-	// Fast Floating Emojis
 	html << "<div class=\"decor\">\n"
 		<< "<span style=\"left:5%; animation-delay:0s;\">💖</span>\n"
 		<< "<span style=\"left:20%; animation-delay:0.4s;\">✨</span>\n"
@@ -78,12 +74,8 @@ void generateAutoindexListing(client &cli, const std::string& uri, const std::st
 
 	html << "<div class=\"container\">\n";
 	html << "<h1>📂 Index of " << uri << "</h1>\n";
-
-	// Parent Link
 	if (uri != "/")
 		html << "<a class=\"dir\" href=\"../\">⬅️ ../</a>\n";
-
-	// Read target directory files and folders
 	struct dirent *entry;
 	while ((entry = readdir(dir)) != NULL)
 	{
@@ -115,7 +107,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 	std::string rootPath = setupRootPath(cli, srv, locConfig, uri);
 	const char *chr_str = rootPath.c_str();
 	struct stat stat_buf;
-	
+
 	if (stat(chr_str, &stat_buf) == -1)
 	{
 		std::cerr<<"in getttttttttttttttt "<<rootPath<<std::endl;
@@ -206,7 +198,6 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 		cli.setGetFileFd(open(chr_str, O_RDONLY));
 		if (cli.getGetFileFd() < 0)
 		{
-			std::cerr<<"I WILL KILL YOU "<<chr_str<<std::endl;
 			cli.getRes().setStatusCode(NOT_FOUND);
 			cli.setState(ERROR);
 			return (-1);
@@ -228,6 +219,7 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			return (-1);
 		}
 		cli.getRes().setContentLength(stat_buf.st_size);
+		std::cerr<<"CONTENT LENGTHHTHTHHTHTHT "<<cli.getRes().getContentLength()<<std::endl;
 		cli.getRes().setHasFileBody(true);
 		cli.getRes().setStatusCode(OK);
 		cli.getRes().setContentType(rootPath);

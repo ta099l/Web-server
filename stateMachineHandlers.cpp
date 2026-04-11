@@ -100,25 +100,27 @@ void handleFileReading(client &cli,server &srv)
 	cli.setFileOffset(n);
 	if(cli.getRes().getContentLength()==cli.getFileOffset())
 	{
+		std::cerr<<cli.getRes().getContentLength()<<"is it = "<<cli.getFileOffset()<<std::endl;
 		cli.getRes().appendFileBody(readBuffer,n);
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
 		cli.setState(SENDING_RESPONSE);
 	}
-	else if(n>0)
+	else if(cli.getFileOffset()>0)
 	{
 		cli.getRes().appendFileBody(readBuffer,n);
 		cli.setState(SENDING_RESPONSE);
 	}
 	else if(n==0)
 	{
+		std::cerr<<"in ================"<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
 		cli.setState(SENDING_RESPONSE);
 	}
-	else
+	else if(n < 0)
 	{
 		close(cli.getGetFileFd());
 		cli.getRes().setStatusCode(500);
@@ -132,15 +134,15 @@ bool handleWrite(client &cli, server &serv)
 	{
 		generateErrorResponse(cli,serv);
 	}
-	if (!cli.getRes().getGeneratedResponseHeader()) {
+	if (!cli.getRes().getGeneratedResponseHeader())
+	{
+		std::cerr<<"CONTENT LENGTHHTHTHHTHTHT "<<cli.getRes().getContentLength()<<std::endl;
 		generateResponseHeader(cli, serv);
 	}
 	std::string &buffer = cli.getResponseBuffer();
 	if(!cli.getRes().getFileBody().empty())
 	{
 		buffer+=cli.getRes().getFileBody();
-		cli.getRes().setFileBody("");
-
 	}
 	if (!buffer.empty())
 	{
@@ -156,13 +158,17 @@ bool handleWrite(client &cli, server &serv)
 	if (cli.getBytesSent() >= buffer.size())
 	{
 		std::cerr<<cli.getResponseBuffer()<<std::endl;
+		std::cerr<<"BYTES SENTTTTTTTT  "<<cli.getBytesSent()<<std::endl;
 		cli.setResponseBuffer("");
 		cli.setBytesSent(0);
 		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
 		{
 			cli.setState(READINGFILE);
+			cli.getRes().setFileBody("");
 			return false;
 		}
+		std::cerr<<"IS FILE DONE "<<cli.isFileDone()<<std::endl;
+		std::cerr<<"BYTES SENTTTTTTTT  "<<cli.getBytesSent()<<std::endl;
 		return true;
 	}
 	return false;
