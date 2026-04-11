@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:38:32 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 15:11:47 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/11 19:37:22 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,11 @@ void HttpResponse::setContentLength(size_t contentLength) { this->contentLength 
 void HttpResponse::setMemoryBody(const std::string& memoryBody) { this->memoryBody = memoryBody; }
 void HttpResponse::setFileBody(const std::string& fileBody) { this->fileBody = fileBody; }
 void HttpResponse::addResHeader(const std::string& key, const std::string& value) { resHeaders[key] = value; }
-void HttpResponse::appendFileBody(const std::string &body,ssize_t n)
+void HttpResponse::appendFileBody(const char *body,ssize_t n)
 {
-	(void)n;
-	fileBody+=body;
-	// fileBody.append(body,n);
+	// (void)n;
+	// fileBody+=body;
+	fileBody.append(body,n);
 }
 void HttpResponse::setContentTypeString(const std::string& str)
 {

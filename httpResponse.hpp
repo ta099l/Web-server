@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/07 20:58:57 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/11 19:37:32 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ class HttpResponse
 		void setContentLength(size_t contentLength);
 		void setMemoryBody(const std::string& memoryBody);
 		void setFileBody(const std::string& fileBody);
-		void appendFileBody(const std::string &fileBody,ssize_t n);
+		void appendFileBody(const char *fileBody,ssize_t n);
 		void addResHeader(const std::string& key, const std::string& value);
 		void setContentType(const std::string& contentType);
 		void setGeneratedResponseHeader(bool val){generatedResponseHeader = val; }

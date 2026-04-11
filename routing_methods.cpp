@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing_methods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/11 18:00:18 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/11 19:38:56 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void generateAutoindexListing(client &cli, const std::string& uri, const std::st
 	closedir(dir);
 
 	std::string finalHtml = html.str();
-	cli.getRes().appendFileBody(finalHtml, finalHtml.size());
+	cli.getRes().appendFileBody(finalHtml.c_str(), finalHtml.size());
 	cli.getRes().setContentLength(finalHtml.size());
 }
 
