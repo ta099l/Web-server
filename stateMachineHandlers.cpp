@@ -97,13 +97,10 @@ void handleFileReading(client &cli,server &srv)
 	(void)srv;
 	char readBuffer[8192];
 	ssize_t n=read(cli.getGetFileFd(),readBuffer,sizeof(readBuffer));
-	std::cerr<<"here"<<n<<std::endl;
 	cli.setFileOffset(n);
-	std::cerr<<"here"<<cli.getFileOffset()<<std::endl;
 	if(cli.getRes().getContentLength()==cli.getFileOffset())
 	{
 		cli.getRes().appendFileBody(readBuffer,n);
-		std::cerr<<"=="<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
@@ -111,13 +108,11 @@ void handleFileReading(client &cli,server &srv)
 	}
 	else if(n>0)
 	{
-		std::cerr<<">"<<std::endl;
 		cli.getRes().appendFileBody(readBuffer,n);
 		cli.setState(SENDING_RESPONSE);
 	}
 	else if(n==0)
 	{
-		std::cerr<<"==0"<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
@@ -129,60 +124,20 @@ void handleFileReading(client &cli,server &srv)
 		cli.getRes().setStatusCode(500);
 		cli.setState(ERROR);
 	}
-	std::cerr<<cli.getRes().getFileBody()<<"weeeee"<<std::endl;
 }
-// bool handleWrite(client &cli, server &serv)
-// {
-// 	if (!cli.getRes().getGeneratedResponseHeader()) {
-// 		generateResponseHeader(cli, serv);
-// 		printf("%s\n",cli.getResponseBuffer().c_str());
-// 	}
-// 	if(cli.getState() == ERROR)
-// 	{
-// 		if(generateErrorResponse(cli,serv))
-// 			return false;
-// 	}
-// 	if (cli.getRes().getHasFileBody() && !cli.isFileDone())
-// 	{
-// 		cli.setState(READINGFILE);
-// 		if(cli.getResponseBuffer().empty())
-// 			return false;
-// 	}
-// 	const std::string& buffer = cli.getResponseBuffer();
-// 	size_t remaining = buffer.size() - cli.getBytesSent();
-// 	ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
-// 	if (sent < 0)
-// 	{
-// 		if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
-// 		return true;
-// 	}
-// 	cli.addBytesSent(sent);
-// 	if (cli.getBytesSent() >= buffer.size())
-// 	{
-// 		cli.setResponseBuffer("");
-// 		cli.setBytesSent(0);
-// 		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
-// 		{
-// 			cli.setState(READINGFILE);
-// 			return false;
-// 		}
-// 		return true;
-// 	}
-// 	return false;
-// }
+
 bool handleWrite(client &cli, server &serv)
 {
-	if (!cli.getRes().getGeneratedResponseHeader()) {
-		generateResponseHeader(cli, serv);
-	}
 	if(cli.getState() == ERROR)
 	{
 		generateErrorResponse(cli,serv);
 	}
+	if (!cli.getRes().getGeneratedResponseHeader()) {
+		generateResponseHeader(cli, serv);
+	}
 	std::string &buffer = cli.getResponseBuffer();
 	if(!cli.getRes().getFileBody().empty())
 	{
-		std::cerr<<cli.getRes().getFileBody();
 		buffer+=cli.getRes().getFileBody();
 		cli.getRes().setFileBody("");
 
@@ -191,8 +146,8 @@ bool handleWrite(client &cli, server &serv)
 	{
 		size_t remaining = buffer.size() - cli.getBytesSent();
 		ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
-		std::cerr<<cli.getResponseBuffer()<<std::endl;
-		if (sent < 0) {
+		if (sent < 0)
+		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
 			return true;
 		}
@@ -200,14 +155,12 @@ bool handleWrite(client &cli, server &serv)
 	}
 	if (cli.getBytesSent() >= buffer.size())
 	{
-		std::cerr<<cli.getBytesSent()<<std::endl;
 		std::cerr<<cli.getResponseBuffer()<<std::endl;
 		cli.setResponseBuffer("");
 		cli.setBytesSent(0);
 		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
 		{
 			cli.setState(READINGFILE);
-			// cli.getRes().setFileBody("");
 			return false;
 		}
 		return true;
@@ -226,89 +179,41 @@ void webserv::setEpoll(int epollFd, int clientFd,int flag)
 }
 void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 {
-	if(cli.getState() == READING && (events & EPOLLIN))
-	{
+    if(cli.getState() == READING && (events & EPOLLIN))
+    {
 		if(handleRead(cli, fd) == 0)
 		{
 			cli.setState(ROUTING);
 		}
-		return;
-	}
+        return;
+    }
+    if(cli.getState() == ROUTING)
+    {
+        handleRouting(cli, serv);
+		std::cerr<<"AFTER ROUTING "<<cli.getState()<<std::endl;
+        setEpoll(epoll_fd, cli.getFd(), 1);
+        return;
+    }
+    if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
+    {
+		std::cerr<<"IN UPLOADDDINGGGGG "<<cli.getState()<<std::endl;
+        handleUpload(cli, serv, cli.getState());
+        return;
+    }
+    if(cli.getState() == READINGFILE)
+    {
+    	handleFileReading(cli, serv);
+        return;
+    }
 
-	if(cli.getState() == ROUTING)
-	{
-		handleRouting(cli, serv);
-		setEpoll(epoll_fd, cli.getFd(), 1);
-		return;
-	}
-
-	if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
-	{
-		handleUpload(cli, serv, cli.getState());
-		return;
-	}
-
-	if(cli.getState() == READINGFILE)
-	{
-		handleFileReading(cli, serv);
-		return;
-	}
-
-	if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
-	{
+    if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
+    {
 		std::cout<<"about to send"<<std::endl;
-		if(handleWrite(cli, serv))
-		{
-			cli.setState(DONE);
-		}
-		return;
-	}
+		std::cerr<<"IN SENDING "<<cli.getState()<<std::endl;
+        if(handleWrite(cli, serv))
+        {
+            cli.setState(DONE);
+        }
+        return;
+    }
 }
-// void	webserv::state_machine(client &cli,server &serv, int fd, uint32_t events)
-// {
-// 	if(cli.getState()== READING && (events & EPOLLIN))
-// 	{
-// 		if(handleRead(cli,fd) == 1)
-// 		{
-// 			cli.setState(DONE);
-// 			return;
-// 		}
-// 	}
-// 	if(cli.getState() == ROUTING)
-// 	{
-// 		if(handleRouting(cli,serv) == 1)
-// 		{
-// 			setEpoll(epoll_fd,cli.getFd(),1);
-// 			return;
-// 		}
-// 	}
-// 	if(cli.getState() == UPLOADING || cli.getState() == OVERWRITE)
-// 	{
-// 		handleUpload(cli,serv,cli.getState());
-// 	}
-// 	if(cli.getState() == READINGFILE)
-// 	{
-// 		handleFileReading(cli,serv);
-// 	}
-// 	if(events & EPOLLOUT)
-// 	{
-
-// 		if(cli.getState()==SENDING_RESPONSE || cli.getState()==ERROR)
-// 		{
-// 			if(handleWrite(cli,serv))
-// 			{
-// 				cli.setState(DONE);
-// 			}
-// 		}
-// 	}
-// 	if(cli.getState() == DONE)
-// 		return;
-// 	// if(state == SENDING_RESPONSE && (events & EPOLLOUT))
-// 	// {
-// 	// 	if(handleWrite(cli,fd) == 1)
-// 	// 	{
-// 	// 		cli.setState(DONE);
-// 	// 		return;
-// 	// 	}
-// 	// }
-// }

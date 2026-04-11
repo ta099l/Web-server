@@ -1,8 +1,17 @@
 #include "webserv.hpp"
 #include "client.hpp"
-std::string buildErrorPath(const LocationConfig& loc, std::string path)
+std::string buildErrorPath(const server &serv,const LocationConfig& loc, std::string path)
 {
-	std::string root = loc.getRoot();
+	std::string root = serv.getRoot();
+	std::cerr<<"LOCATION ROOT in error"<<root<<std::endl;
+
+	const std::map<int, std::string>& pages = loc.getErrorPages();
+	for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+	{
+	    std::cerr << "Error code: " << it->first
+	              << " -> Page: " << it->second << std::endl;
+	}
+
 	if (!root.empty() && root[root.size() - 1] != '/')
 		root += '/';
 	if (!path.empty() && path[0] == '/')
@@ -51,16 +60,29 @@ bool generateErrorResponse(client &cli,server &serv)
 	const LocationConfig* loc = cli.getLocation();
 	bool genError = false;
 	const std::map<int, std::string>& errorPages = loc->getErrorPages();
-	int code = 0;
-	std::string reason;
+	int code = cli.getRes().getStatusCode();
+	std::cerr<<"CODDDEE "<<cli.getRes().getStatusCode()<<std::endl;
+
+	const std::map<int, std::string>& pages = loc->getErrorPages();
+	for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+	{
+	    std::cerr << "Error code: " << it->first
+	              << " -> Page: " << it->second << std::endl;
+	}
+
+	std::string reason = getReasonPhrase(code);
+	// std::cerr<<"ERROR PATH "<<path<<std::endl;
+
 	for (std::map<int, std::string>::const_iterator it = errorPages.begin();it != errorPages.end();it++)
 	{
-		if(cli.getRes().getStatusCode() == it->first)
+		if(code == it->first)
 		{
-			std::string path = buildErrorPath(*loc,it->second);
+			std::string path = buildErrorPath(serv,*loc,it->second);
+			std::cerr<<"ERROR PATH "<<path<<std::endl;
 			cli.setGetFileFd(open(path.c_str(), O_RDONLY));
 			if (cli.getGetFileFd() < 0)
 			{
+				std::cerr<<"ERROR PATHhhhhhhhhhhhhhhh "<<path<<std::endl;
 				cli.getRes().setHasMemoryBody(true);
 				genError = true;
 				break;
@@ -83,7 +105,7 @@ bool generateErrorResponse(client &cli,server &serv)
 				genError = true;
 				break;
 			}
-			cli.getRes().setFileSize(pathStat.st_size);
+			cli.getRes().setContentLength(pathStat.st_size);
 			cli.getRes().setHasFileBody(true);
 			cli.getRes().setVersion(cli.getReq().getVersion());
 			cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
@@ -95,6 +117,9 @@ bool generateErrorResponse(client &cli,server &serv)
 	if(genError)
 	{
 		std::string html =genHtml(code,reason);
+		cli.getRes().setVersion(cli.getReq().getVersion());
+		cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
+		cli.getRes().setContentTypeString("text/html");
 		cli.getRes().setContentLength(html.size());
 		cli.getRes().setFileBody(html);
 	}

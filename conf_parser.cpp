@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 16:34:42 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/10 20:43:32 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/11 16:58:13 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,13 @@ int	webserv::conf_pars(char *file, int flag)
 			{
 				server new_srv;
 				flag = save_info(inFile, new_srv, flag);
+				std::cout<<"server\n";
+				const std::map<int, std::string>& pages = new_srv.getErrorPages();
+				for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+				{
+					std::cerr << "Error code: " << it->first
+							<< " -> Page: " << it->second << std::endl;
+				}
 				servers.push_back(new_srv);
 			}
 			count++;
@@ -44,23 +51,15 @@ int	parse_listen(std::string s_line, std::string line, server& srv, int flag)
 {
 	flag = check_line(line);
 	size_t start = s_line.rfind(" ");
-	// if(start == std::string::npos)
-	// 	return (-1);
-	// std::cout<<start<<"\n";
 	int len = s_line.length() - start;
-	// std::cout<<len<<"\n";
 	std::string substr = s_line.substr(start + 1, len);
-	// std::cout<<substr<<"\n";
 	ListenConfig listen;
 	if(substr.find(":") != std::string::npos)
 	{
 		int pos = substr.find(":");
-		// std::cout<<"pos :"<<pos<<"\n";
 		listen.setHost(substr.substr(0 , pos));
-		// std::cout<<"host :"<<listen.getHost()<<"\n";
 		std::string port = substr.substr(pos + 1, substr.length() - pos);
 		listen.setPort(atoi(port.c_str()));
-		// std::cout<<"port :"<<listen.getPort()<<"\n";
 	}
 	else
 	{
@@ -68,13 +67,11 @@ int	parse_listen(std::string s_line, std::string line, server& srv, int flag)
 		{
 			listen.setHost(substr.substr(0 , substr.length()));
 			listen.setPort(0);
-			// std::cout<<"host :"<<listen.getHost()<<"\n";
 		}
 		else
 		{
 			std::string port = substr.substr(0 , substr.length());
 			listen.setPort(atoi(port.c_str()));
-			// std::cout<<"port :"<<listen.getPort()<<"\n";
 		}
 	}
 	srv.addListen(listen);
@@ -83,6 +80,7 @@ int	parse_listen(std::string s_line, std::string line, server& srv, int flag)
 
 int	store_location(std::string line,std::string s_line, server& srv, LocationConfig &loc, int flag)
 {
+	(void)srv;
 	flag = check_line(line);
 	if (flag == 0)
 		return (0);
@@ -133,14 +131,13 @@ int	store_location(std::string line,std::string s_line, server& srv, LocationCon
 			std::cerr << "Invalid error code in error_page\n";
 			exit(1);
 		}
-		srv.addErrorPage((int)code, tokens[2]);
+		loc.addErrorPage((int)code, tokens[2]);
 	}
 	else
 	{
 		std::cerr << "WHAT EVEN IS THIS CANT U WRITE A CONFIG FILE YOU IDIOT: " << line << "\n";
 		exit(1);
 	}
-
 	return (flag);
 }
 
@@ -166,6 +163,13 @@ int	parse_location(std::ifstream& inFile,std::string s_line, std::string line, s
 		flag = store_location(line, s_line, srv, loc, flag);
 	}
 	srv.addLocation(loc);
+	std::cout<<"LOCATIONNNNN "<<loc.getPath()<<"\n";
+	const std::map<int, std::string>& pages = loc.getErrorPages();
+	for (std::map<int, std::string>::const_iterator it = pages.begin();it != pages.end(); ++it)
+	{
+	    std::cerr <<"IN "<<loc.getPath()<< "Error code: " << it->first
+	              << " -> Page: " << it->second << std::endl;
+	}
 	return (flag);
 }
 

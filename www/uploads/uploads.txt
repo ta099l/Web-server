@@ -1,0 +1,7 @@
+--------------------------O2zX0rxj3gqdI7FqfGErIT
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+hello webserv
+
+--------------------------O2zX0rxj3gqdI7FqfGErIT--

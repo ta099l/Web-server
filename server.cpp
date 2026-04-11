@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/10 20:37:18 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/03/08 21:00:09 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "server.hpp"
 server::server() : root(""), index("index.html"), max_body_size(0),
- autoindex(false),  upload_enable(false), redirect("")
+ autoindex(false),  upload_enable(false)
 {
 }
 server::server(const server &obj)
@@ -175,7 +175,6 @@ LocationConfig::LocationConfig()
 	autoindex = false;
 	upload_enable = false;
 	max_body_size = 0;
-	redirect="";
 }
 
 // LocationConfig Getters
@@ -255,10 +254,7 @@ void LocationConfig::setIndex(const std::string& i)
 }
 void LocationConfig::setRedirect(const std::string& r)
 {
-	// std::cout<<"r"<<r<<std::endl;
 	redirect = r;
-	// std::cout<<"redirect"<<redirect<<std::endl;
-
 }
 void LocationConfig::setMaxBodySize(long long size)
 {

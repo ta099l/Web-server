@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/10 16:04:02 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:21:28 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,11 +292,9 @@ int	handleRead(client &cli,int fd)
 			}
 			else if(cli.getContentLength() > 0)
 			{
-					// std::cout << "----------------\n" << cli.getBuffer() << "\n-------- " << (cli.getBuffer().size() >= cli.getBodyStart() + cli.getContentLength()) << " --------\n";
 				if(cli.getBuffer().size() >= cli.getBodyStart() + cli.getContentLength())
 				{
 					cli.getReq().setBody(cli.getBuffer().substr(cli.getBodyStart(),cli.getContentLength()));
-					// std::cout << "----------------\n" << cli.getReq().getBody() << "\n-------- " << (cli.getBuffer().size() >= cli.getBodyStart() + cli.getContentLength()) << " --------\n";
 					cli.setRequestComplete(true);
 					cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart() + cli.getContentLength()));
 					cli.setState(ROUTING);

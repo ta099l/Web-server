@@ -63,13 +63,7 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 	return 0;
 }
 
-std::string getExtension(const std::string& path)
-{
-	size_t pos = path.find_last_of('.');
-	if (pos == std::string::npos)
-		return "";
-	return path.substr(pos);
-}
+
 int handleRouting(client &cli, server &srv)
 {
 	std::string uri = cli.getReq().getUri();
@@ -82,16 +76,7 @@ int handleRouting(client &cli, server &srv)
 		{
 			return 1;
 		}
-		std::string filePath = setupRootPath(cli, srv, *matchedLocation, uri);
-		std::string ext = getExtension(filePath);
-		const std::map<std::string, CGIConfig>& cgiMap = matchedLocation->getCgi();
-
-		if (cgiMap.find(ext) != cgiMap.end())
-		{
-			const CGIConfig& cgi = cgiMap.at(ext);
-			executeCGI(cli, cgi, filePath);
-			return 1;
-		}
+		//if(cgi)
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);

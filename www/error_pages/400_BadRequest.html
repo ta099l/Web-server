@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>400 - BAD REQUEST</title>
+    <style>
+        body { 
+            background: radial-gradient(circle, #4a0000 0%, #000 80%); 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-family: 'Arial Black', sans-serif; 
+            overflow: hidden; 
+        }
+        .center-box { text-align: center; color: #ff3333; }
+        h1 { 
+            font-size: 15rem; 
+            margin: 0; 
+            text-shadow: 0 0 30px #ff0000; 
+            animation: deform 0.15s infinite; 
+            letter-spacing: 5px; 
+            color: #ff0000;
+        }
+        h2 { font-size: 2.5rem; color: #fff; text-shadow: 0 0 10px #ff0000; text-transform: uppercase; margin-top: -10px; }
+        @keyframes deform {
+            0% { transform: skewX(10deg) skewY(-5deg) translate(2px, 1px); }
+            50% { transform: skewX(-10deg) skewY(5deg) translate(-2px, -2px); }
+            100% { transform: skewX(8deg) skewY(-4deg) translate(1px, 2px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="center-box">
+        <h1>400</h1>
+        <h2>BAD REQUEST</h2>
+    </div>
+</body>
+</html>
