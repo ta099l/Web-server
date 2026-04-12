@@ -83,9 +83,9 @@ void handleUpload(client &cli,server &serv,const ClientState &state)
 	write(cli.getPostFileFd(),cli.getReq().getBody().c_str(),cli.getContentLength());
 	close(cli.getPostFileFd());
 	if(state == UPLOADING)
-		cli.getRes().setStatusCode(200);
+		cli.getRes().setStatusCode(CREATED);
 	else if(state == OVERWRITE)
-		cli.getRes().setStatusCode(201);
+		cli.getRes().setStatusCode(200);
 	generatePostSuccessPage(cli);
 	cli.getRes().setContentTypeString("text/html");
 	cli.setState(SENDING_RESPONSE);
@@ -97,20 +97,15 @@ void handleFileReading(client &cli,server &srv)
 	(void)srv;
 	char readBuffer[8192];
 	ssize_t n=read(cli.getGetFileFd(),readBuffer,sizeof(readBuffer));
-	std::cerr<<"BYTES READ ============="<<n<<std::endl;
 	cli.setFileOffset(n);
-
 	if(n>0)
 	{
-		// std::cerr<<"REAAD BUFFER SIZZZEEEEEEE "<<readBuffer.size()<<std::endl;
 		cli.setFileOffset(n);
 		cli.getRes().appendFileBody(readBuffer,n);
-		std::cerr<<"FILE BODY SIZZZEEEEEEE "<<cli.getRes().getFileBody().size()<<std::endl;
 		cli.setState(SENDING_RESPONSE);
 	}
 	else if(n==0)
 	{
-		std::cerr<<"in ================"<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
@@ -124,110 +119,47 @@ void handleFileReading(client &cli,server &srv)
 	}
 }
 
-// bool handleWrite(client &cli, server &serv)
-// {
-// 	if(cli.getState() == ERROR)
-// 	{
-// 		generateErrorResponse(cli,serv);
-// 	}
-// 	if (!cli.getRes().getGeneratedResponseHeader())
-// 	{
-// 		std::cerr<<"CONTENT LENGTHHTHTHHTHTHT "<<cli.getRes().getContentLength()<<std::endl;
-// 		generateResponseHeader(cli, serv);
-// 	}
-// 	std::string &buffer = cli.getResponseBuffer();
-// 	std::cerr<<"FILE BODY SIZZZEEEEEEE in sending "<<cli.getRes().getFileBody().size()<<std::endl;
-
-// 	if(!cli.getRes().getFileBody().empty())
-// 	{
-// 		buffer+=cli.getRes().getFileBody();
-// 	}
-// 	if (!buffer.empty())
-// 	{
-// 		size_t remaining = buffer.size() - cli.getBytesSent();
-// 		ssize_t sent = send(cli.getFd(), buffer.c_str() + cli.getBytesSent(), remaining, 0);
-// 		std::cerr<<"SENT: "<<sent<<" BUFFER_SIZE: "<<buffer.size()<<"\n";
-// 		if (sent < 0)
-// 		{
-// 			if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
-// 			return true;
-// 		}
-// 		cli.addBytesSent(sent);
-// 	}
-// 	if (cli.getBytesSent() >= buffer.size() && buffer.size() == 0 && cli.getRes().getFileBody().empty())
-// 	{
-// 	    // Nothing to send and nothing queued — truly done
-// 	    return true;
-// 	}
-// 	if (cli.getBytesSent() >= buffer.size())
-// 	{
-// 		std::cerr<<cli.getResponseBuffer()<<std::endl;
-// 		std::cerr<<"BYTES SENTTTTTTTT  "<<cli.getBytesSent()<<std::endl;
-// 		cli.setResponseBuffer("");
-// 		cli.setBytesSent(0);
-// 		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
-// 		{
-// 			cli.setState(READINGFILE);
-// 			cli.getRes().setFileBody("");
-// 			return false;
-// 		}
-// 		std::cerr<<"IS FILE DONE "<<cli.isFileDone()<<std::endl;
-// 		std::cerr<<"BYTES SENTTTTTTTT  "<<cli.getBytesSent()<<std::endl;
-// 		return true;
-// 	}
-// 	return false;
-// }
 bool handleWrite(client &cli, server &serv)
 {
-    if (cli.getState() == ERROR)
-        generateErrorResponse(cli, serv);
+	if (cli.getState() == ERROR)
+		generateErrorResponse(cli, serv);
+	std::string &buffer = cli.getResponseBuffer();
+	std::cerr<<"RESPONSE BUFFER "<< cli.getResponseBuffer();
+	if (buffer.empty())
+	{
+		if (!cli.getRes().getGeneratedResponseHeader())
+			generateResponseHeader(cli, serv);
+		std::cerr<<"RESPONSE BUFFER "<< cli.getResponseBuffer();
 
-    // Step 1: build the buffer ONLY if it's empty (don't re-append on partial sends)
-    std::string &buffer = cli.getResponseBuffer();
-
-    if (buffer.empty())
-    {
-        if (!cli.getRes().getGeneratedResponseHeader())
-            generateResponseHeader(cli, serv);
-
-        // Only append file body if header is already sent
-        // (header + first chunk go together, subsequent chunks are body only)
-        if (!cli.getRes().getFileBody().empty())
-        {
-            buffer += cli.getRes().getFileBody();
-            cli.getRes().setFileBody(""); // clear IMMEDIATELY after staging
-        }
-    }
-
-    // Step 2: send whatever is in the buffer
-    if (!buffer.empty())
-    {
-        size_t remaining = buffer.size() - cli.getBytesSent();
-        ssize_t sent = send(cli.getFd(),
-                            buffer.c_str() + cli.getBytesSent(),
-                            remaining, 0);
-        if (sent < 0)
-        {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
-            return true; // error, close connection
-        }
-        cli.addBytesSent(sent);
-    }
-
-    // Step 3: check if buffer is fully sent
-    if (cli.getBytesSent() >= buffer.size())
-    {
-        cli.setResponseBuffer("");
-        cli.setBytesSent(0);
-
-        if (cli.getRes().getHasFileBody() && !cli.isFileDone())
-        {
-            cli.setState(READINGFILE); // go read next chunk
-            return false;
-        }
-        return true; // truly done
-    }
-    return false;
+		if (!cli.getRes().getFileBody().empty())
+		{
+			buffer += cli.getRes().getFileBody();
+			cli.getRes().setFileBody("");
+		}
+	}
+	if (!buffer.empty())
+	{
+		size_t remaining = buffer.size() - cli.getBytesSent();
+		ssize_t sent = send(cli.getFd(),buffer.c_str() + cli.getBytesSent(),remaining, 0);
+		if (sent < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
+			return true;
+		}
+		cli.addBytesSent(sent);
+	}
+	if (cli.getBytesSent() >= buffer.size())
+	{
+		cli.setResponseBuffer("");
+		cli.setBytesSent(0);
+		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
+		{
+			cli.setState(READINGFILE);
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 void webserv::setEpoll(int epollFd, int clientFd,int flag)
 {
@@ -241,41 +173,36 @@ void webserv::setEpoll(int epollFd, int clientFd,int flag)
 }
 void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 {
-    if(cli.getState() == READING && (events & EPOLLIN))
-    {
+	if(cli.getState() == READING && (events & EPOLLIN))
+	{
 		if(handleRead(cli, fd) == 0)
 		{
 			cli.setState(ROUTING);
 		}
-        return;
-    }
-    if(cli.getState() == ROUTING)
-    {
-        handleRouting(cli, serv);
-		std::cerr<<"AFTER ROUTING "<<cli.getState()<<std::endl;
-        setEpoll(epoll_fd, cli.getFd(), 1);
-        return;
-    }
-    if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
-    {
-		std::cerr<<"IN UPLOADDDINGGGGG "<<cli.getState()<<std::endl;
-        handleUpload(cli, serv, cli.getState());
-        return;
-    }
-    if(cli.getState() == READINGFILE)
-    {
-    	handleFileReading(cli, serv);
-        return;
-    }
-
-    if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
-    {
-		std::cout<<"about to send"<<std::endl;
-		std::cerr<<"IN SENDING "<<cli.getState()<<std::endl;
-        if(handleWrite(cli, serv))
-        {
-            cli.setState(DONE);
-        }
-        return;
-    }
+		return;
+	}
+	if(cli.getState() == ROUTING)
+	{
+		handleRouting(cli, serv);
+		setEpoll(epoll_fd, cli.getFd(), 1);
+		return;
+	}
+	if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)
+	{
+		handleUpload(cli, serv, cli.getState());
+		return;
+	}
+	if(cli.getState() == READINGFILE)
+	{
+		handleFileReading(cli, serv);
+		return;
+	}
+	if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
+	{
+		if(handleWrite(cli, serv))
+		{
+			cli.setState(DONE);
+		}
+		return;
+	}
 }

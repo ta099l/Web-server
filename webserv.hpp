@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bushra <bushra@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 17:57:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 13:36:39 by bushra           ###   ########.fr       */
+/*   Updated: 2026/04/12 20:30:59 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class client;
 enum Codes
 {
 	OK = 200,
+	CREATED = 201,
 	BAD_REQUEST = 400,
 	FORBIDDEN = 403,
 	NOT_FOUND = 404,

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routing_methods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/11 19:38:56 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/12 18:08:34 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ std::string setupRootPath(client &cli, server &srv, const LocationConfig& locCon
 	(void)cli;
 	(void)srv;
 	std::string Path = locConfig.getPath();
-	std::cerr<<"THE MATCHED LOCATION "<<locConfig.getPath()<<std::endl;
 	if(uri.find(Path) == 0)
 		uri.erase(0, Path.length());
 	std::string root = locConfig.getRoot();
@@ -110,7 +109,6 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 
 	if (stat(chr_str, &stat_buf) == -1)
 	{
-		std::cerr<<"in getttttttttttttttt "<<rootPath<<std::endl;
 		cli.getRes().setStatusCode(NOT_FOUND);
 		cli.setState(ERROR);
 		return (-1);
@@ -219,7 +217,6 @@ int get_method(client &cli, server &srv, const LocationConfig& locConfig, std::s
 			return (-1);
 		}
 		cli.getRes().setContentLength(stat_buf.st_size);
-		std::cerr<<"CONTENT LENGTHHTHTHHTHTHT "<<cli.getRes().getContentLength()<<std::endl;
 		cli.getRes().setHasFileBody(true);
 		cli.getRes().setStatusCode(OK);
 		cli.getRes().setContentType(rootPath);

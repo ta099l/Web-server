@@ -1,1 +1,1 @@
-hello webserv
+Hello from curl
