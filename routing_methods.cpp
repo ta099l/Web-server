@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/22 13:59:45 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/12 18:08:34 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/13 13:21:10 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,27 +271,21 @@ int post_method(client &cli, server &srv, const LocationConfig& locConfig, std::
 	struct stat st;
 	if(!locConfig.getUploadEnable()) //and not CGI
 	{
-		std::cerr<<"IN POST METHOD "<<cli.getState()<<std::endl;
 		cli.getRes().setStatusCode(FORBIDDEN);
 		cli.setState(ERROR);
-		std::cerr<<"IN POST METHOD "<<cli.getState()<<std::endl;
 		return (-1);
 	}
 	if (locConfig.getUploadStore().empty())
 	{
-		std::cerr<<"in empty"<<std::endl;
 		cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
 		cli.setState(ERROR);
 		return (-1);
 	}
 	if (locConfig.getUploadStore() != "")
 	{
-		std::cerr<<"not empty"<<std::endl;
-		std::cerr<<locConfig.getUploadStore()<<std::endl;
 		std::string newUploadStore = setupUploadStore(locConfig);
 		if(stat(newUploadStore.c_str(),&st) == -1||!S_ISDIR(st.st_mode))
 		{
-			std::cerr<<"not is dir"<<std::endl;
 
 			cli.getRes().setStatusCode(INTERNAL_SERVER_ERROR);
 			cli.setState(ERROR);

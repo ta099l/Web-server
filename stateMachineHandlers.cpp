@@ -124,13 +124,10 @@ bool handleWrite(client &cli, server &serv)
 	if (cli.getState() == ERROR)
 		generateErrorResponse(cli, serv);
 	std::string &buffer = cli.getResponseBuffer();
-	std::cerr<<"RESPONSE BUFFER "<< cli.getResponseBuffer();
 	if (buffer.empty())
 	{
 		if (!cli.getRes().getGeneratedResponseHeader())
 			generateResponseHeader(cli, serv);
-		std::cerr<<"RESPONSE BUFFER "<< cli.getResponseBuffer();
-
 		if (!cli.getRes().getFileBody().empty())
 		{
 			buffer += cli.getRes().getFileBody();
