@@ -182,7 +182,6 @@ int  checkHeader(client &cli)
 			return 1;
 		if(cli.getContentLength() > 0 || cli.isChunkedEncode())
 			cli.setBodyStart(pos+4);
-		cli.setBuffer(cli.getBuffer().erase())
 	}
 	return 0;
 }
@@ -199,14 +198,17 @@ bool isHexString(const std::string& s)
 
 // ssize_t convertHexa(client &cli)
 // {
+// 	std::cerr<<"the buffer:\n"<<cli.getBuffer()<<std::endl;
+// 	std::cerr<<cli.getBufr
 //     size_t pos = cli.getBuffer().find("\r\n",cli.getBodyStart());
 //     if (pos == std::string::npos)
 // 	{
+// 		std::cerr<<"ahahhahhahhhah\n";
 //         return -2;
 
 // 	}
 
-// 	std::cerr<<cli.getBuffer()[pos]<<std::endl;
+// 	std::cerr<<cli.getBuffer()[pos+]<<std::endl;
 //     std::string hexLine = cli.getBuffer().substr(cli.getBodyStart(),pos);
 // 	// std::cerr<<cli.getBuffer()[cli.getBodyStart()]<<std::endl;
 // 	// size_t semi = hexLine.find(';');
@@ -278,10 +280,11 @@ int readChunks(client &cli)
 			}
 			if(chunkSize == 0)
 			{
+				std::cerr<<"CHUNK SIZE"<<chunkSize<<std::endl;
 				cli.setChunkState(DONECHUNKING);
 				return 1;
 			}
-			std::cerr<<chunkSize<<std::endl;
+			std::cerr<<"CHUNK SIZE"<<chunkSize<<std::endl;
 			cli.setChunkSize(chunkSize);
 			cli.setChunkState(READDATA);
 		}
@@ -298,14 +301,21 @@ int readChunks(client &cli)
 			}
 			std::cerr<<"horaaayyyy"<<std::endl;
 			cli.getReq().appendBody(cli.getBuffer().substr(0,cli.getChunkSize()));
+			std::cerr<<"BODY\n"<<cli.getReq().getBody()<<std::endl;
+			std::cerr<<"horaaayyyy"<<std::endl;
+			
 			cli.setBuffer(cli.getBuffer().erase(0,needed));
+			std::cerr<<"horaaayyyy"<<std::endl;
+			std::cerr<<"max size "<<(size_t)cli.getServer()->getMaxBodySize()<<std::endl;
 			if(cli.getReq().getBody().size() > (size_t)cli.getServer()->getMaxBodySize())
 			{
 				std::cerr<<"RANEEEMEMEMMEMEMMEMEMME\n";
 				cli.getRes().setStatusCode(403);
 				return -1;
 			}
+			std::cerr<<"horaaayhhhhhhyy"<<std::endl;
 			cli.setChunkState(READCHUNK);
+			std::cerr<<"AFTER APPENDING:"<<cli.getReq().getBody()<<std::endl;
 		}
 	}
 	return 0;
@@ -333,6 +343,7 @@ int	handleRead(client &cli,int fd)
 		{
 			if(cli.isChunkedEncode())
 			{
+				std::cerr<<"rannennenenennennen\n";
 				int checker = readChunks(cli);
 				if(checker == -1)
 				{

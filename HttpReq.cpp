@@ -33,7 +33,7 @@ std::string HttpReq::setVersion(const std::string &version) { this->version = ve
 std::string HttpReq::setBody(const std::string &body) { this->body = body; return this->body; }
 void HttpReq::appendBody(std::string str)
 {
-	body.append(str);
+	body+=str;
 }
 
 const std::map<std::string, std::string>& HttpReq::getHeaders() const

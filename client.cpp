@@ -105,6 +105,7 @@ client::client(const client &other) :
 client& client::operator=(const client &other) {
 	if (this != &other) {
 		fd = other.fd;
+		_server = other._server;
 		state = other.state;
 		// buffer = other.buffer;
 		responseBuffer = other.responseBuffer;

@@ -80,7 +80,16 @@ void handleUpload(client &cli,server &serv,const ClientState &state)
 		cli.getRes().setStatusCode(500);
 		return ;
 	}
-	write(cli.getPostFileFd(),cli.getReq().getBody().c_str(),cli.getContentLength());
+	if(cli.isChunkedEncode())
+	{
+		write(cli.getPostFileFd(),
+      cli.getReq().getBody().c_str(),
+      cli.getReq().getBody().size());
+	}
+	else
+	{
+		write(cli.getPostFileFd(),cli.getReq().getBody().c_str(),cli.getContentLength());
+	}
 	close(cli.getPostFileFd());
 	if(state == UPLOADING)
 		cli.getRes().setStatusCode(CREATED);
