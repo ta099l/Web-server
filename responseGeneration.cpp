@@ -15,6 +15,7 @@ std::string getReasonPhrase(int code)
 	switch (code)
 	{
 		case 200: return "OK";
+		case 204: return "No Content";
 		case 201: return "CREATED";
 		case 400: return "Bad Request";
 		case 403: return "Forbidden";

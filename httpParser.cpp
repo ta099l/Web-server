@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/13 19:12:56 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/14 18:00:53 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,75 +196,29 @@ bool isHexString(const std::string& s)
 	return true;
 }
 
-// ssize_t convertHexa(client &cli)
-// {
-// 	std::cerr<<"the buffer:\n"<<cli.getBuffer()<<std::endl;
-// 	std::cerr<<cli.getBufr
-//     size_t pos = cli.getBuffer().find("\r\n",cli.getBodyStart());
-//     if (pos == std::string::npos)
-// 	{
-// 		std::cerr<<"ahahhahhahhhah\n";
-//         return -2;
-
-// 	}
-
-// 	std::cerr<<cli.getBuffer()[pos+]<<std::endl;
-//     std::string hexLine = cli.getBuffer().substr(cli.getBodyStart(),pos);
-// 	// std::cerr<<cli.getBuffer()[cli.getBodyStart()]<<std::endl;
-// 	// size_t semi = hexLine.find(';');
-// 	// if (semi != std::string::npos)
-// 	// {
-// 	// 	std::cerr<<"in semiiiiiiiiiiiiiiiiii\n";
-// 	//     hexLine = hexLine.substr(0, semi);
-// 	// }
-// 	if (hexLine.empty() || !isHexString(hexLine))
-// 	{
-// 		std::cerr << "feeelings to : "<< hexLine <<"hehe"<< std::endl;
-// 		std::cerr << "losseeeerrr\n";
-//     	return -1;
-// 	}
-//     size_t size = std::strtol(hexLine.c_str(), NULL, 16);
-//     cli.setBuffer(cli.getBuffer().erase(0, pos + 2));
-//     return size;
-// }
 ssize_t convertHexa(client &cli)
 {
     std::string buffer = cli.getBuffer();
     size_t start = cli.getBodyStart();
-
-    // Find CRLF starting FROM bodyStart
     size_t pos = buffer.find("\r\n", start);
     if (pos == std::string::npos)
-        return -2; // need more data
-
-    // Extract ONLY the hex line
+        return -2;
     std::string hexLine = buffer.substr(start, pos - start);
-
-    // Handle optional chunk extensions (e.g., "5;ext=value")
     size_t semi = hexLine.find(';');
     if (semi != std::string::npos)
         hexLine = hexLine.substr(0, semi);
-
     if (hexLine.empty() || !isHexString(hexLine))
     {
-        std::cerr << "Invalid hex: " << hexLine << std::endl;
         return -1;
     }
-
     size_t size = std::strtol(hexLine.c_str(), NULL, 16);
-
-    // Move buffer forward ONLY past the chunk size line
     cli.setBuffer(cli.getBuffer().erase(0, pos + 2));
-
-    // IMPORTANT: reset bodyStart since buffer shifted
     cli.setBodyStart(0);
-
     return size;
 }
 int readChunks(client &cli)
 {
 	ssize_t chunkSize;
-	// size_t pos;
 	while(true)
 	{
 
@@ -275,16 +229,13 @@ int readChunks(client &cli)
 				return 0;
 			if(chunkSize < 0)
 			{
-				std::cerr<<"ghuighuishguifhguifhg\n";
 				return -1;
 			}
 			if(chunkSize == 0)
 			{
-				std::cerr<<"CHUNK SIZE"<<chunkSize<<std::endl;
 				cli.setChunkState(DONECHUNKING);
 				return 1;
 			}
-			std::cerr<<"CHUNK SIZE"<<chunkSize<<std::endl;
 			cli.setChunkSize(chunkSize);
 			cli.setChunkState(READDATA);
 		}
@@ -293,29 +244,18 @@ int readChunks(client &cli)
 			size_t needed=cli.getChunkSize()+2;
 			if(cli.getBuffer().size()<needed)
 				return 0;
-			std::cerr<<cli.getBuffer()[cli.getBodyStart()+cli.getChunkSize()]<<std::endl;
 			if (cli.getBuffer()[cli.getBodyStart()+cli.getChunkSize()] != '\r'||cli.getBuffer()[cli.getBodyStart()+cli.getChunkSize() + 1] != '\n')
 			{
-				std::cerr<<"FARAHAAHHHHHAHAHH\n";
 				return -1;
 			}
-			std::cerr<<"horaaayyyy"<<std::endl;
 			cli.getReq().appendBody(cli.getBuffer().substr(0,cli.getChunkSize()));
-			std::cerr<<"BODY\n"<<cli.getReq().getBody()<<std::endl;
-			std::cerr<<"horaaayyyy"<<std::endl;
-			
 			cli.setBuffer(cli.getBuffer().erase(0,needed));
-			std::cerr<<"horaaayyyy"<<std::endl;
-			std::cerr<<"max size "<<(size_t)cli.getServer()->getMaxBodySize()<<std::endl;
 			if(cli.getReq().getBody().size() > (size_t)cli.getServer()->getMaxBodySize())
 			{
-				std::cerr<<"RANEEEMEMEMMEMEMMEMEMME\n";
 				cli.getRes().setStatusCode(403);
 				return -1;
 			}
-			std::cerr<<"horaaayhhhhhhyy"<<std::endl;
 			cli.setChunkState(READCHUNK);
-			std::cerr<<"AFTER APPENDING:"<<cli.getReq().getBody()<<std::endl;
 		}
 	}
 	return 0;
@@ -343,11 +283,9 @@ int	handleRead(client &cli,int fd)
 		{
 			if(cli.isChunkedEncode())
 			{
-				std::cerr<<"rannennenenennennen\n";
 				int checker = readChunks(cli);
 				if(checker == -1)
 				{
-					std::cerr<<"heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeh\n";
 					if(cli.getCode() == 0)
 						cli.getRes().setStatusCode(400);
 					cli.setState(ERROR);
