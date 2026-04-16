@@ -6,7 +6,7 @@
 /*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/14 18:00:53 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/16 16:21:40 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,15 +73,61 @@ int checkReqLine(client &cli)
 
 
 }
+#include <string>
+#include <cstdlib> // for strtol
+
+std::string urlDecode(const std::string& src)
+{
+    std::string result;
+    result.reserve(src.length());
+
+    for (size_t i = 0; i < src.length(); ++i)
+    {
+        if (src[i] == '%' && i + 2 < src.length())
+        {
+            // Check if next two chars are hex digits
+            char hex[3];
+            hex[0] = src[i + 1];
+            hex[1] = src[i + 2];
+            hex[2] = '\0';
+
+            char* endptr;
+            long value = std::strtol(hex, &endptr, 16);
+
+            if (*endptr == '\0') // valid hex
+            {
+                result += static_cast<char>(value);
+                i += 2; // skip next 2 chars
+            }
+            else
+            {
+                // invalid encoding, keep as is
+                result += src[i];
+            }
+        }
+        else if (src[i] == '+')
+        {
+            // optional: decode '+' as space
+            result += ' ';
+        }
+        else
+        {
+            result += src[i];
+        }
+    }
+
+    return result;
+}
 int checkUri(std::string uri)
 {
+	std::cerr<<"URIIIIIIIIIII "<<uri<<std::endl;
 	if(uri.find("../") != std::string::npos)
 		return -1;
 	return 1;
 }
 int parseReqLine(client &cli,std::string &reqline)
 {
-	// printf("%s\n",reqline.c_str());
+	 printf("%s\n",reqline.c_str());
 	std::string trimmedLine=ltrim(reqline);
 	size_t pos1=trimmedLine.find(" ");
 	if(pos1==std::string::npos)
@@ -90,9 +136,14 @@ int parseReqLine(client &cli,std::string &reqline)
 	if(pos2 == std::string::npos)
 		return 1;
 	cli.getReq().setMethod(trim(trimmedLine.substr(0,pos1)));
+	std::cerr<<"URIIIIIIIIIII "<<cli.getReq().getUri()<<std::endl;
 	cli.getReq().setUri(trim(trimmedLine.substr(pos1+1,pos2-pos1-1)));
+	std::cerr<<"URIIIIIIIIIII 2 "<<cli.getReq().getUri()<<std::endl;
+	std::string decoded = urlDecode(cli.getReq().getUri());
+	cli.getReq().setUri(decoded);
 	if(checkUri(cli.getReq().getUri()) == -1)
 	{
+		std::cerr<<"TRAVERSAALLALALALA\n";
 		cli.getRes().setStatusCode(403);
 		return 1;
 	}
@@ -274,9 +325,11 @@ int	handleRead(client &cli,int fd)
 		{
 			if(checkHeader(cli) == 1)
 			{
-				if(cli.getCode() == 0)
+				std::cerr<<cli.getRes().getStatusCode()<<std::endl;
+				if(cli.getRes().getStatusCode() == 0)
 					cli.getRes().setStatusCode(400);
-				return 0;
+				cli.setState(ERROR);
+				return 1;
 			}
 		}
 		if(cli.isHeaderComplete())
@@ -289,7 +342,7 @@ int	handleRead(client &cli,int fd)
 					if(cli.getCode() == 0)
 						cli.getRes().setStatusCode(400);
 					cli.setState(ERROR);
-					return 0;
+					return 1;
 				}
 				if(checker == 1)
 				{

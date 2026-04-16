@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/09 15:46:25 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/16 18:34:11 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,8 +180,11 @@ int webserv::run()
                 if (it != client_fds.end())
                 {
                     state_machine(it->second, *sit, fd, events[i].events);
-                    if (it->second.getState() == ROUTING)
+                    if (it->second.getState() == ROUTING || it->second.getState() == ERROR)
+                    {
+                        std::cerr<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
                         r_cli.push_back(fd);
+                    }
 
                     if (it->second.getState() == DONE)
                         close_client_connection(fd);

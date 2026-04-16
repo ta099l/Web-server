@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 15:05:44 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/11 19:37:32 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/16 16:41:26 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,5 @@ class HttpResponse
 		void setContentType(const std::string& contentType);
 		void setGeneratedResponseHeader(bool val){generatedResponseHeader = val; }
 	void setContentTypeString(const std::string& str);
-
-		//std::string generateResponse(client &cli, server &srv);
-		//functions
-		//void buildErrorResponse(Codes code,LocationConfig *loc);
 };
 #endif
