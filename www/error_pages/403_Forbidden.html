@@ -1,19 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>403 - FORBIDDEN</title>
     <style>
-        body { background: #000; color: #8b0000; font-family: 'Courier New'; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .eye { width: 100px; height: 50px; background: #eee; border-radius: 50%; position: relative; margin-bottom: 20px; box-shadow: 0 0 20px red; }
-        .pupil { width: 30px; height: 30px; background: #000; border-radius: 50%; position: absolute; left: 35px; top: 10px; animation: watch 3s infinite; }
-        @keyframes watch { 0%, 100% { left: 20px; } 50% { left: 50px; } }
+        :root {
+            --burgundy: #4a0404;
+            --blood: #8b0000;
+            --black: #050505;
+            --iron: #2a2a2a;
+            --iron-light: #555;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--blood);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* The Big Bloodshot Eye */
+        .eye-socket {
+            position: relative;
+            width: 300px;
+            height: 180px;
+            background: #ddd;
+            border-radius: 50% 10%;
+            transform: rotate(45deg); 
+            overflow: hidden;
+            border: 8px solid var(--burgundy);
+            box-shadow: 0 0 50px var(--blood), inset 0 0 40px #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: blink 5s infinite;
+        }
+
+        .veins {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% 50%, transparent 40%, rgba(139, 0, 0, 0.3) 100%),
+                repeating-conic-gradient(from 0deg, transparent 0deg 20deg, rgba(255, 0, 0, 0.1) 21deg) 70% 70%;
+        }
+
+        .pupil {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #000 30%, #1a0000 100%);
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 20px #000;
+            animation: track 4s infinite ease-in-out;
+        }
+
+        /* Realistic Interlocking Chains */
+        .chain-container {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .chain-group {
+            position: absolute;
+            top: -100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: swing 3s infinite ease-in-out;
+            transform-origin: top center;
+        }
+
+        .link {
+            width: 30px;
+            height: 50px;
+            border: 8px solid var(--iron);
+            border-radius: 15px;
+            margin-bottom: -15px; /* Overlap for interlocking look */
+            position: relative;
+            background: transparent;
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.1), 3px 3px 10px #000;
+        }
+
+        /* Creates the 3D interlocking illusion */
+        .link:nth-child(even) {
+            width: 15px;
+            border-left-color: var(--iron-light);
+            border-right-color: #111;
+            z-index: 2;
+        }
+
+        .chain-1 { left: 15%; animation-delay: 0.1s; }
+        .chain-2 { left: 50%; animation-delay: 0.6s; }
+        .chain-3 { left: 80%; animation-delay: 0.3s; }
+
+        /* Typography */
+        .content {
+            z-index: 30;
+            text-align: center;
+            margin-top: 40px;
+            text-shadow: 0 0 10px #000;
+        }
+
+        h1 {
+            font-size: 5rem;
+            margin: 10px 0;
+            letter-spacing: 15px;
+            animation: shake 0.2s infinite alternate;
+        }
+
+        p {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+
+        /* Animations */
+        @keyframes track {
+            0%, 100% { transform: translate(-40px, -20px); }
+            50% { transform: translate(40px, 20px); }
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { height: 180px; }
+            95% { height: 5px; }
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        @keyframes shake {
+            from { transform: translateX(-2px); }
+            to { transform: translateX(2px); }
+        }
+
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <div class="eye"><div class="pupil"></div></div>
-        <h1>403</h1>
-        <p>I SEE YOU. YOU DON'T BELONG HERE.</p>
+
+    <div class="chain-container">
+        <div class="chain-group chain-1">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group chain-2">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group chain-3">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
     </div>
+
+    <div class="eye-socket">
+        <div class="veins"></div>
+        <div class="pupil"></div>
+    </div>
+
+    <div class="content">
+        <h1>403</h1>
+        <p>ACCESS DENIED.</p>
+        <p style="color: var(--blood);">I'VE SEEN ENOUGH OF YOU.</p>
+    </div>
+
 </body>
 </html>

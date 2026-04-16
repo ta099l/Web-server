@@ -1,17 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>505 - VERSION NOT SUPPORTED</title>
     <style>
-        body { background: #000; color: #3d3d3d; font-family: 'Old English Text MT', serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        h1 { color: #5c4033; }
+        :root {
+            --burgundy: #2e0101;
+            --blood: #8b0000;
+            --warning: #ff3300;
+            --black: #050505;
+            --metal: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--black);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* The "Vault" Background */
+        .vault-door {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #111 0%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1;
+        }
+
+        /* Industrial Sliding Bars instead of chains */
+        .security-bar {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to bottom, #222, #111, #222);
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #000;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+            box-shadow: 0 0 30px rgba(0,0,0,1);
+            position: relative;
+        }
+
+        .bar-label {
+            color: var(--blood);
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            font-weight: bold;
+            animation: pulse-red 2s infinite;
+        }
+
+        /* Static/Glitch Overlay */
+        .static-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            opacity: 0.2;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* THE 505 - THERMAL SENSOR LOOK */
+        .content {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 14rem;
+            margin: 0;
+            color: #000;
+            /* White core with massive red heat-map glow */
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 15px var(--warning),
+                0 0 40px var(--blood),
+                0 0 100px var(--burgundy);
+            letter-spacing: -10px;
+            animation: monitor-flicker 0.3s infinite;
+        }
+
+        h2 {
+            color: #fff;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            background: var(--blood);
+            display: inline-block;
+            padding: 5px 20px;
+            margin-top: -20px;
+            box-shadow: 0 0 20px var(--blood);
+        }
+
+        /* ERROR MESSAGE */
+        .error-msg {
+            color: var(--warning);
+            margin-top: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            border: 1px solid var(--warning);
+            padding: 10px;
+            display: inline-block;
+            animation: blinker 1s infinite;
+        }
+
+        /* Animations */
+        @keyframes monitor-flicker {
+            0% { opacity: 0.9; transform: skewX(0deg); }
+            50% { opacity: 1; transform: skewX(1deg); }
+            100% { opacity: 0.8; transform: skewX(-1deg); }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Drip leaking from the top bar */
+        .leak {
+            position: absolute;
+            top: 60px;
+            width: 4px;
+            height: 0;
+            background: var(--blood);
+            animation: drip-leak 5s infinite;
+        }
+
+        @keyframes drip-leak {
+            0% { height: 0; opacity: 1; }
+            50% { height: 300px; opacity: 1; }
+            100% { height: 600px; opacity: 0; }
+        }
+
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <h1>505</h1>
-        <p>Thy language is foreign to this ancient monolith.</p>
-        <p>Speak in the old ways, or be silent forever.</p>
+
+    <div class="static-overlay"></div>
+
+    <div class="vault-door">
+        <div class="security-bar">
+            <span class="bar-label">PROTOCOL_LOCK_ENGAGED</span>
+            <div class="leak" style="left: 20%;"></div>
+            <div class="leak" style="left: 80%; animation-delay: 2s;"></div>
+        </div>
+        <div class="security-bar">
+            <span class="bar-label">SYSTEM_REJECT_UNSUPPORTED_V</span>
+        </div>
     </div>
+
+    <div class="content">
+        <h1>505</h1>
+        <h2>Incompatible</h2>
+        <br>
+        <div class="error-msg">Protocol Version Error</div>
+        <p style="color: #666; margin-top: 20px;">The server speaks a newer tongue than yours.</p>
+    </div>
+
 </body>
 </html>

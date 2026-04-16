@@ -1,17 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>501 - NOT IMPLEMENTED</title>
     <style>
-        body { background: #0a0a0a; color: #222; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .brain { font-size: 5rem; filter: grayscale(1); opacity: 0.2; }
+        :root {
+            --burgundy: #3d0202;
+            --blood: #9e0000;
+            --bright-red: #ff0808;
+            --black: #050505;
+            --iron: #222;
+        }
+
+        body {
+            background-color: var(--black);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1000px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Ambient "Breathing" Background */
+        .ambient-glow {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, var(--burgundy) 0%, transparent 70%);
+            animation: breathe 8s infinite ease-in-out;
+            z-index: 1;
+        }
+
+        /* Anchored Chains at the Top */
+        .chain-anchor {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hanging-chain {
+            position: absolute;
+            top: -10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: swing-anchor 6s infinite ease-in-out;
+            transform-origin: top center;
+        }
+
+        .link {
+            width: 16px;
+            height: 30px;
+            border: 4px solid var(--iron);
+            border-radius: 8px;
+            margin-bottom: -10px;
+            background: linear-gradient(90deg, #111, #333, #111);
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.1), 2px 2px 5px #000;
+            position: relative;
+        }
+
+        .link:nth-child(even) {
+            width: 8px;
+            border-left-color: #444;
+            z-index: 2;
+        }
+
+        /* Drip from the very last link */
+        .link:last-child::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -5px;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: var(--blood);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--bright-red);
+            animation: drip 4s infinite;
+        }
+
+        /* THE 501 - STENCILLED LOOK */
+        .content {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+            transform: rotateX(10deg);
+        }
+
+        h1 {
+            font-size: 13rem;
+            margin: 0;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--blood);
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png'), 
+                        linear-gradient(to bottom, var(--bright-red), var(--burgundy));
+            -webkit-background-clip: text;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px var(--burgundy));
+            letter-spacing: -10px;
+            animation: flicker-red 2s infinite;
+        }
+
+        h2 {
+            color: white;
+            letter-spacing: 15px;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            margin-top: -20px;
+            opacity: 0.8;
+            text-shadow: 0 0 10px var(--blood);
+        }
+
+        /* Blood Splatters */
+        .splatter {
+            position: absolute;
+            background: var(--burgundy);
+            border-radius: 50%;
+            filter: blur(10px);
+            z-index: 2;
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        @keyframes swing-anchor {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        @keyframes drip {
+            0%, 50% { transform: translateY(0); opacity: 0; }
+            51% { opacity: 1; }
+            90% { transform: translateY(600px); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes flicker-red {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px var(--burgundy)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 40px var(--blood)); }
+        }
+
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <div class="brain">🧠</div>
+
+    <div class="ambient-glow"></div>
+
+    <div class="chain-anchor" id="chain-rack"></div>
+
+    <div class="content">
         <h1>501</h1>
-        <p>I don't know how to feel. I don't know how to act.</p>
+        <h2>NOT IMPLEMENTED</h2>
+        <p style="color: var(--blood); font-weight: bold; margin-top: 30px;">THE EXECUTION IS PENDING.</p>
+        <p style="color: #444; font-size: 0.9rem;">The chain ends here. Nothing is implemented.</p>
     </div>
+
+    <script>
+        const rack = document.getElementById('chain-rack');
+        
+        for (let i = 0; i < 5; i++) {
+            const group = document.createElement('div');
+            group.className = 'hanging-chain';
+            group.style.left = (10 + (i * 20)) + '%';
+            group.style.animationDelay = (i * 0.8) + 's';
+            
+            const linksCount = 8 + Math.floor(Math.random() * 6);
+            for (let j = 0; j < linksCount; j++) {
+                const link = document.createElement('div');
+                link.className = 'link';
+                group.appendChild(link);
+            }
+            
+            rack.appendChild(group);
+        }
+
+        for (let i = 0; i < 12; i++) {
+            const splatter = document.createElement('div');
+            splatter.className = 'splatter';
+            const size = Math.random() * 200 + 100;
+            splatter.style.width = size + 'px';
+            splatter.style.height = (size * 0.6) + 'px';
+            splatter.style.top = Math.random() * 100 + 'vh';
+            splatter.style.left = Math.random() * 100 + 'vw';
+            splatter.style.transform = `rotate(${Math.random() * 360}deg)`;
+            document.body.appendChild(splatter);
+        }
+    </script>
 </body>
 </html>

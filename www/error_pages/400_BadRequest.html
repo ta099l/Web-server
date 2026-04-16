@@ -2,39 +2,179 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>400 - BAD REQUEST</title>
     <style>
-        body { 
-            background: radial-gradient(circle, #4a0000 0%, #000 80%); 
-            height: 100vh; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-family: 'Arial Black', sans-serif; 
-            overflow: hidden; 
+        :root {
+            --burgundy: #4a0404;
+            --blood: #8b0000;
+            --bright-red: #d30000;
+            --black: #050505;
         }
-        .center-box { text-align: center; color: #ff3333; }
-        h1 { 
-            font-size: 15rem; 
-            margin: 0; 
-            text-shadow: 0 0 30px #ff0000; 
-            animation: deform 0.15s infinite; 
-            letter-spacing: 5px; 
-            color: #ff0000;
+
+        body {
+            background-color: var(--black);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
         }
-        h2 { font-size: 2.5rem; color: #fff; text-shadow: 0 0 10px #ff0000; text-transform: uppercase; margin-top: -10px; }
-        @keyframes deform {
-            0% { transform: skewX(10deg) skewY(-5deg) translate(2px, 1px); }
-            50% { transform: skewX(-10deg) skewY(5deg) translate(-2px, -2px); }
-            100% { transform: skewX(8deg) skewY(-4deg) translate(1px, 2px); }
+
+        /* Background Splatter Animation */
+        .background-fx {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, var(--black) 100%);
+            z-index: 2;
         }
+
+        /* Pulsing/Glitching Text */
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--blood);
+            font-size: 120px;
+            margin: 0;
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite, glitch 0.3s infinite alternate;
+            filter: drop-shadow(0 0 15px var(--burgundy));
+            letter-spacing: -5px;
+        }
+
+        h2 {
+            color: white;
+            font-size: 24px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-top: -20px;
+        }
+
+        /* Blood Drip Physics */
+        .drip-container {
+            position: absolute;
+            top: 0; width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        .drop {
+            position: absolute;
+            background: var(--blood);
+            width: 8px;
+            height: 20px;
+            border-radius: 0 0 10px 10px;
+            top: -25px;
+            animation: fall linear infinite;
+        }
+
+        /* Knife Animation: Vibrating/Stabbing */
+        .knife {
+            position: absolute;
+            width: 180px;
+            fill: #333;
+            animation: vibrate 0.1s infinite;
+        }
+
+        .knife-left { left: -220px; top: 20px; transform: rotate(-15deg); }
+        .knife-right { right: -220px; top: 20px; transform: rotate(195deg) scaleY(-1); }
+
+        /* Animations */
+        @keyframes fall {
+            0% { transform: translateY(0); }
+            70% { transform: translateY(90vh); width: 8px; }
+            100% { transform: translateY(100vh); width: 30px; height: 5px; opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.5); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: 2px 2px var(--burgundy); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); text-shadow: -3px 0 var(--bright-red); }
+            60% { transform: translate(2px, 2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes vibrate {
+            0% { transform: rotate(-15deg) translate(0, 0); }
+            50% { transform: rotate(-16deg) translate(-1px, 1px); }
+            100% { transform: rotate(-14deg) translate(1px, -1px); }
+        }
+
+        /* Blood Splatter shapes */
+        .splat {
+            position: absolute;
+            background: var(--burgundy);
+            border-radius: 50%;
+            filter: blur(10px);
+            opacity: 0.5;
+            animation: spread 10s forwards;
+        }
+
+        @keyframes spread {
+            from { transform: scale(0); opacity: 0.8; }
+            to { transform: scale(2); opacity: 0.3; }
+        }
+
     </style>
 </head>
 <body>
-    <div class="center-box">
-        <h1>400</h1>
-        <h2>BAD REQUEST</h2>
+
+    <div class="background-fx"></div>
+    
+    <div class="drip-container" id="drips"></div>
+
+    <div class="container">
+        <div class="splat" style="width: 200px; height: 150px; top: -50px; left: -100px;"></div>
+        
+        <div style="position: relative; display: inline-block;">
+            <h1>400</h1>
+            
+            <svg class="knife knife-left" viewBox="0 0 100 20">
+                <path d="M0 10 L70 10 L75 2 L100 10 L75 18 L70 10" fill="#777" stroke="#222"/>
+                <rect x="0" y="4" width="30" height="12" fill="#222" />
+            </svg>
+
+            <svg class="knife knife-right" viewBox="0 0 100 20">
+                <path d="M0 10 L70 10 L75 2 L100 10 L75 18 L70 10" fill="#777" stroke="#222" />
+                <rect x="0" y="4" width="30" height="12" fill="#222" />
+            </svg>
+        </div>
+
+        <h2>Bad Request</h2>
+        <p style="color: var(--bright-red); font-style: italic; margin-top: 20px;">
+            The request was made... but it didn't survive.
+        </p>
     </div>
+
+    <script>
+        // Generate random dripping blood drops
+        const container = document.getElementById('drips');
+        function createDrop() {
+            const drop = document.createElement('div');
+            drop.classList.add('drop');
+            drop.style.left = Math.random() * 100 + "vw";
+            drop.style.animationDuration = (Math.random() * 2 + 2) + "s";
+            drop.style.opacity = Math.random();
+            container.appendChild(drop);
+
+            // Remove drop after animation to save memory
+            setTimeout(() => {
+                drop.remove();
+            }, 4000);
+        }
+
+        setInterval(createDrop, 300);
+    </script>
 </body>
 </html>

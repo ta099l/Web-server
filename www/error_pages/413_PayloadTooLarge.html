@@ -1,16 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>413 - PAYLOAD TOO LARGE</title>
     <style>
-        body { background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        h1 { font-size: 15rem; color: #111; position: absolute; z-index: -1; }
-        .crush { animation: sink 2s forwards; color: #8b0000; }
-        @keyframes sink { to { transform: translateY(200px); opacity: 0; } }
+        :root {
+            --burgundy: #4a0404;
+            --blood: #b30000;
+            --bright-red: #ff0000;
+            --black: #050505;
+            --iron: #2a2a2a;
+        }
+
+        body {
+            background-color: var(--black);
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* Snapped Chains */
+        .chain-container {
+            position: absolute;
+            top: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .chain-group {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            top: -20px;
+        }
+
+        .link {
+            width: 22px; height: 38px;
+            border: 6px solid var(--iron);
+            border-radius: 12px;
+            margin-bottom: -10px;
+            box-shadow: inset 1px 1px 3px rgba(255,255,255,0.1), 2px 2px 5px #000;
+        }
+
+        .link:nth-child(even) { width: 10px; border-left-color: #444; }
+
+        /* Snapping Animation for Chain 2 */
+        .chain-left { left: 15%; animation: swing 5s infinite; }
+        .chain-right { right: 15%; animation: swing 5.2s infinite; }
+        
+        .broken-chain {
+            left: 50%;
+            transform: translateX(-50%);
+            animation: snap-drop 4s infinite;
+        }
+
+        /* Blood Overflowing from the Top */
+        .overflow-blood {
+            position: absolute;
+            top: 0;
+            width: 100vw;
+            height: 10px;
+            background: var(--burgundy);
+            box-shadow: 0 0 50px var(--blood);
+            z-index: 2;
+        }
+
+        .big-drip {
+            position: absolute;
+            background: linear-gradient(to bottom, var(--burgundy), var(--blood));
+            width: 40px;
+            height: 100vh;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: blur(5px);
+            opacity: 0.6;
+            animation: swell 4s infinite ease-in-out;
+        }
+
+        /* CLEAR 413 TYPOGRAPHY */
+        .content {
+            text-align: center;
+            z-index: 20;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 11rem;
+            margin: 0;
+            color: var(--blood);
+            text-shadow: 
+                0 0 5px #fff, 
+                0 0 20px var(--blood),
+                0 0 50px var(--burgundy),
+                10px 10px 0px #000;
+            letter-spacing: -5px;
+            animation: burst 4s infinite ease-in-out;
+        }
+
+        h2 {
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            font-size: 1.5rem;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 20px;
+        }
+
+        /* Animations */
+        @keyframes burst {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.15); filter: brightness(1.4); }
+        }
+
+        @keyframes swell {
+            0%, 100% { width: 40px; opacity: 0.4; }
+            50% { width: 120px; opacity: 0.8; }
+        }
+
+        @keyframes snap-drop {
+            0% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            45% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            50% { transform: translateX(-50%) translateY(20px) rotate(5deg); }
+            60% { transform: translateX(-50%) translateY(100vh); opacity: 0; }
+            100% { transform: translateX(-50%) translateY(100vh); opacity: 0; }
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-3deg); transform-origin: top; }
+            50% { transform: rotate(3deg); transform-origin: top; }
+        }
+
+        /* Drip particles */
+        .particle {
+            position: absolute;
+            background: var(--blood);
+            border-radius: 50%;
+            opacity: 0;
+            animation: fall-particle 4s infinite;
+        }
+
     </style>
 </head>
 <body>
-    <h1>413</h1>
-    <div class="crush">IT'S TOO HEAVY. THE SERVER IS COLLAPSING.</div>
+
+    <div class="overflow-blood"></div>
+    <div class="big-drip"></div>
+
+    <div class="chain-container">
+        <div class="chain-group chain-left">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group chain-right">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group broken-chain">
+            <div class="link"></div><div class="link"></div><div class="link" style="border-bottom: none; transform: translateY(5px) rotate(15deg);"></div>
+            <div class="link" style="border-top: none; transform: translateY(20px) rotate(-20deg);"></div>
+            <div class="link"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>413</h1>
+        <h2>Payload Too Large</h2>
+        <p style="color: var(--blood); font-weight: bold; margin-top: 20px; font-size: 1.2rem;">YOU FED ME TOO MUCH.</p>
+        <p style="color: #666; font-style: italic;">Now everything is breaking.</p>
+    </div>
+
 </body>
 </html>

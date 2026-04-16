@@ -1,18 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>500 - SERVER ERROR</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - INTERNAL SERVER ERROR</title>
     <style>
-        body { background: #000; color: #ff0000; font-family: 'Courier New'; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .static { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://media.giphy.com/media/oEI9uWUicG7S/giphy.gif'); opacity: 0.05; pointer-events: none; }
+        :root {
+            --burgundy: #4a0404;
+            --blood: #b30000;
+            --black: #050505;
+            --iron: #2a2a2a;
+        }
+
+        body {
+            background-color: var(--black);
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-direction: column;
+            /* Screen pulses red like a warning light */
+            animation: panic-light 3s infinite;
+        }
+
+        /* Glitch Noise Overlay */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.1;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* Violent Chains */
+        .chain-container {
+            position: absolute;
+            top: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+
+        .chain-group {
+            position: absolute;
+            top: -50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: violent-swing 0.5s infinite alternate;
+            transform-origin: top center;
+        }
+
+        .link {
+            width: 22px; height: 38px;
+            border: 6px solid var(--iron);
+            border-radius: 12px;
+            margin-bottom: -10px;
+            box-shadow: inset 1px 1px 3px rgba(255,255,255,0.1), 2px 2px 10px #000;
+        }
+
+        .link:nth-child(even) { width: 10px; border-left-color: #444; }
+        .chain-1 { left: 10%; animation-delay: 0.1s; }
+        .chain-2 { right: 10%; animation-delay: 0.3s; }
+        .chain-3 { left: 50%; animation-duration: 0.3s; opacity: 0.5; }
+
+        /* CLEAR GLITCHING 500 TYPOGRAPHY */
+        .content {
+            text-align: center;
+            z-index: 20;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 12rem;
+            margin: 0;
+            color: var(--blood);
+            text-shadow: 
+                0 0 5px #fff, 
+                0 0 20px var(--blood),
+                0 0 60px var(--burgundy);
+            letter-spacing: -5px;
+            animation: glitch 0.2s infinite;
+        }
+
+        h2 {
+            color: #eee;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            font-size: 1.8rem;
+            margin-top: 10px;
+            text-shadow: 3px 3px 0px #000;
+        }
+
+        /* Animations */
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: 2px 2px #fff; }
+            20% { transform: translate(-5px, 5px); color: #fff; }
+            40% { transform: translate(-5px, -5px); text-shadow: 5px 0 var(--blood); }
+            60% { transform: translate(5px, 5px); color: var(--blood); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes panic-light {
+            0%, 100% { background-color: var(--black); }
+            50% { background-color: #1a0000; }
+        }
+
+        @keyframes violent-swing {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Blood Splatter on the Lens */
+        .splatter {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--burgundy) 0%, transparent 70%);
+            filter: blur(40px);
+            opacity: 0.4;
+            top: -100px;
+            left: -100px;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
-    <div class="static"></div>
-    <div style="text-align: center;">
-        <h1>500</h1>
-        <p>CRITICAL SYSTEM HEMORRHAGE.</p>
-        <small>The guts of the machine have spilled.</small>
+
+    <div class="splatter"></div>
+    <div class="splatter" style="bottom: -100px; right: -100px; top: auto; left: auto;"></div>
+
+    <div class="chain-container">
+        <div class="chain-group chain-1">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group chain-2">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
+        <div class="chain-group chain-3">
+            <div class="link"></div><div class="link"></div><div class="link"></div><div class="link"></div>
+        </div>
     </div>
+
+    <div class="content">
+        <h1>500</h1>
+        <h2>INTERNAL SERVER ERROR</h2>
+        <p style="color: var(--blood); font-weight: bold; margin-top: 20px; font-size: 1.2rem;">THE SYSTEM HAS BLED OUT.</p>
+        <p style="color: #444; font-style: italic;">Critical failure in the dark.</p>
+    </div>
+
 </body>
 </html>
