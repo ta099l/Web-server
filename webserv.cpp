@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/16 18:34:11 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/17 15:35:31 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,13 +139,12 @@ int webserv::run()
             break;
         }
 
-        std::vector<int> r_cli; // ✅ only one, correct type
+        std::vector<int> r_cli; 
 
         for (int i = 0; i < num_events; ++i)
         {
             int fd = events[i].data.fd;
 
-            // 🔹 HANDLE NEW CONNECTIONS
             if (is_server_socket(fd))
             {
                 for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
@@ -164,14 +163,12 @@ int webserv::run()
                 continue;
             }
 
-            // 🔹 HANDLE ERRORS
             if (events[i].events & (EPOLLERR | EPOLLHUP))
             {
                 close_client_connection(fd);
                 continue;
             }
 
-            // 🔹 HANDLE CLIENT EVENTS
             for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
             {
                 std::map<int, client>& client_fds = sit->getClientFds();
@@ -180,9 +177,12 @@ int webserv::run()
                 if (it != client_fds.end())
                 {
                     state_machine(it->second, *sit, fd, events[i].events);
+                    // if(cgi_extention(it->second))
+                    // {
+                        
+                    // }
                     if (it->second.getState() == ROUTING || it->second.getState() == ERROR)
                     {
-                        std::cerr<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
                         r_cli.push_back(fd);
                     }
 

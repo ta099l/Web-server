@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/07 20:29:28 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/17 16:02:02 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ struct CGIConfig //done
 struct LocationConfig //was struct
 {
 	private:
+		bool isCgi;
 		std::string path; //done
 		std::vector<std::string> methods; //done
 		bool autoindex; //done
@@ -45,6 +46,7 @@ struct LocationConfig //was struct
 		LocationConfig();
 		~LocationConfig();
 		// Getters
+		bool getisCgiLoc() const;
 		const std::string& getPath() const;
 		const std::vector<std::string>& getMethods() const;
 		bool getAutoindex() const;
@@ -57,6 +59,7 @@ struct LocationConfig //was struct
 		const std::map<std::string, CGIConfig>& getCgi() const;
 		const std::map<int, std::string>& getErrorPages() const;
 		// Setters
+		void setisCgiLoc(bool val);
 		void setPath(const std::string& p);
 		void addMethod(const std::string& method);
 		void setAutoindex(bool value);
@@ -93,7 +96,8 @@ struct ListenConfig //done
 class server
 {
 private:
-	std::vector<ListenConfig> listens;
+std::vector<ListenConfig> listens;
+	bool isCgi; //implement
 	std::string root;
 	std::string index;
 	long long max_body_size;
@@ -107,7 +111,6 @@ private:
 	std::map<std::string, CGIConfig> cgi;
 	std::vector<int> listenFds;
 	std::map<int, client> client_fds;
-	bool isCgi; //implement
 public:
 	server();
 	server(const server &obj);

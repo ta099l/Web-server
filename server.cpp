@@ -3,39 +3,41 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:18:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/03/08 21:00:09 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/17 16:19:02 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "server.hpp"
-server::server() : root(""), index("index.html"), max_body_size(0),
+server::server() : isCgi(false),root(""), index("index.html"), max_body_size(0),
  autoindex(false),  upload_enable(false)
 {
 }
 server::server(const server &obj)
-	: listens(obj.listens),
-	root(obj.root),
-	index(obj.index),
-	max_body_size(obj.max_body_size),
-	error_pages(obj.error_pages),
-	locations(obj.locations),
-	methods(obj.methods),
-	autoindex(obj.autoindex),
-	upload_enable(obj.upload_enable),
-	upload_store(obj.upload_store),
-	redirect(obj.redirect),
-	cgi(obj.cgi),
-	listenFds(obj.listenFds)
+    : listens(obj.listens),
+      isCgi(obj.isCgi),
+      root(obj.root),
+      index(obj.index),
+      max_body_size(obj.max_body_size),
+      error_pages(obj.error_pages),
+      locations(obj.locations),
+      methods(obj.methods),
+      autoindex(obj.autoindex),
+      upload_enable(obj.upload_enable),
+      upload_store(obj.upload_store),
+      redirect(obj.redirect),
+      cgi(obj.cgi),
+      listenFds(obj.listenFds)
 {
 }
 server& server::operator=(const server &obj)
 {
 	if (this != &obj)
 	{
+		isCgi = obj.isCgi;
 		listens = obj.listens;
 		root = obj.root;
 		index = obj.index;
@@ -113,6 +115,7 @@ void server::setIsCgi(bool val)
 {
 	this->isCgi = val;
 }
+
 void server::addServerFd(int fd)
 {
 	listenFds.push_back(fd);
@@ -172,12 +175,17 @@ server::~server()
 
 LocationConfig::LocationConfig()
 {
+	isCgi = false;
 	autoindex = false;
 	upload_enable = false;
 	max_body_size = 0;
 }
 
 // LocationConfig Getters
+bool LocationConfig::getisCgiLoc() const
+{
+	return(isCgi);
+}
 const std::string& LocationConfig::getPath() const
 {
 	return path;
@@ -224,6 +232,10 @@ const std::map<int, std::string>& LocationConfig::getErrorPages() const
 }
 
 // LocationConfig Setters
+void LocationConfig::setisCgiLoc(bool val)
+{
+	this->isCgi = val;
+}
 void LocationConfig::setPath(const std::string& p)
 {
 	path = p;

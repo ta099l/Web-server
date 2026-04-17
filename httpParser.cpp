@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/16 16:21:40 by rabusala         ###   ########.fr       */
+/*   Updated: 2026/04/17 15:50:01 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,7 +325,6 @@ int	handleRead(client &cli,int fd)
 		{
 			if(checkHeader(cli) == 1)
 			{
-				std::cerr<<cli.getRes().getStatusCode()<<std::endl;
 				if(cli.getRes().getStatusCode() == 0)
 					cli.getRes().setStatusCode(400);
 				cli.setState(ERROR);
