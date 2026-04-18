@@ -6,11 +6,12 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/17 15:50:01 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/18 18:27:05 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpReq.hpp"
+#include "webserv.hpp"
 #include "client.hpp"
 #include <algorithm>
 #include <ctype.h>
@@ -118,16 +119,60 @@ std::string urlDecode(const std::string& src)
 
     return result;
 }
-int checkUri(std::string uri)
+void parseCgiInput(std::string uri, client &cli, server &srv)
 {
-	std::cerr<<"URIIIIIIIIIII "<<uri<<std::endl;
-	if(uri.find("../") != std::string::npos)
-		return -1;
-	return 1;
+	if(cli.getReq().getMethod() == "GET")
+	{
+		size_t q = uri.find('?');
+		if (q != std::string::npos)
+			cli.setCgiInput(urlDecode(uri.substr(q + 1)));
+	}
 }
-int parseReqLine(client &cli,std::string &reqline)
+void check_if_cgi(std::string uri, client &cli, server &srv)
 {
-	 printf("%s\n",reqline.c_str());
+	std::string cutUri = uri;
+	size_t q = uri.find('?');
+	if (q != std::string::npos)
+		cutUri = uri.substr(0, q);
+	std::string decoded = urlDecode(cutUri);
+	size_t dot = decoded.rfind('.');
+	std::string ext;
+
+	if (dot != std::string::npos)
+		ext = decoded.substr(dot);
+	const std::map<std::string, CGIConfig> *cgiMap ;
+	const std::map<std::string, LocationConfig> &locations = srv.getLocations();
+	const LocationConfig *matchedLocation = findLongestMatch(decoded, locations);
+	if (!matchedLocation)
+	{
+		cgiMap = &srv.getCgi();
+	}
+	else
+	{
+		cli.setLocation(matchedLocation);
+		cgiMap = &matchedLocation->getCgi();
+		
+	}
+	std::string fullPath = setupRootPath(cli, srv, *matchedLocation, decoded);
+	if (!ext.empty() && cgiMap->find(ext) != cgiMap->end())
+	{
+		cli.setIsCgi(true);
+		parseCgiInput(uri, cli, srv);
+		cli.setCgiScriptPath(fullPath);
+		cli.setCgiInterpreter(cgiMap->at(ext).path);
+	}
+	cli.getReq().setUri(decoded);
+}
+int checkUri(std::string uri, client &cli, server &srv)
+{
+	std::string decoded = urlDecode(uri);
+	if (decoded.find("../") != std::string::npos)
+		return -1;
+	check_if_cgi(uri, cli, srv);
+}
+int parseReqLine(client &cli,std::string &reqline, server &srv)
+{
+	printf("%s\n",reqline.c_str());
 	std::string trimmedLine=ltrim(reqline);
 	size_t pos1=trimmedLine.find(" ");
 	if(pos1==std::string::npos)
@@ -136,14 +181,9 @@ int parseReqLine(client &cli,std::string &reqline)
 	if(pos2 == std::string::npos)
 		return 1;
 	cli.getReq().setMethod(trim(trimmedLine.substr(0,pos1)));
-	std::cerr<<"URIIIIIIIIIII "<<cli.getReq().getUri()<<std::endl;
 	cli.getReq().setUri(trim(trimmedLine.substr(pos1+1,pos2-pos1-1)));
-	std::cerr<<"URIIIIIIIIIII 2 "<<cli.getReq().getUri()<<std::endl;
-	std::string decoded = urlDecode(cli.getReq().getUri());
-	cli.getReq().setUri(decoded);
-	if(checkUri(cli.getReq().getUri()) == -1)
+	if(checkUri(cli.getReq().getUri(), cli, srv) == -1)
 	{
-		std::cerr<<"TRAVERSAALLALALALA\n";
 		cli.getRes().setStatusCode(403);
 		return 1;
 	}
@@ -208,13 +248,13 @@ int parseHeader(client &cli)
 	}
 	return 0;
 }
-int parseReq(client &cli)
+int parseReq(client &cli, server &srv)
 {
 	size_t pos=cli.getHeader().find("\r\n");
 	if(pos == std::string::npos)
 		return 1;
 	std::string requestLine = cli.getHeader().substr(0,pos);
-	if(parseReqLine(cli,requestLine) ==1)
+	if(parseReqLine(cli,requestLine, srv) ==1)
 		return 1;
 	cli.setHeader(cli.getHeader().erase(0,pos+2));
 	if(parseHeader(cli) ==1)
@@ -222,14 +262,14 @@ int parseReq(client &cli)
 	return 0;
 
 }
-int  checkHeader(client &cli)
+int  checkHeader(client &cli, server &srv)
 {
 	size_t pos = cli.getBuffer().find("\r\n\r\n");
 	if(pos!=std::string::npos)
 	{
 		cli.setHeaderComplete(true);
 		cli.setHeader(cli.getBuffer().substr(0,pos+2));
-		if(parseReq(cli) == 1)
+		if(parseReq(cli, srv) == 1)
 			return 1;
 		if(cli.getContentLength() > 0 || cli.isChunkedEncode())
 			cli.setBodyStart(pos+4);
@@ -311,7 +351,7 @@ int readChunks(client &cli)
 	}
 	return 0;
 }
-int	handleRead(client &cli,int fd)
+int	handleRead(client &cli,int fd, server &srv )
 {
 	(void) fd;
 	char temp[4096];
@@ -323,7 +363,7 @@ int	handleRead(client &cli,int fd)
 		cli.appendtobuff(temp,n);
 		if(!cli.isHeaderComplete())
 		{
-			if(checkHeader(cli) == 1)
+			if(checkHeader(cli, srv) == 1)
 			{
 				if(cli.getRes().getStatusCode() == 0)
 					cli.getRes().setStatusCode(400);
@@ -347,6 +387,10 @@ int	handleRead(client &cli,int fd)
 				{
 					cli.setRequestComplete(true);
 					cli.setBodySize(cli.getReq().getBody().size());
+					if(cli.getIsCgi() && cli.getReq().getMethod() == "POST")
+					{
+						cli.setCgiInput(cli.getReq().getBody());
+					}
 					cli.setState(ROUTING);
 				}
 			}
@@ -357,6 +401,10 @@ int	handleRead(client &cli,int fd)
 					cli.getReq().setBody(cli.getBuffer().substr(cli.getBodyStart(),cli.getContentLength()));
 					cli.setRequestComplete(true);
 					cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart() + cli.getContentLength()));
+					if (cli.getIsCgi() && cli.getReq().getMethod() == "POST")
+					{
+						cli.setCgiInput(cli.getReq().getBody());
+					}
 					cli.setState(ROUTING);
 				}
 			}

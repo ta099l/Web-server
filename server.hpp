@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 19:32:26 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/17 16:02:02 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/17 18:32:17 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,5 +149,5 @@ public:
 	void addClientFd(int fd, const client &c) ;
 	void setIsCgi(bool val);
 };
-
+const LocationConfig *findLongestMatch(const std::string &uri, const std::map<std::string, LocationConfig> &locations);
 #endif

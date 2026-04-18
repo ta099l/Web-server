@@ -197,7 +197,7 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 {
 	if(cli.getState() == READING && (events & EPOLLIN))
 	{
-		if(handleRead(cli, fd) == 0)
+		if(handleRead(cli, fd, serv) == 0)
 		{
 			cli.setState(ROUTING);
 		}
