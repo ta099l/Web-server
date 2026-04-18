@@ -77,39 +77,6 @@ int checkValidLocConfig(client &cli, server &srv, const LocationConfig& locConfi
 // 	std::string ext = uri.substr(dot);     // ".py" or ".php"
 // 	return (ext == loc.getCgi()); // from your config
 // }
-void searchBuffer_forcgi(client &cli, server &srv)
-{
-	std::string uri = cli.getReq().getUri();
-
-	// remove query string
-	std::string path = uri;
-	size_t q = path.find('?');
-	if (q != std::string::npos)
-		path = path.substr(0, q);
-
-	// find extension
-	size_t dot = path.rfind('.');
-	std::string ext;
-
-	if (dot != std::string::npos)
-		ext = path.substr(dot);
-
-	// find matching location FIRST
-	const std::map<std::string, LocationConfig> &locations = srv.getLocations();
-	const LocationConfig *matchedLocation = findLongestMatch(uri, locations);
-
-	if (!matchedLocation)
-		return;
-
-	cli.setLocation(matchedLocation);
-
-	const std::map<std::string, CGIConfig> &cgiMap = matchedLocation->getCgi();
-
-	if (!ext.empty() && cgiMap.find(ext) != cgiMap.end())
-	{
-		cli.setIsCgi(true);
-	}
-}
 
 int handleRouting(client &cli, server &srv)
 {
@@ -123,13 +90,13 @@ int handleRouting(client &cli, server &srv)
 		{
 			return 1;
 		}
-		if(cli.getIsCgi())
-			return 0; //fix to execute
-		// if (isCgiRequest(cli, *matchedLocation))
-		// {
-		// 	handleCgi(cli, srv, *matchedLocation);
-		// 	return 0;
-		// }
+		// if(cli.getIsCgi())
+		// 	return 0; //fix to execute
+		// // if (isCgiRequest(cli, *matchedLocation))
+		// // {
+		// // 	handleCgi(cli, srv, *matchedLocation);
+		// // 	return 0;
+		// // }
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);

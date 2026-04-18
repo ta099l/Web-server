@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/18 17:37:22 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/18 18:35:50 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,6 @@ public:
 	std::string getUploadPath() const;
 	size_t getBodySize();
 	size_t getFileOffset();
-	std::string getCgiInput();
 	// setters
 	void setCgiPid(pid_t pid);
 	void setCgiInputFd(int fd);

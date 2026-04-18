@@ -119,7 +119,7 @@ void handleFileReading(client &cli,server &srv)
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
-		cli.setState(DONE);
+		cli.setState(SENDING_RESPONSE);
 	}
 	else if(n < 0)
 	{
