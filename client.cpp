@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:25:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/18 17:38:33 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/18 19:14:27 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ client::client() : fd(-1),
 		   bodySize(0),
 		   fileOffset(0),
 		   bytesTosend(0),
-		   isCgi("false"),
+		   isCgi(false),
 		   cgiScriptPath(""),
 		   cgiInterpreter(""),
 		   cgiPid(-1),
@@ -78,7 +78,7 @@ client::client(int fd, server *srv) : fd(fd),
 				      bodySize(0),
 				      fileOffset(0),
 				      bytesTosend(0),
-				      isCgi("false"),
+				      isCgi(false),
 				      cgiScriptPath(""),
 				      cgiInterpreter(""),
 				      cgiPid(-1),

@@ -6,7 +6,7 @@
 /*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/18 18:49:15 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/18 20:28:48 by tabuayya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,8 +159,11 @@ void check_if_cgi(std::string uri, client &cli, server &srv)
 	{
 		cli.setIsCgi(true);
 		parseCgiInput(uri, cli, srv);
+		std::cerr << "CGI input: " << cli.getCgiInput() << std::endl;
 		cli.setCgiScriptPath(fullPath);
+		std::cerr<<"CGI PATHHTHHTHT: "<<cli.getCgiScriptPath()<<std::endl;
 		cli.setCgiInterpreter(cgiMap->at(ext).path);
+		std::cerr << "CGI interperte r: " << cli.getCgiInterpreter() << std::endl;
 	}
 	cli.getReq().setUri(decoded);
 }
@@ -172,7 +175,7 @@ int checkUri(std::string uri, client &cli, server &srv)
 	std::string decoded = urlDecode(uri);
 	if (decoded.find("../") != std::string::npos)
 		return -1;
-	// check_if_cgi(uri, cli, srv);
+	check_if_cgi(uri, cli, srv);
 	return 1;
 }
 int parseReqLine(client &cli,std::string &reqline, server &srv)
@@ -189,11 +192,11 @@ int parseReqLine(client &cli,std::string &reqline, server &srv)
 		return 1;
 	cli.getReq().setMethod(trim(trimmedLine.substr(0,pos1)));
 	cli.getReq().setUri(trim(trimmedLine.substr(pos1+1,pos2-pos1-1)));
-	// if(checkUri(cli.getReq().getUri(), cli, srv) == -1)
-	// {
-	// 	cli.getRes().setStatusCode(403);
-	// 	return 1;
-	// }
+	if(checkUri(cli.getReq().getUri(), cli, srv) == -1)
+	{
+		cli.getRes().setStatusCode(403);
+		return 1;
+	}
 	cli.getReq().setVersion(trim(trimmedLine.substr(pos2+1)));
 	if(checkReqLine(cli) == 1)
 		return 1;

@@ -90,13 +90,13 @@ int handleRouting(client &cli, server &srv)
 		{
 			return 1;
 		}
-		// if(cli.getIsCgi())
-		// 	return 0; //fix to execute
-		// // if (isCgiRequest(cli, *matchedLocation))
-		// // {
-		// // 	handleCgi(cli, srv, *matchedLocation);
-		// // 	return 0;
-		// // }
+		if(cli.getIsCgi())
+			return 0; //fix to execute
+		// if (isCgiRequest(cli, *matchedLocation))
+		// {
+		// 	handleCgi(cli, srv, *matchedLocation);
+		// 	return 0;
+		// }
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);
