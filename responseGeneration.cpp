@@ -160,7 +160,6 @@ bool generateErrorResponse(client &cli,server &serv)
 		if(code == it->first)
 		{
 			std::string path = buildErrorPath(serv,*base,it->second);
-			std::cerr<<"PATHHTHHTHHT "<<path<<std::endl;
 			cli.setGetFileFd(open(path.c_str(), O_RDONLY));
 			if (cli.getGetFileFd() < 0)
 			{
@@ -187,7 +186,6 @@ bool generateErrorResponse(client &cli,server &serv)
 				break;
 			}
 			cli.getRes().setContentLength(pathStat.st_size);
-			std::cerr<<"IIIIIIIIIIIIIIIIIIIIIIIIIII BELIEVE I CAN FLYYYYYYYYYYYYYYYYYY AND KILL THEMM ALLLLLLLLLLL\n";
 			cli.getRes().setHasFileBody(true);
 			if(!cli.getReq().getVersion().empty())
 				cli.getRes().setVersion(cli.getReq().getVersion());
@@ -195,14 +193,12 @@ bool generateErrorResponse(client &cli,server &serv)
 				cli.getRes().setVersion("HTTP/1.1");
 			cli.getRes().setReason(getReasonPhrase(cli.getRes().getStatusCode()));
 			cli.getRes().setContentType(path);
-			std::cerr<<"content type "<<cli.getRes().getContentType()<<std::endl;
 			cli.setState(READINGFILE);
 			return false;
 		}
 	}
 	if(it==errorPages->end())
 	{
-		std::cerr<<"I BELIEVE I CAN FLYYYYYYYYYYYYYYYYYY AND KILL THEMM ALLLLLLLLLLL\n";
 		cli.getRes().setHasMemoryBody(true);
 		genError = true;
 	}

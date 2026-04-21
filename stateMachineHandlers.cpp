@@ -115,7 +115,6 @@ void handleFileReading(client &cli,server &srv)
 	}
 	else if(n==0)
 	{
-		std::cerr<<"in 0000000000000000"<<std::endl;
 		close(cli.getGetFileFd());
 		cli.setFileDone(true);
 		cli.getRes().setStatusCode(200);
@@ -134,11 +133,6 @@ bool handleWrite(client &cli, server &serv)
 	if (cli.getState() == ERROR)
 	{
 		generateErrorResponse(cli, serv);
-		// if(!generateErrorResponse(cli, serv))
-		// {
-		// 	std::cerr<<"heheheheheheheh\n";
-		// 	return false;
-		// }
 	}
 	std::string &buffer = cli.getResponseBuffer();
 	if (buffer.empty())
@@ -148,7 +142,6 @@ bool handleWrite(client &cli, server &serv)
 
 			generateResponseHeader(cli, serv);
 		}
-		std::cerr<<"RESPONSE BUFFER:\n"<<cli.getResponseBuffer()<<std::endl;
 
 		if (!cli.getRes().getMemoryBody().empty())
 		{
@@ -157,7 +150,6 @@ bool handleWrite(client &cli, server &serv)
 		}
 		if (!cli.getRes().getFileBody().empty())
 		{
-			std::cerr<<"NOT HERE YOU IDIOTTTTTTTT\n";
 			buffer += cli.getRes().getFileBody();
 			cli.getRes().setFileBody("");
 		}
@@ -170,7 +162,6 @@ bool handleWrite(client &cli, server &serv)
 		{
 			return false;
 		}
-		std::cerr<<"BUFFERR:\n"<<buffer<<std::endl;
 		cli.addBytesSent(sent);
 	}
 	if (cli.getBytesSent() >= buffer.size())
@@ -179,7 +170,6 @@ bool handleWrite(client &cli, server &serv)
 		cli.setBytesSent(0);
 		if (cli.getRes().getHasFileBody() && !cli.isFileDone())
 		{
-			std::cerr<<"i will kill you\n";
 			cli.setState(READINGFILE);
 			return false;
 		}
@@ -208,7 +198,6 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 		if(cli.getState() == ERROR)
 		{
 			setEpoll(epoll_fd, cli.getFd(), 1);
-			std::cerr<<cli.getState();
 		}
 		return;
 	}
@@ -235,19 +224,15 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 	}
 	if(cli.getState() == READINGFILE)
 	{
-		std::cerr<<"BACK TO READING\n";
 		handleFileReading(cli, serv);
 		return;
 	}
 	if((events & EPOLLOUT) && (cli.getState() == SENDING_RESPONSE || cli.getState() == ERROR))
 	{
-		std::cerr<<"gjkfhg"<<cli.getState()<<std::endl;
 		if(handleWrite(cli, serv))
 		{
 			cli.setState(DONE);
 		}
-		std::cerr<<"OUTTTT\n";
-		std::cerr<<cli.getState()<<std::endl;
 		return;
 	}
 }
