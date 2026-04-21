@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpReq.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: balhamad <balhamad@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 15:19:50 by rabusala          #+#    #+#             */
-/*   Updated: 2026/02/18 19:52:24 by balhamad         ###   ########.fr       */
+/*   Updated: 2026/04/20 17:05:48 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ std::string HttpReq::setVersion(const std::string &version) { this->version = ve
 std::string HttpReq::setBody(const std::string &body) { this->body = body; return this->body; }
 void HttpReq::appendBody(std::string str)
 {
+	// body.append(str,str.size());
 	body+=str;
 }
 

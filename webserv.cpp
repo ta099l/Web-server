@@ -3,15 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/12 17:32:41 by tabuayya          #+#    #+#             */
-/*   Updated: 2026/04/17 15:35:31 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/20 18:54:46 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+int g_siganl = 1;
 #include "webserv.hpp"
 #include "client.hpp"
+#include <ctime>
+#include <csignal>
+
 webserv::webserv()
 {
 }
@@ -39,7 +43,9 @@ int webserv::initialize_epoll()
 		std::cerr << "Failed to create epoll file descriptor" << std::endl;
 		return -1;
 	}
-	for (std::list<server>::iterator it = servers.begin(); it != servers.end(); ++it)
+    for (std::list<server>::iterator it = servers.begin(); it != servers.end(); ++it)
+        it->setEpollFd(epoll_fd);
+    for (std::list<server>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
     const std::vector<int>& listenfds = it->getServerFd();
     for (size_t j = 0; j < listenfds.size(); j++)
@@ -124,11 +130,17 @@ void webserv::close_client_connection(int fd)
     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
     close(fd);
 }
+
+void handle_sigint(int sig)
+{
+    (void)sig;
+    g_siganl = 0;
+}
 int webserv::run()
 {
     struct epoll_event events[100];
-
-    while(true)
+    signal(SIGINT, handle_sigint);
+    while(g_siganl)
     {
         int num_events = epoll_wait(epoll_fd, events, 100, -1);
         if(num_events == -1)
@@ -139,7 +151,7 @@ int webserv::run()
             break;
         }
 
-        std::vector<int> r_cli; 
+        std::vector<int> r_cli;
 
         for (int i = 0; i < num_events; ++i)
         {
@@ -163,33 +175,65 @@ int webserv::run()
                 continue;
             }
 
-            if (events[i].events & (EPOLLERR | EPOLLHUP))
+            bool handled = false;
+            for (std::list<server>::iterator sit = servers.begin(); sit != servers.end() && !handled; ++sit)
             {
-                close_client_connection(fd);
-                continue;
-            }
+                std::map<int, client> &client_fds = sit->getClientFds();
 
-            for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
-            {
-                std::map<int, client>& client_fds = sit->getClientFds();
+                // First: check if fd is a known client socket fd
                 std::map<int, client>::iterator it = client_fds.find(fd);
-
                 if (it != client_fds.end())
                 {
-                    state_machine(it->second, *sit, fd, events[i].events);
-                    // if(cgi_extention(it->second))
-                    // {
-                        
-                    // }
-                    if (it->second.getState() == ROUTING || it->second.getState() == ERROR)
+                    if (events[i].events & (EPOLLERR | EPOLLHUP))
                     {
-                        r_cli.push_back(fd);
-                    }
-
-                    if (it->second.getState() == DONE)
                         close_client_connection(fd);
-
+                    }
+                    else
+                    {
+                        state_machine(it->second, *sit, fd, events[i].events);
+                        if (it->second.getState() == ROUTING || it->second.getState() == ERROR)
+                            r_cli.push_back(fd);
+                        if (it->second.getState() == DONE)
+                            close_client_connection(fd);
+                    }
+                    handled = true;
                     break;
+                }
+
+                // Second: check if fd is a CGI pipe fd belonging to any client
+                for (std::map<int, client>::iterator cit = client_fds.begin(); cit != client_fds.end(); ++cit)
+                {
+                    client &cli = cit->second;
+                    if (cli.getCgiInputFd() == fd || cli.getCgiOutputFd() == fd)
+                    {
+                        state_machine(cli, *sit, fd, events[i].events);
+                        if (cli.getState() == DONE)
+                            close_client_connection(cit->first);
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+        }
+        // CGI timeout check
+        for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
+        {
+            std::map<int, client> &client_fds = sit->getClientFds();
+            for (std::map<int, client>::iterator it = client_fds.begin(); it != client_fds.end(); ++it)
+            {
+                client &cli = it->second;
+                if (cli.getState() == CGI_READING_STDOUT || cli.getState() == CGI_WRITING_STDIN)
+                {
+                    if (std::time(NULL) - cli.getCgiStartTime() > 10)
+                    {
+                        killCgi(cli, *sit);
+                        cli.getRes().setStatusCode(504);
+                        cli.setState(ERROR);
+                        struct epoll_event ev;
+                        ev.events = EPOLLOUT;
+                        ev.data.fd = cli.getFd();
+                        epoll_ctl(epoll_fd, EPOLL_CTL_ADD, cli.getFd(), &ev);
+                    }
                 }
             }
         }
@@ -215,7 +259,28 @@ int webserv::run()
             }
         }
     }
+// 1. Close all client connections
+for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
+{
+    std::map<int, client>& client_fds = sit->getClientFds();
+    for (std::map<int, client>::iterator it = client_fds.begin(); it != client_fds.end(); ++it)
+    {
+        close(it->first);
+    }
+}
 
+// 2. Close listening sockets
+for (std::list<server>::iterator sit = servers.begin(); sit != servers.end(); ++sit)
+{
+    const std::vector<int>& fds = sit->getServerFd();
+    for (size_t i = 0; i < fds.size(); ++i)
+    {
+        close(fds[i]);
+    }
+}
+
+// 3. Close epoll fd
+close(epoll_fd);
     return 0;
 }
 /**

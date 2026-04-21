@@ -24,6 +24,7 @@ std::string getReasonPhrase(int code)
 		case 413: return "Payload Too Large";
 		case 500: return "Internal Server Error";
 		case 501: return "Not Implemented";
+		case 504: return "Gateway Timeout";
 		default: return "Unknown Error";
 	}
 }

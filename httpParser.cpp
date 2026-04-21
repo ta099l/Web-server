@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   httpParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/15 14:06:49 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/18 20:28:48 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/20 17:46:01 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void check_if_cgi(std::string uri, client &cli, server &srv)
 	{
 		cli.setLocation(matchedLocation);
 		cgiMap = &matchedLocation->getCgi();
-		
+
 	}
 	std::string fullPath = setupRootPath(cli, srv, *matchedLocation, decoded);
 	if (!ext.empty() && cgiMap->find(ext) != cgiMap->end())
@@ -283,6 +283,9 @@ int  checkHeader(client &cli, server &srv)
 			return 1;
 		if(cli.getContentLength() > 0 || cli.isChunkedEncode())
 			cli.setBodyStart(pos+4);
+		std::cout << "be : -----------\n" << cli.getBuffer() << "\n-------------------" << std::endl;
+		cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart()));
+		std::cout << "af : -----------\n" << cli.getBuffer() << "\n-------------------" << std::endl;
 	}
 	return 0;
 }
@@ -367,7 +370,7 @@ int	handleRead(client &cli,int fd, server &srv )
 	char temp[4096];
 	ssize_t n=recv(cli.getFd(),temp,4096,0);
 	if(n == 0)
-		return 1;
+		return 0;
 	else if(n > 0)
 	{
 		cli.appendtobuff(temp,n);
@@ -406,37 +409,39 @@ int	handleRead(client &cli,int fd, server &srv )
 			}
 			else if(cli.getContentLength() > 0)
 			{
-				if(cli.getBuffer().size() >= cli.getBodyStart() + cli.getContentLength())
+				cli.getReq().appendBody(cli.getBuffer());
+				cli.setBuffer("");
+				if(cli.getReq().getBody().size() >= cli.getContentLength())
 				{
-					cli.getReq().setBody(cli.getBuffer().substr(cli.getBodyStart(),cli.getContentLength()));
+					std::ofstream out("testing");
+					out << cli.getReq().getBody();
 					cli.setRequestComplete(true);
-					cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart() + cli.getContentLength()));
 					if (cli.getIsCgi() && cli.getReq().getMethod() == "POST")
 					{
 						cli.setCgiInput(cli.getReq().getBody());
 					}
 					cli.setState(ROUTING);
 				}
+				else
+				{
+					return 1;
+				}
 			}
 			else
 			{
 				cli.setRequestComplete(true);
-				cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart()));
-				cli.setState(ROUTING);
+				std::cerr<<"IN THE LAST ELSSSSSSSSSSE\n";
+				return 0;
+				// cli.setBuffer(cli.getBuffer().erase(0,cli.getBodyStart()));
+				// cli.setState(ROUTING);
 			}
 		}
 	}
 	else
 	{
-		if(errno == EWOULDBLOCK || errno == EAGAIN)
-			return 0;//this is forbidden
-		else
-		{
-			cli.setState(DONE);
-			return 1;
-		}
+		return 1;
 	}
-	return 0;
+	return 1;
 }
 
 

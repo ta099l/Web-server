@@ -29,6 +29,7 @@ struct CGIConfig //done
 struct LocationConfig //was struct
 {
 	private:
+		
 		bool isCgi;
 		std::string path; //done
 		std::vector<std::string> methods; //done
@@ -95,9 +96,9 @@ struct ListenConfig //done
 
 class server
 {
-private:
-std::vector<ListenConfig> listens;
-	bool isCgi; //implement
+	private:
+	std::vector<ListenConfig> listens;
+	bool isCgi; // implement
 	std::string root;
 	std::string index;
 	long long max_body_size;
@@ -108,15 +109,17 @@ std::vector<ListenConfig> listens;
 	bool upload_enable;
 	std::string upload_store;
 	std::string redirect;
+	int epollFd;
 	std::map<std::string, CGIConfig> cgi;
 	std::vector<int> listenFds;
 	std::map<int, client> client_fds;
-public:
+	public:
 	server();
 	server(const server &obj);
 	server& operator=(const server &obj);
 	~server();
 	// getters
+	int getEpollFd() const;
 	const std::vector<ListenConfig>& getListens() const;
 	const std::string& getRoot() const;
 	const std::string& getIndex() const;
@@ -133,6 +136,7 @@ public:
 	std::map<int, client>& getClientFds();
 	bool getIsCgi();
 	// setters
+	void setEpollFd(int fd);
 	void addListen(const ListenConfig& l);
 	void setRoot(const std::string& r);
 	void setIndex(const std::string& i);

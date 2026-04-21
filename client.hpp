@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tabuayya <tabuayya@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rabusala <rabusala@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 16:24:47 by rabusala          #+#    #+#             */
-/*   Updated: 2026/04/18 18:35:50 by tabuayya         ###   ########.fr       */
+/*   Updated: 2026/04/20 17:45:45 by rabusala         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "server.hpp"
 #include "HttpReq.hpp"
 #include "httpResponse.hpp"
+#include <ctime>
 enum ClientState
 {
 	READING,
@@ -44,6 +45,7 @@ class server;
 class client
 {
 	int fd;
+	std::time_t cgiStartTime;
 	server *_server;
 	const LocationConfig *location;
 	// server srv;
@@ -82,7 +84,7 @@ class client
 	pid_t cgiPid;
 	int cgiInputFd;
 	int cgiOutputFd;
-	
+
 	std::string cgiOutputBuffer;
 	std::string cgiInput;
 
@@ -96,7 +98,8 @@ public:
 	pid_t getCgiPid();
 	int getCgiInputFd();
 	int getCgiOutputFd();
-	std::string getCgiInput();
+	std::string &getCgiInput(); // must be a ref so handleCgiWrite can erase from it
+	std::time_t getCgiStartTime();
 	std::string getCgiOutputBuffer();
 	std::string getCgiScriptPath();
 	std::string getCgiInterpreter();
@@ -125,6 +128,7 @@ public:
 	size_t getBodySize();
 	size_t getFileOffset();
 	// setters
+	void setCgiStartTime(std::time_t t);
 	void setCgiPid(pid_t pid);
 	void setCgiInputFd(int fd);
 	void setCgiOutputFd(int fd);
@@ -159,10 +163,10 @@ public:
 	void setIsDir(bool val);
 	void setIsChunkedEncoded(bool val);
 	void setUploadPath(std::string path);
-	void appendtobuff(std::string buff, size_t n)
+	void appendtobuff(const char *buff, size_t n)
 	{
-		buffer += buff;
-		n += n;
+		buffer.append(buff,n);
+		// n += n;
 	}
 	// checkers
 	bool isChunkedEncode();

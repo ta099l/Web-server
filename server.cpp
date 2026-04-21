@@ -13,22 +13,23 @@
 #include "webserv.hpp"
 #include "server.hpp"
 server::server() : isCgi(false), root(""), index("index.html"), max_body_size(0),
-		   autoindex(false), upload_enable(false)
+		   autoindex(false), upload_enable(false), epollFd(-1)
 {
 }
 server::server(const server &obj)
     : listens(obj.listens),
-      isCgi(obj.isCgi),
-      root(obj.root),
-      index(obj.index),
-      max_body_size(obj.max_body_size),
-      error_pages(obj.error_pages),
-      locations(obj.locations),
-      methods(obj.methods),
-      autoindex(obj.autoindex),
-      upload_enable(obj.upload_enable),
-      upload_store(obj.upload_store),
-      redirect(obj.redirect),
+    isCgi(obj.isCgi),
+    root(obj.root),
+    index(obj.index),
+    max_body_size(obj.max_body_size),
+    error_pages(obj.error_pages),
+    locations(obj.locations),
+    methods(obj.methods),
+    autoindex(obj.autoindex),
+    upload_enable(obj.upload_enable),
+    upload_store(obj.upload_store),
+    redirect(obj.redirect),
+    epollFd(obj.epollFd),
       cgi(obj.cgi),
       listenFds(obj.listenFds)
 {
@@ -49,6 +50,7 @@ server &server::operator=(const server &obj)
 		upload_enable = obj.upload_enable;
 		upload_store = obj.upload_store;
 		redirect = obj.redirect;
+		epollFd = obj.epollFd;
 		cgi = obj.cgi;
 		listenFds = obj.listenFds;
 	}
@@ -168,7 +170,8 @@ void server::addCgi(const CGIConfig &c)
 {
 	cgi[c.extension] = c;
 }
-
+int server::getEpollFd() const { return epollFd; }
+void server::setEpollFd(int fd) { epollFd = fd; }
 server::~server()
 {
 }

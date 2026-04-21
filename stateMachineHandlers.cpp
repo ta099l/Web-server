@@ -150,6 +150,11 @@ bool handleWrite(client &cli, server &serv)
 		}
 		std::cerr<<"RESPONSE BUFFER:\n"<<cli.getResponseBuffer()<<std::endl;
 
+		if (!cli.getRes().getMemoryBody().empty())
+		{
+			buffer += cli.getRes().getMemoryBody();
+			cli.getRes().setMemoryBody("");
+		}
 		if (!cli.getRes().getFileBody().empty())
 		{
 			std::cerr<<"NOT HERE YOU IDIOTTTTTTTT\n";
@@ -163,8 +168,7 @@ bool handleWrite(client &cli, server &serv)
 		ssize_t sent = send(cli.getFd(),buffer.c_str() + cli.getBytesSent(),remaining, 0);
 		if (sent < 0)
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK) return false;
-			return true;
+			return false;
 		}
 		std::cerr<<"BUFFERR:\n"<<buffer<<std::endl;
 		cli.addBytesSent(sent);
@@ -212,6 +216,16 @@ void webserv::state_machine(client &cli, server &serv, int fd, uint32_t events)
 	{
 		handleRouting(cli, serv);
 		setEpoll(epoll_fd, cli.getFd(), 1);
+		return;
+	}
+	if (cli.getState() == CGI_WRITING_STDIN && (events & EPOLLOUT))
+	{
+		handleCgiWrite(cli, serv);
+		return;
+	}
+	if (cli.getState() == CGI_READING_STDOUT && (events & (EPOLLIN | EPOLLHUP)))
+	{
+		handleCgiRead(cli, serv);
 		return;
 	}
 	if(cli.getState() == UPLOADING  || cli.getState() == OVERWRITE)

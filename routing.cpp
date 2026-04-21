@@ -90,13 +90,8 @@ int handleRouting(client &cli, server &srv)
 		{
 			return 1;
 		}
-		if(cli.getIsCgi())
-			return 0; //fix to execute
-		// if (isCgiRequest(cli, *matchedLocation))
-		// {
-		// 	handleCgi(cli, srv, *matchedLocation);
-		// 	return 0;
-		// }
+		if (cli.getIsCgi())
+			return setupCgi(cli, srv);
 		if (cli.getReq().getMethod() == "GET")
 		{
 			get_method(cli, srv, *matchedLocation, uri);
@@ -109,28 +104,28 @@ int handleRouting(client &cli, server &srv)
 		{
 		    struct stat st;
 		    std::string filePath = setupRootPath(cli, srv, *matchedLocation, uri);
-		
+
 		    if (stat(filePath.c_str(), &st) != 0)
 		    {
 		        cli.getRes().setStatusCode(404);
 		        cli.setState(ERROR);
 		        return 1;
 		    }
-		
+
 		    if (S_ISDIR(st.st_mode))
 		    {
 		        cli.getRes().setStatusCode(403);
 		        cli.setState(ERROR);
 		        return 1;
 		    }
-		
+
 		    if (remove(filePath.c_str()) != 0)
 		    {
 		        cli.getRes().setStatusCode(403);
 		        cli.setState(ERROR);
 		        return 1;
 		    }
-		
+
 		    cli.getRes().setStatusCode(204);
 		    cli.setState(SENDING_RESPONSE); // NOT ERROR
 		    return 0;
