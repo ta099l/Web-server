@@ -23,7 +23,7 @@ This project focuses heavily on system programming concepts such as sockets, fil
 Clone the repository and compile using `make`:
 
 ```bash
-git clone <repository_url>
+git clone git@github.com:ta099l/Web-server.git webserv
 cd webserv
 make
 ```
@@ -58,15 +58,62 @@ curl http://127.0.0.1:8080
 
 ## Usage Example
 
+### Start server
 ```bash
-# Start server
 ./webserv conf/config.conf
-
-# Send request
-curl -X GET http://localhost:8080/index.html
 ```
 
 ---
+
+### GET Request
+Fetch a static file from the server:
+
+```bash
+curl -X GET http://127.0.0.1:8080/index.html
+```
+
+---
+
+### POST Request
+Send data to the server (e.g., form submission or API endpoint):
+
+```bash
+curl -X POST http://127.0.0.1:8080/form -H "Content-Type: application/x-www-form-urlencoded" -d "name=tasnim&age=21"
+```
+
+---
+
+### DELETE Request
+Remove a resource from the server:
+
+```bash
+curl -X DELETE http://127.0.0.1:8080/file.txt
+```
+
+---
+
+### CGI Execution
+
+#### GET request to CGI
+Execute a CGI script with query parameters:
+
+```bash
+curl "http://127.0.0.1:8080/cgi-bin/script.py?name=tasnim&age=21"
+```
+
+#### POST request to CGI
+Send data to a CGI script:
+
+```bash
+curl -X POST http://127.0.0.1:8080/cgi-bin/script.py -H "Content-Type: application/x-www-form-urlencoded" -d "name=tasnim&age=21"
+```
+
+---
+
+### Notes
+- Replace `script.py` with your actual CGI script name
+- Ensure CGI is enabled in your configuration file
+- The `/cgi-bin/` route must be properly configured
 
 ## Technical Choices
 - Language: C++
